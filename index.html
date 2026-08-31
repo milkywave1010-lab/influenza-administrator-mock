@@ -517,7 +517,7 @@ refresh.addEventListener('click',()=>{refresh.dataset.loading='true';statusTexts
 rangeButtons.forEach(b=>b.addEventListener('click',()=>{rangeButtons.forEach(x=>x.setAttribute('aria-pressed',String(x===b)));view=b.dataset.range;root.dataset.rangeView=view;labels();display()}));
 prev.addEventListener('click',()=>{dateInput.value=input(add(parse(dateInput.value),view==='week'?-7:-1));fetchRows()});
 next.addEventListener('click',()=>{dateInput.value=input(add(parse(dateInput.value),view==='week'?7:1));fetchRows()});
-dateInput.addEventListener('change',()=>{display();loadMessage.textContent='基準日を変更しました。予約状況を呼び出してください。'});
+dateInput.addEventListener('change',()=>{display();loadMessage.textContent='基準日を変更しました。予約状況を更新してください。'});
 load.addEventListener('click',fetchRows);
 root.querySelectorAll('[data-reserve-id]').forEach(b=>b.addEventListener('click',()=>{const row=root.querySelector(`[data-reservation-id="${b.dataset.reserveId}"]`);if(!row)return;rows.forEach(x=>x.classList.remove('admin-row-focus'));row.classList.add('admin-row-focus');row.scrollIntoView({behavior:'smooth',block:'center'})}));
 root.querySelectorAll('[data-book-date]').forEach(b=>b.addEventListener('click',()=>{root.querySelector('#admin-book-date').value=b.dataset.bookDate;root.querySelector('#admin-book-time').value=b.dataset.bookTime;root.querySelector('#admin-manual-form').scrollIntoView({behavior:'smooth',block:'center'})}));
