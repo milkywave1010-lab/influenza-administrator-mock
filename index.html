@@ -131,6 +131,9 @@
 #influenza-admin-mock .admin-panel-head h2 { margin: 0; font-size: 17px; font-weight: 500; }
 #influenza-admin-mock .admin-panel-body { padding: 16px 18px 18px; }
 #influenza-admin-mock .admin-filters { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; }
+#influenza-admin-mock .admin-period-nav { display: flex; gap: 8px; }
+#influenza-admin-mock .admin-period-nav button { white-space: nowrap; }
+#influenza-admin-mock .admin-load-message { min-width: 210px; padding-bottom: 9px; }
 #influenza-admin-mock .admin-field { display: grid; gap: 5px; min-width: 0; }
 #influenza-admin-mock .admin-field label { color: var(--admin-muted); font-size: 12px; }
 #influenza-admin-mock .admin-field input,
@@ -349,6 +352,13 @@
                 <input id="admin-date" type="date" value="2026-10-05">
               </div>
               <div class="admin-field">
+                <label>日付移動</label>
+                <div class="admin-period-nav">
+                  <button class="admin-secondary" id="admin-prev-period" type="button">前日</button>
+                  <button class="admin-secondary" id="admin-next-period" type="button">翌日</button>
+                </div>
+              </div>
+              <div class="admin-field">
                 <label for="admin-state-filter">状態</label>
                 <select id="admin-state-filter">
                   <option>すべて</option>
@@ -356,6 +366,11 @@
                   <option>キャンセル済み</option>
                 </select>
               </div>
+              <div class="admin-field">
+                <label for="admin-load-reservations">表示更新</label>
+                <button class="admin-secondary" id="admin-load-reservations" type="button">予約状況を呼び出す</button>
+              </div>
+              <div class="admin-subline admin-load-message" id="admin-load-message" role="status">基準日を選び、予約状況を呼び出してください。</div>
             </div>
             <div class="admin-range-label" id="admin-range-label">2026年10月5日（月）の予約</div>
             <div class="admin-calendar-shell" aria-label="予約カレンダー">
@@ -465,6 +480,7 @@
                 <div class="admin-field admin-field-full"><label for="admin-book-tel">電話番号</label><input id="admin-book-tel" type="tel" value="09000000000" required></div>
                 <div class="admin-field"><label for="admin-book-birth">生年月日</label><input id="admin-book-birth" type="text" value="19800123" required></div>
                 <div class="admin-field"><label for="admin-book-card">診察券</label><select id="admin-book-card"><option>無</option><option>有</option><option>紛失</option></select></div>
+                <div class="admin-field admin-field-full"><label for="admin-book-staff">登録者</label><input id="admin-book-staff" type="text" value="受付担当A" required></div>
               </div>
               <button class="admin-primary" type="submit">予約内容を確認</button>
               <p class="admin-form-note">登録元は「管理画面」として記録されます。</p>
@@ -490,82 +506,27 @@
 </div>
 
 <script>
-(() => {
-  const root = document.getElementById('influenza-admin-mock');
-  const refresh = root.querySelector('#admin-refresh-status');
-  const statusTexts = root.querySelectorAll('[data-status-text]');
-  const lastCheck = root.querySelector('#admin-last-check');
-  const rangeLabel = root.querySelector('#admin-range-label');
-  const rangeButtons = root.querySelectorAll('[data-range]');
-  const filter = root.querySelector('#admin-state-filter');
-  const rows = root.querySelectorAll('#admin-reservation-rows tr');
-  const modal = root.querySelector('#admin-cancel-modal');
-  const modalDetail = root.querySelector('#admin-cancel-detail');
-  const cancelClose = root.querySelector('#admin-cancel-close');
-  const cancelConfirm = root.querySelector('#admin-cancel-confirm');
-  let activeCancelButton = null;
-
-  refresh.addEventListener('click', () => {
-    refresh.dataset.loading = 'true';
-    statusTexts.forEach(node => node.textContent = '確認中…');
-    window.setTimeout(() => {
-      statusTexts.forEach(node => node.textContent = '正常');
-      lastCheck.textContent = `最終確認 ${new Date().toLocaleTimeString('ja-JP', {hour:'2-digit', minute:'2-digit'})}`;
-      refresh.dataset.loading = 'false';
-    }, 650);
-  });
-
-  rangeButtons.forEach(button => button.addEventListener('click', () => {
-    rangeButtons.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-    root.dataset.rangeView = button.dataset.range;
-    rangeLabel.textContent = button.dataset.range === 'week'
-      ? '2026年10月5日（月）〜10月11日（日）の予約'
-      : '2026年10月5日（月）の予約';
-  }));
-
-  root.querySelectorAll('[data-reserve-id]').forEach(button => button.addEventListener('click', () => {
-    const row = root.querySelector(`[data-reservation-id="${button.dataset.reserveId}"]`);
-    if (!row) return;
-    rows.forEach(item => item.classList.remove('admin-row-focus'));
-    row.classList.add('admin-row-focus');
-    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }));
-
-  root.querySelectorAll('[data-book-date]').forEach(button => button.addEventListener('click', () => {
-    root.querySelector('#admin-book-date').value = button.dataset.bookDate;
-    root.querySelector('#admin-book-time').value = button.dataset.bookTime;
-    root.querySelector('#admin-manual-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }));
-
-  filter.addEventListener('change', () => {
-    rows.forEach(row => { row.hidden = filter.value !== 'すべて' && row.dataset.status !== filter.value; });
-  });
-
-  root.querySelectorAll('[data-cancel-id]').forEach(button => button.addEventListener('click', () => {
-    activeCancelButton = button;
-    modalDetail.innerHTML = `<strong>${button.dataset.cancelName}</strong><br>${button.dataset.cancelTime}<br>${button.dataset.cancelId}`;
-    modal.dataset.open = 'true';
-    cancelClose.focus();
-  }));
-
-  cancelClose.addEventListener('click', () => { modal.dataset.open = 'false'; activeCancelButton = null; });
-  cancelConfirm.addEventListener('click', () => {
-    if (!activeCancelButton) return;
-    const row = activeCancelButton.closest('tr');
-    row.dataset.status = 'キャンセル済み';
-    const badge = row.querySelector('.admin-status-badge');
-    badge.dataset.state = 'cancelled';
-    badge.textContent = '● キャンセル済み';
-    activeCancelButton.textContent = '処理済み';
-    activeCancelButton.disabled = true;
-    modal.dataset.open = 'false';
-    activeCancelButton = null;
-  });
-
-  root.querySelector('#admin-manual-form').addEventListener('submit', event => {
-    event.preventDefault();
-    root.querySelector('#admin-book-toast').dataset.show = 'true';
-  });
+(()=>{
+const root=document.getElementById('influenza-admin-mock'),refresh=root.querySelector('#admin-refresh-status'),statusTexts=root.querySelectorAll('[data-status-text]'),lastCheck=root.querySelector('#admin-last-check'),rangeLabel=root.querySelector('#admin-range-label'),rangeButtons=root.querySelectorAll('[data-range]'),dateInput=root.querySelector('#admin-date'),prev=root.querySelector('#admin-prev-period'),next=root.querySelector('#admin-next-period'),load=root.querySelector('#admin-load-reservations'),loadMessage=root.querySelector('#admin-load-message'),filter=root.querySelector('#admin-state-filter'),rows=root.querySelectorAll('#admin-reservation-rows tr'),modal=root.querySelector('#admin-cancel-modal'),detail=root.querySelector('#admin-cancel-detail'),close=root.querySelector('#admin-cancel-close'),confirmButton=root.querySelector('#admin-cancel-confirm');
+let active=null,view='day';
+const wd=['日','月','火','水','木','金','土'],pad=v=>String(v).padStart(2,'0'),parse=v=>{const p=String(v).split('-').map(Number);return new Date(p[0],p[1]-1,p[2])},input=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,add=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x},jp=d=>`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${wd[d.getDay()]}）`;
+function display(){const base=parse(dateInput.value),finish=add(base,6);rangeLabel.textContent=view==='week'?`${jp(base)}〜${jp(finish)}の予約`:`${jp(base)}の予約`;root.querySelectorAll('.admin-cal-day[data-day]').forEach(h=>{const d=add(base,Number(h.dataset.day));h.innerHTML=`${wd[d.getDay()]}<span>${d.getMonth()+1}/${d.getDate()}</span>`});root.querySelectorAll('.admin-cal-cell[data-day] [data-book-date]').forEach(b=>{b.dataset.bookDate=input(add(base,Number(b.closest('.admin-cal-cell').dataset.day)))})}
+function labels(){prev.textContent=view==='week'?'前週':'前日';next.textContent=view==='week'?'翌週':'翌日'}
+function fetchRows(){load.disabled=true;load.textContent='呼び出し中…';loadMessage.textContent='予約状況を呼び出しています。';setTimeout(()=>{display();load.disabled=false;load.textContent='予約状況を呼び出す';loadMessage.textContent=`予約状況を表示しました（${new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}）。`},450)}
+refresh.addEventListener('click',()=>{refresh.dataset.loading='true';statusTexts.forEach(n=>n.textContent='確認中…');setTimeout(()=>{statusTexts.forEach(n=>n.textContent='正常');lastCheck.textContent=`最終確認 ${new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}`;refresh.dataset.loading='false'},450)});
+rangeButtons.forEach(b=>b.addEventListener('click',()=>{rangeButtons.forEach(x=>x.setAttribute('aria-pressed',String(x===b)));view=b.dataset.range;root.dataset.rangeView=view;labels();display()}));
+prev.addEventListener('click',()=>{dateInput.value=input(add(parse(dateInput.value),view==='week'?-7:-1));fetchRows()});
+next.addEventListener('click',()=>{dateInput.value=input(add(parse(dateInput.value),view==='week'?7:1));fetchRows()});
+dateInput.addEventListener('change',()=>{display();loadMessage.textContent='基準日を変更しました。予約状況を呼び出してください。'});
+load.addEventListener('click',fetchRows);
+root.querySelectorAll('[data-reserve-id]').forEach(b=>b.addEventListener('click',()=>{const row=root.querySelector(`[data-reservation-id="${b.dataset.reserveId}"]`);if(!row)return;rows.forEach(x=>x.classList.remove('admin-row-focus'));row.classList.add('admin-row-focus');row.scrollIntoView({behavior:'smooth',block:'center'})}));
+root.querySelectorAll('[data-book-date]').forEach(b=>b.addEventListener('click',()=>{root.querySelector('#admin-book-date').value=b.dataset.bookDate;root.querySelector('#admin-book-time').value=b.dataset.bookTime;root.querySelector('#admin-manual-form').scrollIntoView({behavior:'smooth',block:'center'})}));
+filter.addEventListener('change',()=>rows.forEach(r=>{r.hidden=filter.value!=='すべて'&&r.dataset.status!==filter.value}));
+root.querySelectorAll('[data-cancel-id]').forEach(b=>b.addEventListener('click',()=>{active=b;confirmButton.disabled=false;confirmButton.textContent='キャンセルを実行';close.disabled=false;detail.innerHTML=`<strong>${b.dataset.cancelName}</strong><br>${b.dataset.cancelTime}<br>${b.dataset.cancelId}`;modal.dataset.open='true';close.focus()}));
+close.addEventListener('click',()=>{modal.dataset.open='false';active=null});
+confirmButton.addEventListener('click',()=>{if(!active)return;confirmButton.disabled=true;confirmButton.textContent='キャンセル処理中…';close.disabled=true;detail.insertAdjacentHTML('beforeend','<br><strong>キャンセル処理中です。</strong>');setTimeout(()=>{const row=active.closest('tr'),badge=row.querySelector('.admin-status-badge');row.dataset.status='キャンセル済み';badge.dataset.state='cancelled';badge.textContent='● キャンセル済み';active.textContent='処理済み';active.disabled=true;modal.dataset.open='false';active=null},450)});
+root.querySelector('#admin-manual-form').addEventListener('submit',e=>{e.preventDefault();const toast=root.querySelector('#admin-book-toast'),staff=root.querySelector('#admin-book-staff').value.trim();toast.textContent='予約を登録中…';toast.dataset.show='true';setTimeout(()=>{toast.textContent=`予約を登録しました。登録者：${staff}（予約シートO列）`},450)});
+labels();display();
 })();
 </script>
 
