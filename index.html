@@ -130,10 +130,14 @@
 #influenza-admin-mock .admin-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--admin-line); }
 #influenza-admin-mock .admin-panel-head h2 { margin: 0; font-size: 17px; font-weight: 500; }
 #influenza-admin-mock .admin-panel-body { padding: 16px 18px 18px; }
-#influenza-admin-mock .admin-filters { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; }
-#influenza-admin-mock .admin-period-nav { display: flex; gap: 8px; }
-#influenza-admin-mock .admin-period-nav button { white-space: nowrap; }
-#influenza-admin-mock .admin-load-message { min-width: 210px; padding-bottom: 9px; }
+#influenza-admin-mock .admin-filters { display: grid; gap: 10px; }
+#influenza-admin-mock .admin-filter-row { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; }
+#influenza-admin-mock .admin-date-row .admin-field,
+#influenza-admin-mock .admin-status-row .admin-field { min-width: 155px; }
+#influenza-admin-mock .admin-date-row button,
+#influenza-admin-mock .admin-status-row button { white-space: nowrap; }
+#influenza-admin-mock .admin-load-message { display: none; flex-basis: 100%; }
+#influenza-admin-mock .admin-load-message[data-show="true"] { display: block; }
 #influenza-admin-mock .admin-field { display: grid; gap: 5px; min-width: 0; }
 #influenza-admin-mock .admin-field label { color: var(--admin-muted); font-size: 12px; }
 #influenza-admin-mock .admin-field input,
@@ -347,30 +351,26 @@
           </div>
           <div class="admin-panel-body">
             <div class="admin-filters">
-              <div class="admin-field">
-                <label for="admin-date">基準日</label>
-                <input id="admin-date" type="date" value="2026-10-05">
-              </div>
-              <div class="admin-field">
-                <label>日付移動</label>
-                <div class="admin-period-nav">
-                  <button class="admin-secondary" id="admin-prev-period" type="button">前日</button>
-                  <button class="admin-secondary" id="admin-next-period" type="button">翌日</button>
+              <div class="admin-filter-row admin-date-row">
+                <button class="admin-secondary" id="admin-prev-period" type="button">前日</button>
+                <div class="admin-field">
+                  <label for="admin-date">基準日</label>
+                  <input id="admin-date" type="date" value="2026-10-05">
                 </div>
+                <button class="admin-secondary" id="admin-next-period" type="button">翌日</button>
               </div>
-              <div class="admin-field">
-                <label for="admin-state-filter">状態</label>
-                <select id="admin-state-filter">
-                  <option>すべて</option>
-                  <option>予約済み</option>
-                  <option>キャンセル済み</option>
-                </select>
-              </div>
-              <div class="admin-field">
-                <label for="admin-load-reservations">表示更新</label>
+              <div class="admin-filter-row admin-status-row">
+                <div class="admin-field">
+                  <label for="admin-state-filter">状態</label>
+                  <select id="admin-state-filter">
+                    <option>すべて</option>
+                    <option>予約済み</option>
+                    <option>キャンセル済み</option>
+                  </select>
+                </div>
                 <button class="admin-secondary" id="admin-load-reservations" type="button">予約状況更新</button>
+                <div class="admin-subline admin-load-message" id="admin-load-message" role="status"></div>
               </div>
-              <div class="admin-subline admin-load-message" id="admin-load-message" role="status">基準日を選び、予約状況を更新してください。</div>
             </div>
             <div class="admin-range-label" id="admin-range-label">2026年10月5日（月）の予約</div>
             <div class="admin-calendar-shell" aria-label="予約カレンダー">
@@ -512,7 +512,7 @@ let active=null,view='day';
 const wd=['日','月','火','水','木','金','土'],pad=v=>String(v).padStart(2,'0'),parse=v=>{const p=String(v).split('-').map(Number);return new Date(p[0],p[1]-1,p[2])},input=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,add=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x},jp=d=>`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${wd[d.getDay()]}）`;
 function display(){const base=parse(dateInput.value),finish=add(base,6);rangeLabel.textContent=view==='week'?`${jp(base)}〜${jp(finish)}の予約`:`${jp(base)}の予約`;root.querySelectorAll('.admin-cal-day[data-day]').forEach(h=>{const d=add(base,Number(h.dataset.day));h.innerHTML=`${wd[d.getDay()]}<span>${d.getMonth()+1}/${d.getDate()}</span>`});root.querySelectorAll('.admin-cal-cell[data-day] [data-book-date]').forEach(b=>{b.dataset.bookDate=input(add(base,Number(b.closest('.admin-cal-cell').dataset.day)))})}
 function labels(){prev.textContent=view==='week'?'前週':'前日';next.textContent=view==='week'?'翌週':'翌日'}
-function fetchRows(){load.disabled=true;load.textContent='呼び出し中…';loadMessage.textContent='予約状況を更新しています。';setTimeout(()=>{display();load.disabled=false;load.textContent='予約状況更新';loadMessage.textContent=`予約状況を表示しました（${new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}）。`},450)}
+function fetchRows(){load.disabled=true;load.textContent='呼び出し中…';loadMessage.dataset.show='true';loadMessage.textContent='予約状況を更新しています。';setTimeout(()=>{display();load.disabled=false;load.textContent='予約状況更新';loadMessage.textContent=`予約状況を表示しました（${new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}）。`},450)}
 refresh.addEventListener('click',()=>{refresh.dataset.loading='true';statusTexts.forEach(n=>n.textContent='確認中…');setTimeout(()=>{statusTexts.forEach(n=>n.textContent='正常');lastCheck.textContent=`最終確認 ${new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}`;refresh.dataset.loading='false'},450)});
 rangeButtons.forEach(b=>b.addEventListener('click',()=>{rangeButtons.forEach(x=>x.setAttribute('aria-pressed',String(x===b)));view=b.dataset.range;root.dataset.rangeView=view;labels();display()}));
 prev.addEventListener('click',()=>{dateInput.value=input(add(parse(dateInput.value),view==='week'?-7:-1));fetchRows()});
