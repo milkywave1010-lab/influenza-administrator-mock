@@ -368,9 +368,9 @@
               </div>
               <div class="admin-field">
                 <label for="admin-load-reservations">表示更新</label>
-                <button class="admin-secondary" id="admin-load-reservations" type="button">予約状況を呼び出す</button>
+                <button class="admin-secondary" id="admin-load-reservations" type="button">予約状況更新</button>
               </div>
-              <div class="admin-subline admin-load-message" id="admin-load-message" role="status">基準日を選び、予約状況を呼び出してください。</div>
+              <div class="admin-subline admin-load-message" id="admin-load-message" role="status">基準日を選び、予約状況を更新してください。</div>
             </div>
             <div class="admin-range-label" id="admin-range-label">2026年10月5日（月）の予約</div>
             <div class="admin-calendar-shell" aria-label="予約カレンダー">
@@ -512,7 +512,7 @@ let active=null,view='day';
 const wd=['日','月','火','水','木','金','土'],pad=v=>String(v).padStart(2,'0'),parse=v=>{const p=String(v).split('-').map(Number);return new Date(p[0],p[1]-1,p[2])},input=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,add=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x},jp=d=>`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${wd[d.getDay()]}）`;
 function display(){const base=parse(dateInput.value),finish=add(base,6);rangeLabel.textContent=view==='week'?`${jp(base)}〜${jp(finish)}の予約`:`${jp(base)}の予約`;root.querySelectorAll('.admin-cal-day[data-day]').forEach(h=>{const d=add(base,Number(h.dataset.day));h.innerHTML=`${wd[d.getDay()]}<span>${d.getMonth()+1}/${d.getDate()}</span>`});root.querySelectorAll('.admin-cal-cell[data-day] [data-book-date]').forEach(b=>{b.dataset.bookDate=input(add(base,Number(b.closest('.admin-cal-cell').dataset.day)))})}
 function labels(){prev.textContent=view==='week'?'前週':'前日';next.textContent=view==='week'?'翌週':'翌日'}
-function fetchRows(){load.disabled=true;load.textContent='呼び出し中…';loadMessage.textContent='予約状況を呼び出しています。';setTimeout(()=>{display();load.disabled=false;load.textContent='予約状況を呼び出す';loadMessage.textContent=`予約状況を表示しました（${new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}）。`},450)}
+function fetchRows(){load.disabled=true;load.textContent='呼び出し中…';loadMessage.textContent='予約状況を更新しています。';setTimeout(()=>{display();load.disabled=false;load.textContent='予約状況更新';loadMessage.textContent=`予約状況を表示しました（${new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}）。`},450)}
 refresh.addEventListener('click',()=>{refresh.dataset.loading='true';statusTexts.forEach(n=>n.textContent='確認中…');setTimeout(()=>{statusTexts.forEach(n=>n.textContent='正常');lastCheck.textContent=`最終確認 ${new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}`;refresh.dataset.loading='false'},450)});
 rangeButtons.forEach(b=>b.addEventListener('click',()=>{rangeButtons.forEach(x=>x.setAttribute('aria-pressed',String(x===b)));view=b.dataset.range;root.dataset.rangeView=view;labels();display()}));
 prev.addEventListener('click',()=>{dateInput.value=input(add(parse(dateInput.value),view==='week'?-7:-1));fetchRows()});
