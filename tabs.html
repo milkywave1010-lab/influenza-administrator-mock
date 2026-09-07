@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>インフルエンザ予約 管理画面モック</title>
+<style>
+:root{--green:#2f7b62;--green2:#eaf4ef;--ink:#27312d;--muted:#77817c;--bg:#f7f4ed;--paper:#fffdf8;--line:#e6dfd2;--red:#b95151;--red2:#fff0f0;--orange:#d38b35;--orange2:#fff1dc;--blue:#3b789c;--shadow:0 10px 28px rgba(54,72,65,.08)}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",Meiryo,sans-serif}.page{max-width:1500px;margin:auto;padding:18px}.top{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:14px}.brand h1{margin:0;font-size:22px}.brand p{margin:4px 0 0;color:var(--muted);font-size:13px}.badge{padding:8px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);font-size:12px}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;position:sticky;top:0;z-index:10;background:var(--bg);padding:6px 0}.tab{min-height:54px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-weight:900;font-size:16px;cursor:pointer}.tab.active{background:var(--green);border-color:var(--green);color:#fff}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}.metric{padding:14px 16px}.metric span{display:block;color:var(--muted);font-size:12px}.metric b{display:block;font-size:27px;margin-top:2px}.main{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(420px,.95fr);gap:14px;align-items:start}.panel-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}.panel-head h2{margin:0;font-size:18px}.panel-body{padding:14px 16px}.viewtabs{display:flex;gap:7px}.viewtabs button{height:36px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:800;cursor:pointer}.viewtabs button.active{background:var(--green2);color:var(--green);border-color:#cce3d8}.weekbar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin-bottom:10px}.weekbar button{height:38px;border:1px solid #efd3a8;border-radius:8px;background:var(--orange2);color:#8d5618;font-weight:900;padding:0 12px}.weekbar strong{text-align:center;font-size:18px}.calendar{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}.week-grid{display:grid;grid-template-columns:68px repeat(7,minmax(80px,1fr));min-width:760px}.cell{min-height:44px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:7px 6px;font-size:12px}.headcell{background:#f6f0e6;font-weight:900;text-align:center;color:var(--green)}.time{background:#fffaf1;font-weight:900;text-align:center}.slot{min-height:44px;cursor:pointer}.slot:hover{background:#f7fbf9}.event{display:block;border-left:4px solid var(--green);background:#edf7f2;border-radius:6px;padding:5px 6px;color:#285b4a;font-weight:800}.event.cancel{border-left-color:var(--red);background:var(--red2);color:var(--red)}.month-grid{display:none;grid-template-columns:repeat(7,1fr)}.month-grid.show{display:grid}.month-grid .cell{min-height:92px}.sun{color:#bf4a4a}.sat{color:#3d6fa3}.selected-day{background:#eef7f2}.side-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.side-title h3{margin:0;font-size:19px}.search{display:grid;grid-template-columns:1fr 150px;gap:8px;margin-bottom:10px}.search input,.search select,.field input,.field select,.field textarea{width:100%;border:1px solid #d9d1c4;border-radius:8px;background:#fff;font:inherit}.search input,.search select,.field input,.field select{height:44px;padding:0 11px}.patients{display:grid;gap:8px}.patient{border:1px solid var(--line);border-radius:9px;background:#fff;padding:10px}.patient-top{display:flex;justify-content:space-between;gap:10px}.patient b{font-size:16px}.meta{color:var(--muted);font-size:12px;margin-top:4px}.ops{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.ops button{height:34px;padding:0 10px;border:1px solid var(--line);border-radius:7px;background:#fff;font-weight:800}.ops .danger{color:var(--red);border-color:#ecc6c6;background:#fffafa}.status-pill{font-size:11px;padding:4px 8px;border-radius:999px;background:var(--green2);color:var(--green);font-weight:900}.form-list{display:grid;gap:11px}.field{display:grid;gap:5px}.field label{font-size:13px;font-weight:900}.field textarea{min-height:80px;padding:10px;resize:vertical}.form-note{font-size:12px;color:var(--muted)}.reserve-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.reserve-actions button{min-height:46px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:900}.reserve-actions .primary{background:var(--green);color:#fff;border-color:var(--green)}.status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.status-card{padding:18px}.status-card h3{margin:0 0 8px;font-size:16px}.status-card strong{font-size:28px;color:var(--green)}.rows{display:grid;gap:8px;margin-top:10px}.row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:13px}.logs{margin-top:12px}.log{display:grid;grid-template-columns:150px 120px 1fr 90px;gap:8px;padding:10px;border-top:1px solid var(--line);font-size:12px}.ok{color:var(--green);font-weight:900}.hidden{display:none!important}.scrollx{overflow:auto;-webkit-overflow-scrolling:touch}
+@media(max-width:900px){.page{padding:10px}.top{align-items:flex-start}.brand h1{font-size:18px}.badge{display:none}.tabs{gap:5px}.tab{font-size:13px;min-height:48px;padding:0 5px}.summary{grid-template-columns:1fr 1fr;gap:7px}.metric{padding:10px}.metric b{font-size:22px}.main{grid-template-columns:1fr}.panel-head{padding:11px}.panel-body{padding:11px}.weekbar strong{font-size:15px}.week-grid{min-width:680px}.search{grid-template-columns:1fr}.status-grid{grid-template-columns:1fr}.log{grid-template-columns:90px 86px 1fr}.log span:last-child{display:none}.month-grid .cell{min-height:72px}.reserve-actions{grid-template-columns:1fr}.side-title h3{font-size:17px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top"><div class="brand"><h1>インフルエンザ予防接種 予約管理</h1><p>上井草在宅支援診療所</p></div><div class="badge">管理者ログイン中</div></div>
+  <div class="tabs">
+    <button class="tab active" data-tab="manage">1. 管理画面（予約）</button>
+    <button class="tab" data-tab="counter">2. 窓口予約</button>
+    <button class="tab" data-tab="status">3. ステータス・設定</button>
+  </div>
+
+  <section id="sharedSummary" class="summary">
+    <div class="card metric"><span>本日の予約</span><b>12</b></div>
+    <div class="card metric"><span>本日の残枠</span><b>28</b></div>
+    <div class="card metric"><span>今週のキャンセル</span><b>2</b></div>
+    <div class="card metric"><span>問い合わせ</span><b>未読 0件</b></div>
+  </section>
+
+  <section id="manage" class="tabpage">
+    <div class="main">
+      <div class="card">
+        <div class="panel-head"><h2>予約カレンダー</h2><div class="viewtabs"><button class="active" data-view="week">週間</button><button data-view="month">月間</button></div></div>
+        <div class="panel-body">
+          <div class="weekbar"><button>≪ 前週</button><strong>2026年9月6日〜9月12日</strong><button>次週 ≫</button></div>
+          <div class="scrollx"><div id="weekCalendar" class="calendar week-grid"></div></div>
+          <div id="monthCalendar" class="calendar month-grid"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="panel-head"><h2>患者情報一覧</h2><span class="status-pill">9月7日（月）</span></div>
+        <div class="panel-body">
+          <div class="search"><input placeholder="氏名・ふりがな・電話番号・予約IDで検索"><select><option>すべて</option><option>予約確定</option><option>キャンセル</option></select></div>
+          <div class="patients">
+            <div class="patient"><div class="patient-top"><div><b>山田 太郎</b><div class="meta">やまだ たろう / 09:00 / R-20260907-0900-01</div></div><span class="status-pill">予約確定</span></div><div class="meta">1980/04/12　090-1234-5678　診察券：有</div><div class="ops"><button>詳細</button><button>時間変更</button><button class="danger">キャンセル</button></div></div>
+            <div class="patient"><div class="patient-top"><div><b>高橋 健</b><div class="meta">たかはし けん / 10:00 / R-20260907-1000-01</div></div><span class="status-pill">予約確定</span></div><div class="meta">1975/08/03　080-9876-5432　診察券：無</div><div class="ops"><button>詳細</button><button>時間変更</button><button class="danger">キャンセル</button></div></div>
+            <div class="patient"><div class="patient-top"><div><b>加藤 大輔</b><div class="meta">かとう だいすけ / 11:00 / R-20260907-1100-01</div></div><span class="status-pill" style="background:var(--red2);color:var(--red)">キャンセル</span></div><div class="meta">1990/11/22　090-2222-3333　診察券：有</div><div class="ops"><button>詳細</button><button>再予約</button></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="counter" class="tabpage hidden">
+    <div class="main">
+      <div class="card">
+        <div class="panel-head"><h2>予約カレンダー</h2><div class="viewtabs"><button class="active" data-view="week">週間</button><button data-view="month">月間</button></div></div>
+        <div class="panel-body">
+          <div class="weekbar"><button>≪ 前週</button><strong>2026年9月6日〜9月12日</strong><button>次週 ≫</button></div>
+          <div class="scrollx"><div class="calendar week-grid clone-week"></div></div>
+          <div class="calendar month-grid clone-month"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="panel-head"><h2>患者情報入力</h2><span class="form-note">日時以外は任意</span></div>
+        <div class="panel-body">
+          <div class="form-list">
+            <div class="field"><label>氏名</label><input placeholder="例：山田 太郎"></div>
+            <div class="field"><label>ふりがな</label><input placeholder="例：やまだ たろう"></div>
+            <div class="field"><label>生年月日</label><input type="date"></div>
+            <div class="field"><label>性別</label><select><option value="">未選択</option><option>男性</option><option>女性</option><option>その他</option></select></div>
+            <div class="field"><label>郵便番号</label><input placeholder="123-4567"></div>
+            <div class="field"><label>住所</label><input placeholder="東京都杉並区…"></div>
+            <div class="field"><label>電話番号</label><input placeholder="090-1234-5678" inputmode="tel"></div>
+            <div class="field"><label>診察券有無</label><select><option>無</option><option>有</option></select></div>
+            <div class="field"><label>診察券番号</label><input placeholder="任意"></div>
+            <div class="field"><label>備考</label><textarea placeholder="任意"></textarea></div>
+          </div>
+          <div class="reserve-actions"><button>入力をクリア</button><button class="primary">予約内容を確認</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="status" class="tabpage hidden">
+    <div class="status-grid">
+      <div class="card status-card"><h3>GAS通信</h3><strong>正常</strong><div class="rows"><div class="row"><span>最終確認</span><b>18:20</b></div><div class="row"><span>エラー</span><b>0件</b></div></div></div>
+      <div class="card status-card"><h3>スプレッドシート</h3><strong>接続済み</strong><div class="rows"><div class="row"><span>予約シート</span><b>正常</b></div><div class="row"><span>最終書込</span><b>18:18</b></div></div></div>
+      <div class="card status-card"><h3>Googleカレンダー</h3><strong>同期ON</strong><div class="rows"><div class="row"><span>最終同期</span><b>18:19</b></div><div class="row"><span>未反映</span><b>0件</b></div></div></div>
+      <div class="card status-card"><h3>予約受付</h3><strong>受付中</strong><div class="rows"><div class="row"><span>公開状態</span><b>公開中</b></div><div class="row"><span>通常締切</span><b>前日12:00</b></div></div></div>
+      <div class="card status-card"><h3>枠・休診設定</h3><strong>正常</strong><div class="rows"><div class="row"><span>臨時枠</span><b>2件</b></div><div class="row"><span>休診設定</span><b>1件</b></div></div></div>
+      <div class="card status-card"><h3>問い合わせ</h3><strong>未読 0件</strong><div class="rows"><div class="row"><span>最終受信</span><b>16:42</b></div><div class="row"><span>状態</span><b>正常</b></div></div></div>
+    </div>
+    <div class="card logs"><div class="panel-head"><h2>最近の処理ログ</h2></div><div class="panel-body"><div class="log"><b>18:19</b><span>同期</span><span>Googleカレンダーへ同期</span><span class="ok">成功</span></div><div class="log"><b>18:18</b><span>予約</span><span>窓口予約を登録</span><span class="ok">成功</span></div><div class="log"><b>17:54</b><span>キャンセル</span><span>予約キャンセルを確定</span><span class="ok">成功</span></div></div></div>
+  </section>
+</div>
+<script>
+const days=['日','月','火','水','木','金','土'];
+const dates=['9/6','9/7','9/8','9/9','9/10','9/11','9/12'];
+const times=['09:00','09:30','10:00','10:30','11:00','11:30','12:00','13:00','13:30','14:00','14:30','15:00','15:30','16:00'];
+const events={"1-0":'山田 太郎',"2-0":'佐藤 花子',"1-2":'高橋 健',"4-1":'田中 美咲',"1-4":'加藤 大輔',"5-2":'渡辺 隆',"3-4":'小林 輔子',"4-7":'松本 直樹'};
+function weekHTML(){let h='<div class="cell headcell">時間</div>';for(let d=0;d<7;d++)h+=`<div class="cell headcell ${d===0?'sun':''} ${d===6?'sat':''}">${dates[d]}(${days[d]})</div>`;times.forEach((t,r)=>{h+=`<div class="cell time">${t}</div>`;for(let d=0;d<7;d++){const k=`${d}-${r}`;h+=`<div class="cell slot ${d===1?'selected-day':''}">${events[k]?`<span class="event ${events[k]==='加藤 大輔'?'cancel':''}">${events[k]}</span>`:''}</div>`}});return h}
+function monthHTML(){let h='';days.forEach((d,i)=>h+=`<div class="cell headcell ${i===0?'sun':''} ${i===6?'sat':''}">${d}</div>`);let n=30,start=2;for(let i=0;i<start;i++)h+='<div class="cell"></div>';for(let d=1;d<=n;d++){const w=(start+d-1)%7;h+=`<div class="cell ${w===0?'sun':''} ${w===6?'sat':''}"><b>${d}</b>${[7,10,14,21,28].includes(d)?'<div class="meta">予約あり</div>':''}</div>`}return h}
+function fillCalendars(){document.getElementById('weekCalendar').innerHTML=weekHTML();document.getElementById('monthCalendar').innerHTML=monthHTML();document.querySelectorAll('.clone-week').forEach(x=>x.innerHTML=weekHTML());document.querySelectorAll('.clone-month').forEach(x=>x.innerHTML=monthHTML())}
+fillCalendars();
+document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.tabpage').forEach(x=>x.classList.add('hidden'));document.getElementById(btn.dataset.tab).classList.remove('hidden');document.getElementById('sharedSummary').classList.toggle('hidden',btn.dataset.tab==='status')}));
+document.addEventListener('click',e=>{if(!e.target.matches('[data-view]'))return;const card=e.target.closest('.card');card.querySelectorAll('[data-view]').forEach(x=>x.classList.remove('active'));e.target.classList.add('active');const week=card.querySelector('.week-grid');const month=card.querySelector('.month-grid');const isMonth=e.target.dataset.view==='month';week?.classList.toggle('hidden',isMonth);month?.classList.toggle('show',isMonth);});
+</script>
+</body>
+</html>
