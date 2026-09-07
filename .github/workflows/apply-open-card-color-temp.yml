@@ -1,0 +1,42 @@
+name: 患者詳細表示の色分け修正
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-open-card-color-temp.yml'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: 指定箇所だけ修正
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('tabs.html')
+          s=p.read_text(encoding='utf-8')
+          reps=[
+            ('.patient-table tr.active{box-shadow:inset 4px 0 var(--green)}', '.patient-table tr.active{box-shadow:inset 4px 0 var(--orange);background:var(--orange-soft)}', 2, '選択カード色'),
+            ('.detail-actions{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:8px;padding:14px}', '.detail-actions{display:grid;grid-template-columns:1fr 1.2fr;gap:8px;padding:14px}', 1, '詳細操作列'),
+            ('<div class="detail-actions"><button>詳細を開く</button><button>時間変更</button><button class="danger">${p.status===\'キャンセル\'?\'再予約\':\'この予約をキャンセル\'}</button></div>', '<div class="detail-actions"><button>時間変更</button><button class="danger">${p.status===\'キャンセル\'?\'再予約\':\'この予約をキャンセル\'}</button></div>', 1, '詳細を開くボタン')
+          ]
+          for old,new,count,name in reps:
+              actual=s.count(old)
+              if actual!=count:
+                  raise SystemExit(f'{name} target count={actual}, expected={count}')
+              s=s.replace(old,new)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: 変更を反映
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add tabs.html
+          git diff --cached --quiet && exit 0
+          git commit -m "開いている患者カードを薄いオレンジで表示"
+          git push
