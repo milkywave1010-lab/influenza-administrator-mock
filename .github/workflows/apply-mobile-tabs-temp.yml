@@ -1,4 +1,4 @@
-name: 管理画面モックのスマホ切替を反映
+name: 管理画面モックのスマホ専用表示を反映
 on:
   push:
     paths:
@@ -11,45 +11,92 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: スマホ切替を予約画面と同じ動きにする
+      - name: スマホ専用表示を反映
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p=Path('tabs.html')
           s=p.read_text()
-          old='@media(max-width:900px){.page{padding:10px}.badge{display:none}.brand h1{font-size:18px}.tabs{gap:5px}.tab{font-size:12px;min-height:46px;padding:0 4px}.summary{grid-template-columns:1fr 1fr;gap:7px}.metric{padding:10px}.metric b{font-size:22px}.main{grid-template-columns:1fr}.panel-body{padding:11px}.navrow strong{font-size:15px}.right-tools{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}.detail-col:first-child{border-right:0;padding-right:0}.detail-col:last-child{padding-left:0}.detail-actions{grid-template-columns:1fr}.status-grid{grid-template-columns:1fr}.log{grid-template-columns:90px 90px 1fr}.log span:last-child{display:none}.reserve-actions{grid-template-columns:1fr}.month-day{min-height:78px}}'
-          new='@media(max-width:900px){.page{padding:10px}.badge{display:none}.brand h1{font-size:18px}.tabs{grid-template-columns:1fr;--tab-collapse:0;row-gap:calc(10px * (1 - var(--tab-collapse)));position:sticky;top:0;z-index:20;padding:8px 0;background:var(--bg)}.tab{min-height:58px;max-height:58px;padding:9px 12px;font-size:17px;transition:min-height .05s linear,max-height .05s linear,opacity .05s linear,padding .05s linear,border-width .05s linear;overflow:hidden}.tab:not(.active){min-height:calc(58px * (1 - var(--tab-collapse)));max-height:calc(58px * (1 - var(--tab-collapse)));padding-top:calc(9px * (1 - var(--tab-collapse)));padding-bottom:calc(9px * (1 - var(--tab-collapse)));opacity:calc(1 - var(--tab-collapse));border-width:calc(1px * (1 - var(--tab-collapse)))}.tabs.is-stuck .tab:not(.active){pointer-events:none}.summary{grid-template-columns:1fr 1fr;gap:7px}.metric{padding:10px}.metric b{font-size:22px}.main{grid-template-columns:1fr}.panel-body{padding:11px}.navrow strong{font-size:15px}.right-tools{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr}.detail-col:first-child{border-right:0;padding-right:0}.detail-col:last-child{padding-left:0}.detail-actions{grid-template-columns:1fr}.status-grid{grid-template-columns:1fr}.log{grid-template-columns:90px 90px 1fr}.log span:last-child{display:none}.reserve-actions{grid-template-columns:1fr}.month-day{min-height:78px}}'
-          if old not in s:
-            raise SystemExit('スマホCSS対象が見つかりません')
-          s=s.replace(old,new,1)
-          old2='renderAllCalendars();renderPatients();\n</script>'
-          new2='''renderAllCalendars();renderPatients();
-(function(){
-  const tabs=document.querySelector('.tabs');
-  if(!tabs)return;
-  const sentinel=document.createElement('div');
-  sentinel.setAttribute('aria-hidden','true');
-  tabs.parentNode.insertBefore(sentinel,tabs);
-  const collapseDistance=130;
-  const syncTabs=function(){
-    if(window.matchMedia('(max-width:900px)').matches){
-      const start=sentinel.getBoundingClientRect().top+window.pageYOffset;
-      const progress=Math.max(0,Math.min(1,(window.pageYOffset-start)/collapseDistance));
-      tabs.style.setProperty('--tab-collapse',progress.toFixed(3));
-      tabs.classList.toggle('is-stuck',progress>=0.999);
-    }else{
-      tabs.style.removeProperty('--tab-collapse');
-      tabs.classList.remove('is-stuck');
-    }
-  };
-  window.addEventListener('scroll',syncTabs,{passive:true});
-  window.addEventListener('resize',syncTabs);
-  syncTabs();
-})();
-</script>'''
-          if old2 not in s:
-            raise SystemExit('スマホ動作追加位置が見つかりません')
-          p.write_text(s.replace(old2,new2,1))
+          marker='id="mobile-dedicated-layout"'
+          if marker in s:
+            raise SystemExit('既にスマホ専用表示が入っています')
+          css=r'''<style id="mobile-dedicated-layout">
+          @media(max-width:900px){
+            html,body{width:100%;max-width:100%;overflow-x:hidden}
+            body{font-size:16px}
+            .page{width:100%;max-width:100%;padding:10px;overflow-x:hidden}
+            .top{align-items:flex-start}.brand h1{font-size:18px}.badge{display:none}
+            .tabs{grid-template-columns:1fr;--tab-collapse:0;row-gap:calc(10px * (1 - var(--tab-collapse)));position:sticky;top:0;z-index:20;padding:8px 0;background:var(--bg)}
+            .tab{width:100%;min-height:58px;max-height:58px;padding:9px 12px;font-size:17px;border-radius:8px;transition:min-height .05s linear,max-height .05s linear,opacity .05s linear,padding .05s linear,border-width .05s linear;overflow:hidden}
+            .tab:not(.active){min-height:calc(58px * (1 - var(--tab-collapse)));max-height:calc(58px * (1 - var(--tab-collapse)));padding-top:calc(9px * (1 - var(--tab-collapse)));padding-bottom:calc(9px * (1 - var(--tab-collapse)));opacity:calc(1 - var(--tab-collapse));border-width:calc(1px * (1 - var(--tab-collapse)))}
+            .tabs.is-stuck .tab:not(.active){pointer-events:none}
+            .summary{grid-template-columns:1fr 1fr;gap:7px}.metric{padding:10px}.metric b{font-size:22px}
+            .main{grid-template-columns:minmax(0,1fr);gap:12px}.tabpage,.card,.calendar-card,.panel-body{min-width:0;max-width:100%}
+            .panel-head{padding:12px;align-items:center}.panel-head h2{font-size:18px}
+            .viewtabs{display:grid;grid-template-columns:1fr 1fr;width:180px;gap:6px}.viewtabs button{width:100%;height:48px;padding:0 10px;font-size:16px}
+            .navrow{grid-template-columns:auto minmax(0,1fr) auto;gap:6px}.navrow button{height:46px;padding:0 8px;font-size:14px}.navrow strong{min-width:0;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+            .scrollx{width:100%;max-width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+            .week-wrap{overflow-x:hidden}
+            .week-grid{width:100%;min-width:0;grid-template-columns:48px repeat(7,minmax(0,1fr))}
+            .cell{min-width:0;min-height:42px;padding:4px 2px;font-size:10px;overflow:hidden}
+            .head{font-size:10px;line-height:1.25}.time{font-size:11px}
+            .event{padding:3px 2px;font-size:9px;line-height:1.2;white-space:normal;overflow:hidden}
+            .month-wrap{overflow-x:hidden}.month-grid{width:100%;min-width:0;grid-template-columns:repeat(7,minmax(0,1fr))}
+            .month-head{min-width:0;min-height:34px;padding:5px 2px;font-size:11px}.month-day{min-width:0;min-height:62px;padding:4px 2px}.month-day button{min-height:54px;padding:2px}.month-day b{font-size:13px}.month-day small{font-size:9px;line-height:1.2;word-break:break-all}
+            .legend{gap:10px;font-size:11px}
+            .right-tools{grid-template-columns:1fr;gap:8px}.right-tools input,.right-tools select{height:52px;font-size:16px}
+            .patient-table,.patient-table tbody{display:block;width:100%}.patient-table thead{display:none}.patient-table tr{display:block;width:100%;margin:0 0 10px;padding:10px;border:1px solid var(--line);border-radius:9px;background:#fff}.patient-table tr.active{box-shadow:inset 4px 0 var(--green)}
+            .patient-table td{display:block;width:100%;padding:5px 0;border:0;font-size:13px}.patient-table td:first-child{font-size:16px}.patient-table .ops{margin-top:4px}.patient-table .ops button{min-height:40px}
+            .detail{width:100%;margin-top:10px}.detail-head{align-items:flex-start;flex-direction:column}.detail-grid{grid-template-columns:1fr;padding:8px 12px}.detail-col:first-child{border-right:0;padding-right:0}.detail-col:last-child{padding-left:0}.detail-row{grid-template-columns:88px minmax(0,1fr)}.detail-actions{grid-template-columns:1fr}
+            #counter .main{grid-template-columns:1fr}.form-list{grid-template-columns:1fr}.field input,.field select,.field textarea{min-height:54px;font-size:16px}.reserve-actions{grid-template-columns:1fr}.selected-slot{font-size:15px}
+            .status-grid{grid-template-columns:1fr}.log{grid-template-columns:84px 84px minmax(0,1fr)}.log span:last-child{display:none}
+          }
+          </style>'''
+          js=r'''<script id="mobile-dedicated-tabs-behavior">
+          (function(){
+            const tabs=document.querySelector('.tabs');
+            if(!tabs)return;
+            const buttons=[...tabs.querySelectorAll('.tab')];
+            const names={
+              manage:{active:'1. 管理画面（予約）',inactive:'1. 管理画面（予約）はこちら'},
+              counter:{active:'2. 窓口予約',inactive:'2. 窓口予約はこちら'},
+              status:{active:'3. ステータス・設定',inactive:'3. ステータス・設定はこちら'}
+            };
+            function syncLabels(){
+              if(!window.matchMedia('(max-width:900px)').matches){
+                buttons.forEach(btn=>{btn.textContent=names[btn.dataset.tab].active;});
+                return;
+              }
+              buttons.forEach(btn=>{
+                const n=names[btn.dataset.tab];
+                btn.textContent=btn.classList.contains('active')?n.active:n.inactive;
+              });
+            }
+            buttons.forEach(btn=>btn.addEventListener('click',()=>setTimeout(syncLabels,0)));
+            const sentinel=document.createElement('div');
+            sentinel.setAttribute('aria-hidden','true');
+            tabs.parentNode.insertBefore(sentinel,tabs);
+            const collapseDistance=130;
+            function syncSticky(){
+              if(window.matchMedia('(max-width:900px)').matches){
+                const start=sentinel.getBoundingClientRect().top+window.pageYOffset;
+                const progress=Math.max(0,Math.min(1,(window.pageYOffset-start)/collapseDistance));
+                tabs.style.setProperty('--tab-collapse',progress.toFixed(3));
+                tabs.classList.toggle('is-stuck',progress>=0.999);
+              }else{
+                tabs.style.removeProperty('--tab-collapse');
+                tabs.classList.remove('is-stuck');
+              }
+              syncLabels();
+            }
+            window.addEventListener('scroll',syncSticky,{passive:true});
+            window.addEventListener('resize',syncSticky);
+            syncSticky();
+          })();
+          </script>'''
+          s=s.replace('</head>',css+'\n</head>',1)
+          s=s.replace('</body>',js+'\n</body>',1)
+          p.write_text(s)
           PY
       - name: 変更をコミット
         run: |
@@ -57,5 +104,5 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add tabs.html
           git diff --cached --quiet && exit 0
-          git commit -m "スマホ切替を予約画面と同じ表示と動きに変更"
+          git commit -m "管理画面モックをスマホ専用表示に修正"
           git push
