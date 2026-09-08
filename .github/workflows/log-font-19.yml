@@ -1,0 +1,32 @@
+name: Log font 19
+on:
+  push:
+    paths:
+      - '.github/workflows/log-font-19.yml'
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Change desktop log font only
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('tabs.html')
+          text = path.read_text()
+          old = '.log{grid-template-columns:110px 190px minmax(0,1fr) 100px;gap:14px;padding:14px 10px;font-size:24px;align-items:center}'
+          new = '.log{grid-template-columns:110px 190px minmax(0,1fr) 100px;gap:14px;padding:14px 10px;font-size:19px;align-items:center}'
+          count = text.count(old)
+          if count != 1:
+              raise SystemExit(f'expected 1 target, found {count}')
+          path.write_text(text.replace(old, new, 1))
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add tabs.html
+          git commit -m '処理ログのPC文字サイズを19pxに変更'
+          git push
