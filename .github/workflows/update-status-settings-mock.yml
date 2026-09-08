@@ -14,10 +14,27 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import base64, re
+
           path = Path('tabs.html')
           text = path.read_text()
           marker = 'status-settings-final-layout'
           if marker in text:
               raise SystemExit('layout already applied')
-          css = base64.b64decode('CjxzdHlsZSBpZD0ic3RhdHVzLXNldHRpbmdzLWZpbmFsLWxheW91dCI+Ci50YWJbZGF0YS10YWI9Im1hbmFnZSJde2JhY2tncm91bmQ6IzJmNzE1OCFpbXBvcnRhbnQ7Ym9yZGVyLWNvbG9yOiMyZjcxNTghaW1wb3J0YW50O2NvbG9yOiNmZmYhaW1wb3J0YW50fQoudGFiW2RhdGEtdGFiPSJjb3VudGVyIl17YmFja2dyb3VuZDojZmZmMGRjIWltcG9ydGFudDtib3JkZXItY29sb3I6I2U4Yzk5YiFpbXBvcnRhbnQ7Y29sb3I6IzdmNTMxZiFpbXBvcnRhbnR9Ci50YWJbZGF0YS10YWI9InN0YXR1cyJde2JhY2tncm91bmQ6I2VhZjRmYiFpbXBvcnRhbnQ7Ym9yZGVyLWNvbG9yOiNiZGQ0ZTMhaW1wb3J0YW50O2NvbG9yOiMzMTVmN2IhaW1wb3J0YW50fQouc3RhdHVzLWdyaWR7Z3JpZC10ZW1wbGF0ZS1jb2x1bW5zOnJlcGVhdCg0LG1pbm1heCgwLDFmcikpO2dhcDoxMnB4fQouc3RhdHVzLWNhcmR7bWluLXdpZHRoOjA7cGFkZGluZzoxOHB4fQouc3RhdHVzLWNhcmQgc3Ryb25nLnN0YXRlLWVycm9ye2NvbG9yOnZhcigtLXJlZCl9Ci5sb2dze21hcmdpbi10b3A6MTRweH0KLmxvZ3MgLnBhbmVsLWhlYWQgLmFsbC1sb2dze2JvcmRlcjowO2JhY2tncm91bmQ6dHJhbnNwYXJlbnQ7Y29sb3I6dmFyKC0tZ3JlZW4pO2ZvbnQtc2l6ZToxNnB4O2ZvbnQtd2VpZ2h0OjkwMDtjdXJzb3I6cG9pbnRlcn0KLmxvZ3tncmlkLXRlbXBsYXRlLWNvbHVtbnM6MTEwcHggMTkwcHggbWlubWF4KDAsMWZyKSAxMDBweDtnYXA6MTRweDtwYWRkaW5nOjE0cHggMTBweDtmb250LXNpemU6MjRweDthbGlnbi1pdGVtczpjZW50ZXJ9Ci5sb2cgLmVycm9ye2NvbG9yOnZhcigtLXJlZCk7Zm9udC13ZWlnaHQ6OTAwfQouc2V0dGluZ3MtYXJlYXtkaXNwbGF5OmdyaWQ7Z2FwOjEycHg7bWFyZ2luLXRvcDoxNHB4fQouc2V0dGluZ3Mtcm93e2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6cmVwZWF0KDIsbWlubWF4KDAsMWZyKSk7Z2FwOjEycHh9Ci5zZXR0aW5nLWNhcmR7b3ZlcmZsb3c6aGlkZGVufQouc2V0dGluZy1jYXJkIHN1bW1hcnl7bGlzdC1zdHlsZTpub25lO2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW47Z2FwOjE2cHg7cGFkZGluZzoxOHB4IDIwcHg7Y3Vyc29yOnBvaW50ZXJ9Ci5zZXR0aW5nLWNhcmQgc3VtbWFyeTo6LXdlYmtpdC1kZXRhaWxzLW1hcmtlcntkaXNwbGF5Om5vbmV9Ci5zZXR0aW5nLWNhcmQgc3VtbWFyeSBoM3ttYXJnaW46MDtmb250LXNpemU6MjBweH0KLnsu...
+
+          css = Path('.github/status-style.css').read_text()
+          fragment = Path('.github/status-fragment.html').read_text().rstrip()
+          text = text.replace('</head>', f'<style id="{marker}">\n{css}</style>\n</head>', 1)
+
+          start = text.index('<section id="status" class="tabpage hidden">')
+          end = text.index('</section>', start) + len('</section>')
+          text = text[:start] + fragment + text[end:]
+          path.write_text(text)
+          PY
+      - name: Commit
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add tabs.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'ステータス設定モックの見た目を更新'
+          git push
