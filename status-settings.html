@@ -96,12 +96,7 @@ button{cursor:pointer}
 }
 </style>
 <style id="status-settings-mobile-polish-final">
-/* 公開モック最終調整：全要素を画面内に収容し、横はみ出しを禁止 */
-html,body{
-  width:100%;
-  max-width:100%;
-  overflow-x:hidden;
-}
+html,body{width:100%;max-width:100%;overflow-x:hidden}
 #influenza-admin-mock,
 #influenza-admin-mock .admin-shell,
 #influenza-admin-mock .admin-main,
@@ -114,162 +109,82 @@ html,body{
 #influenza-admin-mock .admin-setting-v1-field,
 #influenza-admin-mock .admin-setting-v1-record,
 #influenza-admin-mock .admin-basic-schedule-v1,
-#influenza-admin-mock .admin-basic-schedule-v1-scroll{
-  min-width:0;
-  max-width:100%;
-  box-sizing:border-box;
-}
+#influenza-admin-mock .admin-basic-schedule-v1-scroll{min-width:0;max-width:100%;box-sizing:border-box}
 #influenza-admin-mock .admin-setting-v1-card{width:100%;overflow:hidden}
 #influenza-admin-mock .admin-setting-v1-field input,
 #influenza-admin-mock .admin-setting-v1-field select,
-#influenza-admin-mock .admin-setting-v1-field textarea{
-  display:block;
-  width:100%;
-  min-width:0;
-  max-width:100%;
-  box-sizing:border-box;
-}
+#influenza-admin-mock .admin-setting-v1-field textarea{display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box}
 #influenza-admin-mock .admin-setting-v1-record>div:first-child{min-width:0}
 #influenza-admin-mock .admin-setting-v1-record b,
 #influenza-admin-mock .admin-setting-v1-record span{overflow-wrap:anywhere;word-break:break-word}
-
 @media(max-width:900px){
-  #influenza-admin-mock .admin-shell{
-    width:100%;
-    max-width:100%;
-    padding:10px;
-    overflow-x:hidden;
-  }
-  #influenza-admin-mock .admin-main,
-  #influenza-admin-mock .admin-status-page-v1{
-    width:100%;
-    max-width:100%;
-    overflow-x:hidden;
-  }
-  #influenza-admin-mock .admin-main-tabs{
-    width:100%;
-    min-width:0;
-    max-width:100%;
-    grid-template-columns:1fr;
-  }
-  #influenza-admin-mock .admin-main-tab{
-    width:100%;
-    min-width:0;
-    max-width:100%;
-  }
+  #influenza-admin-mock .admin-shell{width:100%;max-width:100%;padding:10px;overflow-x:hidden}
+  #influenza-admin-mock .admin-main,#influenza-admin-mock .admin-status-page-v1{width:100%;max-width:100%;overflow-x:hidden}
+  #influenza-admin-mock .admin-main-tabs{width:100%;min-width:0;max-width:100%;grid-template-columns:1fr}
+  #influenza-admin-mock .admin-main-tab{width:100%;min-width:0;max-width:100%}
   #influenza-admin-mock .admin-status-v1-grid{grid-template-columns:1fr}
-  #influenza-admin-mock .admin-status-v1-panel,
-  #influenza-admin-mock .admin-status-v1-body{min-width:0;max-width:100%;overflow:hidden}
-  #influenza-admin-mock .admin-status-v1-log{
-    grid-template-columns:52px 78px minmax(0,1fr);
-    gap:6px;
-    min-width:0;
-    padding:11px 2px;
-    font-size:11px;
-  }
+  #influenza-admin-mock .admin-status-v1-panel,#influenza-admin-mock .admin-status-v1-body{min-width:0;max-width:100%;overflow:hidden}
+  #influenza-admin-mock .admin-status-v1-log{grid-template-columns:52px 78px minmax(0,1fr);gap:6px;min-width:0;padding:11px 2px;font-size:11px}
   #influenza-admin-mock .admin-status-v1-log>*{min-width:0;overflow-wrap:anywhere}
   #influenza-admin-mock .admin-status-v1-log .ok{grid-column:3;text-align:right}
-
   #influenza-admin-mock .admin-settings-v1-row{grid-template-columns:1fr}
   #influenza-admin-mock .admin-setting-v1-body{padding:14px 12px 16px}
   #influenza-admin-mock .admin-setting-v1-form{grid-template-columns:1fr}
   #influenza-admin-mock .admin-setting-v1-field.full{grid-column:auto}
-
   #influenza-admin-mock .admin-basic-schedule-v1{width:100%;overflow:hidden}
-  #influenza-admin-mock .admin-basic-schedule-v1-head{
-    align-items:flex-start;
-    flex-direction:column;
-    gap:4px;
-  }
-  #influenza-admin-mock .admin-basic-schedule-v1-scroll{
-    width:100%;
-    min-width:0;
-    max-width:100%;
-    overflow:hidden;
-  }
-  #influenza-admin-mock .admin-basic-schedule-v1-table{
-    width:100%;
-    min-width:0;
-    max-width:100%;
-    table-layout:fixed;
-    border-collapse:collapse;
-  }
-  #influenza-admin-mock .admin-basic-schedule-v1-table th,
-  #influenza-admin-mock .admin-basic-schedule-v1-table td{
-    min-width:0;
-    width:auto;
-    padding:7px 1px;
-    font-size:11px;
-    overflow:hidden;
-    white-space:nowrap;
-    text-overflow:clip;
-  }
-  #influenza-admin-mock .admin-basic-schedule-v1-table th:first-child,
-  #influenza-admin-mock .admin-basic-schedule-v1-table td:first-child{width:62px}
-  #influenza-admin-mock .admin-basic-schedule-v1-table input[type="checkbox"]{
-    display:inline-block;
-    width:18px;
-    min-width:18px;
-    max-width:18px;
-    height:18px;
-    margin:0;
-    padding:0;
-    vertical-align:middle;
-  }
-
-  #influenza-admin-mock .admin-setting-v1-actions{
-    display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    width:100%;
-    min-width:0;
-    max-width:100%;
-    gap:8px;
-  }
+  #influenza-admin-mock .admin-basic-schedule-v1-head{align-items:flex-start;flex-direction:column;gap:4px}
+  #influenza-admin-mock .admin-basic-schedule-v1-scroll{width:100%;min-width:0;max-width:100%;overflow:hidden}
+  #influenza-admin-mock .admin-basic-schedule-v1-table{width:100%;min-width:0;max-width:100%;table-layout:fixed;border-collapse:collapse}
+  #influenza-admin-mock .admin-basic-schedule-v1-table th,#influenza-admin-mock .admin-basic-schedule-v1-table td{min-width:0;width:auto;padding:7px 1px;font-size:11px;overflow:hidden;white-space:nowrap;text-overflow:clip}
+  #influenza-admin-mock .admin-basic-schedule-v1-table th:first-child,#influenza-admin-mock .admin-basic-schedule-v1-table td:first-child{width:62px}
+  #influenza-admin-mock .admin-basic-schedule-v1-table input[type="checkbox"]{display:inline-block;width:18px;min-width:18px;max-width:18px;height:18px;margin:0;padding:0;vertical-align:middle}
+  #influenza-admin-mock .admin-setting-v1-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;min-width:0;max-width:100%;gap:8px}
   #influenza-admin-mock .admin-setting-v1-actions:has(>button:only-child){grid-template-columns:1fr}
-  #influenza-admin-mock .admin-setting-v1-actions button{
-    width:100%;
-    min-width:0;
-    max-width:100%;
-    white-space:normal;
-    line-height:1.3;
-  }
-
-  #influenza-admin-mock .admin-setting-v1-record{
-    width:100%;
-    min-width:0;
-    max-width:100%;
-    grid-template-columns:1fr;
-    gap:9px;
-  }
-  #influenza-admin-mock .admin-setting-v1-record .buttons{
-    display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    width:100%;
-    min-width:0;
-    gap:7px;
-  }
-  #influenza-admin-mock .admin-setting-v1-record .buttons button{
-    width:100%;
-    min-width:0;
-    max-width:100%;
-  }
+  #influenza-admin-mock .admin-setting-v1-actions button{width:100%;min-width:0;max-width:100%;white-space:normal;line-height:1.3}
+  #influenza-admin-mock .admin-setting-v1-record{width:100%;min-width:0;max-width:100%;grid-template-columns:1fr;gap:9px}
+  #influenza-admin-mock .admin-setting-v1-record .buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;min-width:0;gap:7px}
+  #influenza-admin-mock .admin-setting-v1-record .buttons button{width:100%;min-width:0;max-width:100%}
   #influenza-admin-mock .mock-note{overflow-wrap:anywhere}
 }
-
 @media(max-width:380px){
   #influenza-admin-mock .admin-shell{padding:8px}
   #influenza-admin-mock .admin-setting-v1-card>summary{padding:14px 12px}
   #influenza-admin-mock .admin-setting-v1-body{padding:12px 10px 14px}
-  #influenza-admin-mock .admin-basic-schedule-v1-table th,
-  #influenza-admin-mock .admin-basic-schedule-v1-table td{font-size:10px;padding:6px 0}
-  #influenza-admin-mock .admin-basic-schedule-v1-table th:first-child,
-  #influenza-admin-mock .admin-basic-schedule-v1-table td:first-child{width:56px}
-  #influenza-admin-mock .admin-basic-schedule-v1-table input[type="checkbox"]{
-    width:17px;
-    min-width:17px;
-    max-width:17px;
-    height:17px;
+  #influenza-admin-mock .admin-basic-schedule-v1-table th,#influenza-admin-mock .admin-basic-schedule-v1-table td{font-size:10px;padding:6px 0}
+  #influenza-admin-mock .admin-basic-schedule-v1-table th:first-child,#influenza-admin-mock .admin-basic-schedule-v1-table td:first-child{width:56px}
+  #influenza-admin-mock .admin-basic-schedule-v1-table input[type="checkbox"]{width:17px;min-width:17px;max-width:17px;height:17px}
+}
+</style>
+<style id="status-settings-ios-datetime-final">
+@media(max-width:900px){
+  #influenza-admin-mock .admin-setting-v1-field{width:100%!important;min-width:0!important;max-width:100%!important;overflow:hidden!important}
+  #influenza-admin-mock .admin-setting-v1-field input[type="date"],
+  #influenza-admin-mock .admin-setting-v1-field input[type="time"]{
+    display:block!important;
+    position:relative!important;
+    width:calc(100% - 2px)!important;
+    min-width:0!important;
+    max-width:calc(100% - 2px)!important;
+    inline-size:calc(100% - 2px)!important;
+    min-inline-size:0!important;
+    max-inline-size:calc(100% - 2px)!important;
+    margin:0 auto!important;
+    padding:8px 10px!important;
+    box-sizing:border-box!important;
+    -webkit-appearance:none!important;
+    appearance:none!important;
+    text-align:center!important;
+    text-align-last:center!important;
+    overflow:hidden!important;
   }
+  #influenza-admin-mock .admin-setting-v1-field input[type="date"]::-webkit-date-and-time-value,
+  #influenza-admin-mock .admin-setting-v1-field input[type="time"]::-webkit-date-and-time-value{display:block!important;width:100%!important;min-width:0!important;margin:0!important;padding:0!important;text-align:center!important}
+  #influenza-admin-mock .admin-setting-v1-field input[type="date"]::-webkit-datetime-edit,
+  #influenza-admin-mock .admin-setting-v1-field input[type="time"]::-webkit-datetime-edit{display:block!important;width:100%!important;min-width:0!important;margin:0!important;padding:0!important;text-align:center!important}
+  #influenza-admin-mock .admin-setting-v1-field input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+  #influenza-admin-mock .admin-setting-v1-field input[type="time"]::-webkit-datetime-edit-fields-wrapper{display:flex!important;width:100%!important;min-width:0!important;justify-content:center!important;align-items:center!important;padding:0!important}
+  #influenza-admin-mock .admin-setting-v1-field input[type="date"]::-webkit-calendar-picker-indicator,
+  #influenza-admin-mock .admin-setting-v1-field input[type="time"]::-webkit-calendar-picker-indicator{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;opacity:0!important}
 }
 </style>
 </head>
@@ -283,14 +198,12 @@ html,body{
       </div>
       <div class="admin-user">管理者としてログイン中</div>
     </header>
-
     <main class="admin-main">
       <div class="admin-main-tabs" role="tablist">
         <button type="button" class="admin-main-tab" data-admin-tab="manage">1. 管理画面（予約）</button>
         <button type="button" class="admin-main-tab" data-admin-tab="counter">2. 窓口予約</button>
         <button type="button" class="admin-main-tab" data-admin-tab="status" aria-selected="true">3. ステータス・設定</button>
       </div>
-
       <section class="admin-status-page-v1">
         <div class="admin-status-v1-grid">
           <div class="admin-status-v1-card"><h3>GAS通信</h3><strong>正常</strong><div class="admin-status-v1-rows"><div class="admin-status-v1-row"><span>最終確認</span><b>09:42</b></div><div class="admin-status-v1-row"><span>エラー</span><b>0件</b></div></div></div>
@@ -298,7 +211,6 @@ html,body{
           <div class="admin-status-v1-card"><h3>Googleカレンダー</h3><strong>接続済み</strong><div class="admin-status-v1-rows"><div class="admin-status-v1-row"><span>最終接続</span><b>09:42</b></div></div></div>
           <div class="admin-status-v1-card"><h3>エラーステータス</h3><strong>異常なし</strong><div class="admin-status-v1-rows"><div class="admin-status-v1-row"><span>最終確認</span><b>09:42</b></div></div></div>
         </div>
-
         <div class="admin-status-v1-panel">
           <div class="admin-status-v1-head"><h2>処理ログ</h2><button type="button" id="toggleLogs">すべて見る ›</button></div>
           <div class="admin-status-v1-body" id="logs">
@@ -307,7 +219,6 @@ html,body{
             <div class="admin-status-v1-log"><b>09:31</b><span>設定変更</span><span>基本設定を更新しました</span><span class="ok">正常</span></div>
           </div>
         </div>
-
         <div class="admin-settings-v1">
           <details class="admin-setting-v1-card" open>
             <summary><div><h3>設定カード（基本設定）</h3><p>基本設定を確認・変更</p></div><span class="chev">⌄</span></summary>
@@ -320,7 +231,6 @@ html,body{
                 <div class="admin-setting-v1-field"><label>受付間隔（分）</label><input type="number" min="1" value="30"></div>
                 <div class="admin-setting-v1-field"><label>1枠あたり人数</label><input type="number" min="1" value="10"></div>
                 <div class="admin-setting-v1-field"><label>表示月数</label><input type="number" min="1" value="2"></div>
-
                 <div class="admin-basic-schedule-v1">
                   <div class="admin-basic-schedule-v1-head"><strong>曜日・時間別受付設定</strong><span>スプレッドシート「基本設定」と同期</span></div>
                   <div class="admin-basic-schedule-v1-scroll">
@@ -332,13 +242,11 @@ html,body{
                   <div class="admin-setting-v1-message" id="scheduleMsg"></div>
                   <div class="admin-setting-v1-actions"><button type="button" class="save" id="saveSchedule">曜日・時間表を保存</button></div>
                 </div>
-
                 <div class="admin-setting-v1-message" id="baseMsg"></div>
                 <div class="admin-setting-v1-actions"><button type="submit" class="save">基本設定を保存</button></div>
               </form>
             </div>
           </details>
-
           <div class="admin-settings-v1-row">
             <details class="admin-setting-v1-card"><summary><div><h3>休診日</h3><p>休診日の確認・変更</p></div><span class="chev">⌄</span></summary><div class="admin-setting-v1-body" id="holiday"></div></details>
             <details class="admin-setting-v1-card"><summary><div><h3>臨時休診日</h3><p>臨時休診日の確認・変更</p></div><span class="chev">⌄</span></summary><div class="admin-setting-v1-body" id="block"></div></details>
@@ -376,5 +284,3 @@ document.addEventListener('click',e=>{const del=e.target.closest('[data-del]');i
 </script>
 </body>
 </html>
-
-
