@@ -3,9 +3,7 @@ from pathlib import Path
 path = Path('status-settings.html')
 text = path.read_text(encoding='utf-8')
 marker = 'status-settings-mobile-containment-final'
-if marker not in text:
-    text += r'''
-<style id="status-settings-mobile-containment-final">
+style_block = r'''<style id="status-settings-mobile-containment-final">
 #influenza-admin-mock .admin-status-page-v1,
 #influenza-admin-mock .admin-settings-v1,
 #influenza-admin-mock .admin-settings-v1-row,
@@ -63,6 +61,19 @@ if marker not in text:
     overflow-wrap:anywhere!important;
   }
 }
-</style>
-'''
-    path.write_text(text, encoding='utf-8')
+</style>'''
+
+# Remove any previous copy, including the accidental post-</html> copy.
+start = text.find('<style id="status-settings-mobile-containment-final">')
+if start >= 0:
+    end = text.find('</style>', start)
+    if end < 0:
+        raise SystemExit('containment style end not found')
+    end += len('</style>')
+    text = text[:start] + text[end:]
+
+head_end = text.find('</head>')
+if head_end < 0:
+    raise SystemExit('</head> not found')
+text = text[:head_end] + style_block + '\n' + text[head_end:]
+path.write_text(text, encoding='utf-8')
