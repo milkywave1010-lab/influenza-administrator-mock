@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>インフルエンザ予約 管理｜ステータス・設定モック</title>
+<style>
+:root{color-scheme:light}
+html,body{margin:0;padding:0;background:#f7f4ed;color:#27312d;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",Meiryo,sans-serif}
+*{box-sizing:border-box}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+#influenza-admin-mock{
+  --admin-bg:#f7f4ed;--admin-surface:#fffdf9;--admin-surface-strong:#fff;--admin-text:#27312d;--admin-muted:#727d77;--admin-line:#e4ddcf;--admin-green:#2f7b62;--admin-green-dark:#285b4a;--admin-green-soft:#e9f4ef;--admin-red:#c25252;--admin-red-soft:#fff0f0;--admin-amber:#8e5618;--admin-amber-soft:#fff2df;--admin-blue:#4b82b7;--admin-shadow:0 8px 24px rgba(51,65,58,.08);
+  background:var(--admin-bg);color:var(--admin-text);min-height:100vh
+}
+#influenza-admin-mock .admin-shell{min-height:100vh;max-width:1540px;margin:0 auto;padding:18px}
+#influenza-admin-mock .admin-header{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:0 0 12px}
+#influenza-admin-mock .admin-brand-name{margin:0;font-size:22px;font-weight:800}
+#influenza-admin-mock .admin-brand-sub{margin:2px 0 0;font-size:13px;color:var(--admin-muted)}
+#influenza-admin-mock .admin-user{padding:8px 12px;border:1px solid var(--admin-line);border-radius:999px;background:#fff;font-size:12px}
+#influenza-admin-mock .admin-main{display:grid;gap:14px}
+#influenza-admin-mock .admin-main-tabs{position:sticky;top:0;z-index:30;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:6px 0 10px;background:var(--admin-bg)}
+#influenza-admin-mock .admin-main-tab{min-height:52px;padding:0 12px;border:1px solid var(--admin-line);border-radius:10px;font-size:16px;font-weight:900}
+#influenza-admin-mock .admin-main-tab[data-admin-tab="manage"]{background:#2f7158;border-color:#2f7158;color:#fff}
+#influenza-admin-mock .admin-main-tab[data-admin-tab="counter"]{background:#fff0dc;border-color:#e8c99b;color:#7f531f}
+#influenza-admin-mock .admin-main-tab[data-admin-tab="status"]{background:#eaf4fb;border-color:#bdd4e3;color:#315f7b;box-shadow:inset 0 0 0 2px #315f7b22}
+#influenza-admin-mock .admin-status-page-v1{display:grid;gap:14px}
+#influenza-admin-mock .admin-status-v1-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+#influenza-admin-mock .admin-status-v1-card{min-width:0;padding:16px;border:1px solid var(--admin-line);border-radius:10px;background:var(--admin-surface);box-shadow:var(--admin-shadow)}
+#influenza-admin-mock .admin-status-v1-card h3{margin:0 0 8px;font-size:15px}
+#influenza-admin-mock .admin-status-v1-card strong{display:block;color:var(--admin-green-dark);font-size:24px;line-height:1.25}
+#influenza-admin-mock .admin-status-v1-rows{display:grid;gap:0;margin-top:12px}
+#influenza-admin-mock .admin-status-v1-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--admin-line);font-size:12px}
+#influenza-admin-mock .admin-status-v1-panel{border:1px solid var(--admin-line);border-radius:10px;background:var(--admin-surface);box-shadow:var(--admin-shadow);overflow:hidden}
+#influenza-admin-mock .admin-status-v1-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-bottom:1px solid var(--admin-line)}
+#influenza-admin-mock .admin-status-v1-head h2{margin:0;font-size:16px}
+#influenza-admin-mock .admin-status-v1-head button{border:0;background:transparent;color:var(--admin-green-dark);font-weight:800}
+#influenza-admin-mock .admin-status-v1-body{padding:0 12px}
+#influenza-admin-mock .admin-status-v1-log{display:grid;grid-template-columns:70px 145px minmax(0,1fr) 70px;gap:12px;padding:12px 4px;border-top:1px solid var(--admin-line);align-items:center;font-size:12px}
+#influenza-admin-mock .admin-status-v1-log:first-child{border-top:0}
+#influenza-admin-mock .admin-status-v1-log .ok{color:var(--admin-green-dark);font-weight:800}
+#influenza-admin-mock .admin-settings-v1{display:grid;gap:10px}
+#influenza-admin-mock .admin-settings-v1-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#influenza-admin-mock .admin-setting-v1-card{border:1px solid var(--admin-line);border-radius:10px;background:var(--admin-surface);box-shadow:var(--admin-shadow);overflow:hidden}
+#influenza-admin-mock .admin-setting-v1-card>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 17px;cursor:pointer}
+#influenza-admin-mock .admin-setting-v1-card>summary::-webkit-details-marker{display:none}
+#influenza-admin-mock .admin-setting-v1-card>summary h3{margin:0;font-size:15px}
+#influenza-admin-mock .admin-setting-v1-card>summary p{margin:4px 0 0;color:var(--admin-muted);font-size:11px}
+#influenza-admin-mock .admin-setting-v1-card>summary .chev{font-size:18px;transition:transform .15s ease}
+#influenza-admin-mock .admin-setting-v1-card[open]>summary .chev{transform:rotate(180deg)}
+#influenza-admin-mock .admin-setting-v1-body{padding:14px 17px 17px;border-top:1px solid var(--admin-line)}
+#influenza-admin-mock .admin-setting-v1-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#influenza-admin-mock .admin-setting-v1-field{display:grid;gap:4px}
+#influenza-admin-mock .admin-setting-v1-field.full{grid-column:1/-1}
+#influenza-admin-mock .admin-setting-v1-field label{color:var(--admin-muted);font-size:11px}
+#influenza-admin-mock .admin-setting-v1-field input,#influenza-admin-mock .admin-setting-v1-field select,#influenza-admin-mock .admin-setting-v1-field textarea{width:100%;min-height:40px;padding:8px 10px;border:1px solid var(--admin-line);border-radius:7px;background:var(--admin-surface-strong);color:var(--admin-text)}
+#influenza-admin-mock .admin-setting-v1-field textarea{min-height:76px;resize:vertical}
+#influenza-admin-mock .admin-setting-v1-actions{display:flex;justify-content:flex-end;gap:8px;grid-column:1/-1}
+#influenza-admin-mock .admin-setting-v1-actions button,#influenza-admin-mock .admin-setting-v1-record button{min-height:36px;padding:7px 11px;border:1px solid var(--admin-line);border-radius:7px;background:var(--admin-surface-strong);color:var(--admin-text);font-weight:700}
+#influenza-admin-mock .admin-setting-v1-actions .save{border-color:var(--admin-green);background:var(--admin-green);color:#fff}
+#influenza-admin-mock .admin-setting-v1-message{grid-column:1/-1;min-height:18px;color:var(--admin-muted);font-size:11px}
+#influenza-admin-mock .admin-setting-v1-records{display:grid;gap:7px;margin-top:12px}
+#influenza-admin-mock .admin-setting-v1-record{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--admin-line);border-radius:8px;background:var(--admin-bg)}
+#influenza-admin-mock .admin-setting-v1-record b{display:block;font-size:12px}
+#influenza-admin-mock .admin-setting-v1-record span{display:block;margin-top:2px;color:var(--admin-muted);font-size:10px}
+#influenza-admin-mock .admin-setting-v1-record .buttons{display:flex;gap:6px}
+#influenza-admin-mock .admin-setting-v1-record .delete{color:var(--admin-red)}
+#influenza-admin-mock .admin-basic-schedule-v1{grid-column:1/-1;margin-top:4px;padding-top:14px;border-top:1px solid var(--admin-line)}
+#influenza-admin-mock .admin-basic-schedule-v1-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:10px}
+#influenza-admin-mock .admin-basic-schedule-v1-head strong{font-size:16px}
+#influenza-admin-mock .admin-basic-schedule-v1-head span{color:var(--admin-muted);font-size:12px}
+#influenza-admin-mock .admin-basic-schedule-v1-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--admin-line);border-radius:9px;background:var(--admin-surface-strong)}
+#influenza-admin-mock .admin-basic-schedule-v1-table{width:100%;min-width:680px;border-collapse:collapse}
+#influenza-admin-mock .admin-basic-schedule-v1-table th,#influenza-admin-mock .admin-basic-schedule-v1-table td{padding:9px 8px;border-right:1px solid var(--admin-line);border-bottom:1px solid var(--admin-line);text-align:center;font-size:13px}
+#influenza-admin-mock .admin-basic-schedule-v1-table th:last-child,#influenza-admin-mock .admin-basic-schedule-v1-table td:last-child{border-right:0}
+#influenza-admin-mock .admin-basic-schedule-v1-table tr:last-child th,#influenza-admin-mock .admin-basic-schedule-v1-table tr:last-child td{border-bottom:0}
+#influenza-admin-mock .admin-basic-schedule-v1-table thead th{background:var(--admin-bg);color:var(--admin-text);font-weight:700}
+#influenza-admin-mock .admin-basic-schedule-v1-table tbody th{background:var(--admin-bg);color:var(--admin-text);font-weight:700;white-space:nowrap}
+#influenza-admin-mock .admin-basic-schedule-v1-table .weekday-row th,#influenza-admin-mock .admin-basic-schedule-v1-table .weekday-row td{background:color-mix(in srgb,var(--admin-green-soft) 58%,var(--admin-surface-strong))}
+#influenza-admin-mock .admin-basic-schedule-v1-table input[type="checkbox"]{width:20px;height:20px;margin:0;accent-color:var(--admin-green);vertical-align:middle}
+#influenza-admin-mock .mock-note{padding:10px 12px;border:1px solid #d9d2c7;border-radius:9px;background:#fff9ee;color:#6b5b43;font-size:12px}
+@media(max-width:900px){
+  #influenza-admin-mock .admin-shell{padding:10px}
+  #influenza-admin-mock .admin-user{display:none}
+  #influenza-admin-mock .admin-main-tabs{grid-template-columns:1fr;gap:8px}
+  #influenza-admin-mock .admin-main-tab{min-height:58px;font-size:17px}
+  #influenza-admin-mock .admin-status-v1-grid{grid-template-columns:1fr}
+  #influenza-admin-mock .admin-status-v1-log{grid-template-columns:64px 100px minmax(0,1fr);gap:6px}
+  #influenza-admin-mock .admin-status-v1-log span:last-child{grid-column:3}
+  #influenza-admin-mock .admin-settings-v1-row{grid-template-columns:1fr}
+  #influenza-admin-mock .admin-setting-v1-form{grid-template-columns:1fr}
+  #influenza-admin-mock .admin-setting-v1-field.full{grid-column:auto}
+  #influenza-admin-mock .admin-basic-schedule-v1-head{align-items:flex-start;flex-direction:column;gap:4px}
+  #influenza-admin-mock .admin-basic-schedule-v1-table{min-width:620px}
+}
+</style>
+</head>
+<body>
+<div id="influenza-admin-mock">
+  <div class="admin-shell">
+    <header class="admin-header">
+      <div>
+        <p class="admin-brand-name">インフルエンザ予約 管理</p>
+        <p class="admin-brand-sub">上井草在宅支援診療所</p>
+      </div>
+      <div class="admin-user">管理者としてログイン中</div>
+    </header>
+
+    <main class="admin-main">
+      <div class="admin-main-tabs" role="tablist">
+        <button type="button" class="admin-main-tab" data-admin-tab="manage">1. 管理画面（予約）</button>
+        <button type="button" class="admin-main-tab" data-admin-tab="counter">2. 窓口予約</button>
+        <button type="button" class="admin-main-tab" data-admin-tab="status" aria-selected="true">3. ステータス・設定</button>
+      </div>
+
+      <section class="admin-status-page-v1">
+        <div class="admin-status-v1-grid">
+          <div class="admin-status-v1-card"><h3>GAS通信</h3><strong>正常</strong><div class="admin-status-v1-rows"><div class="admin-status-v1-row"><span>最終確認</span><b>09:42</b></div><div class="admin-status-v1-row"><span>エラー</span><b>0件</b></div></div></div>
+          <div class="admin-status-v1-card"><h3>スプレッドシート</h3><strong>接続済み</strong><div class="admin-status-v1-rows"><div class="admin-status-v1-row"><span>予約シート</span><b>正常</b></div><div class="admin-status-v1-row"><span>同期</span><b>正常</b></div></div></div>
+          <div class="admin-status-v1-card"><h3>Googleカレンダー</h3><strong>接続済み</strong><div class="admin-status-v1-rows"><div class="admin-status-v1-row"><span>最終接続</span><b>09:42</b></div></div></div>
+          <div class="admin-status-v1-card"><h3>エラーステータス</h3><strong>異常なし</strong><div class="admin-status-v1-rows"><div class="admin-status-v1-row"><span>最終確認</span><b>09:42</b></div></div></div>
+        </div>
+
+        <div class="admin-status-v1-panel">
+          <div class="admin-status-v1-head"><h2>処理ログ</h2><button type="button" id="toggleLogs">すべて見る ›</button></div>
+          <div class="admin-status-v1-body" id="logs">
+            <div class="admin-status-v1-log"><b>09:42</b><span>システム</span><span>ステータスを確認しました</span><span class="ok">正常</span></div>
+            <div class="admin-status-v1-log"><b>09:35</b><span>設定変更</span><span>基本設定の曜日・時間表を更新しました</span><span class="ok">正常</span></div>
+            <div class="admin-status-v1-log"><b>09:31</b><span>設定変更</span><span>基本設定を更新しました</span><span class="ok">正常</span></div>
+          </div>
+        </div>
+
+        <div class="admin-settings-v1">
+          <details class="admin-setting-v1-card" open>
+            <summary><div><h3>設定カード（基本設定）</h3><p>基本設定を確認・変更</p></div><span class="chev">⌄</span></summary>
+            <div class="admin-setting-v1-body">
+              <form class="admin-setting-v1-form" id="baseForm">
+                <div class="admin-setting-v1-field"><label>受付開始日</label><input type="date" value="2026-09-01"></div>
+                <div class="admin-setting-v1-field"><label>受付終了日</label><input type="date" value="2027-03-31"></div>
+                <div class="admin-setting-v1-field"><label>受付開始時間</label><input type="time" value="08:30"></div>
+                <div class="admin-setting-v1-field"><label>受付終了時間</label><input type="time" value="19:30"></div>
+                <div class="admin-setting-v1-field"><label>受付間隔（分）</label><input type="number" min="1" value="30"></div>
+                <div class="admin-setting-v1-field"><label>1枠あたり人数</label><input type="number" min="1" value="10"></div>
+                <div class="admin-setting-v1-field"><label>表示月数</label><input type="number" min="1" value="2"></div>
+
+                <div class="admin-basic-schedule-v1">
+                  <div class="admin-basic-schedule-v1-head"><strong>曜日・時間別受付設定</strong><span>スプレッドシート「基本設定」と同期</span></div>
+                  <div class="admin-basic-schedule-v1-scroll">
+                    <table class="admin-basic-schedule-v1-table" aria-label="曜日・時間別受付設定">
+                      <thead><tr><th>時刻</th><th>月</th><th>火</th><th>水</th><th>木</th><th>金</th><th>土</th><th>日</th></tr></thead>
+                      <tbody id="scheduleBody"></tbody>
+                    </table>
+                  </div>
+                  <div class="admin-setting-v1-message" id="scheduleMsg"></div>
+                  <div class="admin-setting-v1-actions"><button type="button" class="save" id="saveSchedule">曜日・時間表を保存</button></div>
+                </div>
+
+                <div class="admin-setting-v1-message" id="baseMsg"></div>
+                <div class="admin-setting-v1-actions"><button type="submit" class="save">基本設定を保存</button></div>
+              </form>
+            </div>
+          </details>
+
+          <div class="admin-settings-v1-row">
+            <details class="admin-setting-v1-card"><summary><div><h3>休診日</h3><p>休診日の確認・変更</p></div><span class="chev">⌄</span></summary><div class="admin-setting-v1-body" id="holiday"></div></details>
+            <details class="admin-setting-v1-card"><summary><div><h3>臨時休診日</h3><p>臨時休診日の確認・変更</p></div><span class="chev">⌄</span></summary><div class="admin-setting-v1-body" id="block"></div></details>
+          </div>
+          <div class="admin-settings-v1-row">
+            <details class="admin-setting-v1-card"><summary><div><h3>臨時枠</h3><p>臨時枠の確認・変更</p></div><span class="chev">⌄</span></summary><div class="admin-setting-v1-body" id="adhoc"></div></details>
+            <details class="admin-setting-v1-card"><summary><div><h3>接種増減枠</h3><p>接種増減枠の確認・変更</p></div><span class="chev">⌄</span></summary><div class="admin-setting-v1-body" id="extra"></div></details>
+          </div>
+        </div>
+        <div class="mock-note">※ GitHub上の表示確認用モックです。レイアウト・項目・操作位置をDEV実装に合わせています。ここでの操作は実スプレッドシートには書き込みません。</div>
+      </section>
+    </main>
+  </div>
+</div>
+<script>
+const days=['月','火','水','木','金','土','日'];
+const times=['08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30'];
+const weekdayOn=[true,true,true,true,true,true,false];
+const active=(time,i)=>{const h=Number(time.slice(0,2));if(i===6)return false;if(h===12||h===13)return false;if(i===5&&h>=17)return false;return true};
+const body=document.getElementById('scheduleBody');
+body.innerHTML=`<tr class="weekday-row"><th>曜日ON</th>${weekdayOn.map((v,i)=>`<td><input type="checkbox" ${v?'checked':''} aria-label="${days[i]} 曜日ON"></td>`).join('')}</tr>`+times.map(t=>`<tr><th>${t}</th>${days.map((d,i)=>`<td><input type="checkbox" ${active(t,i)?'checked':''} aria-label="${t} ${d}"></td>`).join('')}</tr>`).join('');
+const records={
+ holiday:{fields:[['date','日付','date'],['note','備考','text']],rows:[['2026-10-12','祝日のため休診']]},
+ block:{fields:[['date','日付','date'],['start','開始時刻','time'],['end','終了時刻','time'],['note','備考','text']],rows:[['2026-10-06','13:00','15:00','院内都合']]},
+ adhoc:{fields:[['date','日付','date'],['time','時刻','time'],['capacity','定員','number'],['note','備考','text']],rows:[['2026-10-08','18:30','6','臨時追加']]},
+ extra:{fields:[['date','日付','date'],['time','時刻','time'],['delta','増減人数','number'],['note','備考','text']],rows:[['2026-10-09','09:00','-2','調整']]}
+};
+function recordTitle(kind,r){if(kind==='holiday')return`${r[0]} ${r[1]}`;if(kind==='block')return`${r[0]} ${r[1]}〜${r[2]}`;if(kind==='adhoc')return`${r[0]} ${r[1]} 定員${r[2]}`;return`${r[0]} ${r[1]} ${Number(r[2])>0?'+':''}${r[2]}`}
+function render(kind){const cfg=records[kind],box=document.getElementById(kind);box.innerHTML=`<form class="admin-setting-v1-form" data-form="${kind}">${cfg.fields.map(([n,l,t])=>`<div class="admin-setting-v1-field ${n==='note'?'full':''}"><label>${l}</label><input type="${t}" name="${n}" ${n==='date'?'required':''}></div>`).join('')}<div class="admin-setting-v1-message" data-msg="${kind}"></div><div class="admin-setting-v1-actions"><button type="reset">入力をクリア</button><button type="submit" class="save">追加・更新</button></div></form><div class="admin-setting-v1-records">${cfg.rows.map((r,i)=>`<div class="admin-setting-v1-record"><div><b>${recordTitle(kind,r)}</b><span>${r[r.length-1]||''}　登録: ijika@kamiigusa-zaitaku.clinic</span></div><div class="buttons"><button type="button" data-edit="${kind}" data-i="${i}">編集</button><button type="button" class="delete" data-del="${kind}" data-i="${i}">削除</button></div></div>`).join('')}</div>`}
+Object.keys(records).forEach(render);
+document.getElementById('baseForm').addEventListener('submit',e=>{e.preventDefault();const m=document.getElementById('baseMsg');m.textContent='保存しました。（モック内のみ）';setTimeout(()=>m.textContent='',1800)});
+document.getElementById('saveSchedule').addEventListener('click',()=>{const m=document.getElementById('scheduleMsg');m.textContent='保存しました。（モック内のみ）';setTimeout(()=>m.textContent='',1800)});
+document.addEventListener('submit',e=>{const f=e.target.closest('[data-form]');if(!f)return;e.preventDefault();const kind=f.dataset.form,cfg=records[kind];const vals=cfg.fields.map(([n])=>f.elements[n].value);cfg.rows.push(vals);render(kind)});
+document.addEventListener('click',e=>{const del=e.target.closest('[data-del]');if(del){records[del.dataset.del].rows.splice(Number(del.dataset.i),1);render(del.dataset.del);return}const edit=e.target.closest('[data-edit]');if(edit){const kind=edit.dataset.edit,row=records[kind].rows[Number(edit.dataset.i)],f=document.querySelector(`[data-form="${kind}"]`);records[kind].fields.forEach(([n],i)=>f.elements[n].value=row[i]||'');f.scrollIntoView({behavior:'smooth',block:'center'})}});
+</script>
+</body>
+</html>
