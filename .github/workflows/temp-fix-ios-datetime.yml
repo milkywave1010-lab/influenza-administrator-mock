@@ -1,0 +1,112 @@
+name: temp-fix-ios-datetime
+on:
+  push:
+    paths:
+      - '.github/workflows/temp-fix-ios-datetime.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fix iOS date/time inputs
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('status-settings.html')
+          s=p.read_text(encoding='utf-8')
+          marker='status-settings-ios-datetime-final'
+          if marker not in s:
+              css=r'''<style id="status-settings-ios-datetime-final">
+@media(max-width:900px){
+  #influenza-admin-mock .admin-setting-v1-field{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    overflow:hidden!important;
+  }
+  #influenza-admin-mock .admin-setting-v1-field input[type="date"],
+  #influenza-admin-mock .admin-setting-v1-field input[type="time"]{
+    display:block!important;
+    position:relative!important;
+    width:calc(100% - 2px)!important;
+    min-width:0!important;
+    max-width:calc(100% - 2px)!important;
+    inline-size:calc(100% - 2px)!important;
+    min-inline-size:0!important;
+    max-inline-size:calc(100% - 2px)!important;
+    margin:0 auto!important;
+    padding:8px 10px!important;
+    box-sizing:border-box!important;
+    -webkit-appearance:none!important;
+    appearance:none!important;
+    text-align:center!important;
+    text-align-last:center!important;
+    overflow:hidden!important;
+  }
+  #influenza-admin-mock .admin-setting-v1-field input[type="date"]::-webkit-date-and-time-value,
+  #influenza-admin-mock .admin-setting-v1-field input[type="time"]::-webkit-date-and-time-value{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:0!important;
+    text-align:center!important;
+  }
+  #influenza-admin-mock .admin-setting-v1-field input[type="date"]::-webkit-datetime-edit,
+  #influenza-admin-mock .admin-setting-v1-field input[type="time"]::-webkit-datetime-edit{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:0!important;
+    text-align:center!important;
+  }
+  #influenza-admin-mock .admin-setting-v1-field input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+  #influenza-admin-mock .admin-setting-v1-field input[type="time"]::-webkit-datetime-edit-fields-wrapper{
+    display:flex!important;
+    width:100%!important;
+    min-width:0!important;
+    justify-content:center!important;
+    align-items:center!important;
+    padding:0!important;
+  }
+  #influenza-admin-mock .admin-setting-v1-field input[type="date"]::-webkit-calendar-picker-indicator,
+  #influenza-admin-mock .admin-setting-v1-field input[type="time"]::-webkit-calendar-picker-indicator{
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    margin:0!important;
+    padding:0!important;
+    opacity:0!important;
+    cursor:pointer!important;
+  }
+}
+</style>
+'''
+              pos=s.find('</head>')
+              if pos<0: raise SystemExit('</head> not found')
+              s=s[:pos]+css+s[pos:]
+              p.write_text(s,encoding='utf-8')
+          PY
+      - name: Verify
+        run: |
+          grep -q 'status-settings-ios-datetime-final' status-settings.html
+          grep -q '::-webkit-date-and-time-value' status-settings.html
+          grep -q 'justify-content:center' status-settings.html
+      - name: Render smoke test
+        run: |
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || true)"
+          test -n "$CHROME"
+          "$CHROME" --headless --disable-gpu --no-sandbox --window-size=430,2600 --screenshot=phone-430-datetime.png "file://$PWD/status-settings.html"
+          test -s phone-430-datetime.png
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add status-settings.html
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'iPhoneの日付時間入力幅と中央表示を修正'
+          git push
