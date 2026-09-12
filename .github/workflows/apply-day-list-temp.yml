@@ -1,4 +1,4 @@
-name: 曜日選択で患者一覧切替
+name: iPhone日付時間入力修正
 on:
   push:
     paths:
@@ -11,91 +11,94 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: 管理画面モックに曜日選択動作を追加
+      - name: iPhoneの日付時間入力を修正
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          p=Path('tabs.html')
-          s=p.read_text()
-          marker='<!-- day-patient-list-switch -->'
-          if marker in s:
-            raise SystemExit('既に反映済みです')
-          addon=r'''<!-- day-patient-list-switch -->
-<script>
-(function(){
-  const manage=document.getElementById('manage');
-  const calendar=document.getElementById('weekCalendar');
-  if(!manage||!calendar) return;
-
-  const days=[
-    {label:'9月6日（日）',patients:[]},
-    {label:'9月7日（月）',patients:[
-      {name:'山田 太郎',kana:'やまだ たろう',time:'09:00',id:'R-20260907-0900-01',birth:'1980/04/12',tel:'090-1234-5678',card:'有',status:'予約確定'},
-      {name:'高橋 健',kana:'たかはし けん',time:'10:00',id:'R-20260907-1000-01',birth:'1975/08/03',tel:'080-9876-5432',card:'無',status:'予約確定'},
-      {name:'加藤 大輔',kana:'かとう だいすけ',time:'11:00',id:'R-20260907-1100-01',birth:'1990/11/22',tel:'090-2222-3333',card:'有',status:'キャンセル'}
-    ]},
-    {label:'9月8日（火）',patients:[
-      {name:'佐藤 花子',kana:'さとう はなこ',time:'09:00',id:'R-20260908-0900-01',birth:'1982/06/14',tel:'090-3333-4444',card:'有',status:'予約確定'}
-    ]},
-    {label:'9月9日（水）',patients:[
-      {name:'小林 輔子',kana:'こばやし ほこ',time:'11:00',id:'R-20260909-1100-01',birth:'1978/03/09',tel:'080-4444-5555',card:'無',status:'予約確定'}
-    ]},
-    {label:'9月10日（木）',patients:[
-      {name:'田中 美咲',kana:'たなか みさき',time:'09:30',id:'R-20260910-0930-01',birth:'1988/12/01',tel:'090-5555-6666',card:'有',status:'予約確定'},
-      {name:'松本 直樹',kana:'まつもと なおき',time:'13:00',id:'R-20260910-1300-01',birth:'1970/07/21',tel:'080-6666-7777',card:'有',status:'予約確定'}
-    ]},
-    {label:'9月11日（金）',patients:[
-      {name:'渡辺 隆',kana:'わたなべ たかし',time:'10:00',id:'R-20260911-1000-01',birth:'1969/09/18',tel:'090-7777-8888',card:'無',status:'予約確定'}
-    ]},
-    {label:'9月12日（土）',patients:[]}
-  ];
-
-  const titlePill=manage.querySelector('.panel-head .status-pill');
-  const list=manage.querySelector('.patients');
-
-  function patientHtml(p){
-    const cancelled=p.status==='キャンセル';
-    return '<div class="patient"><div class="patient-top"><div><b>'+p.name+'</b><div class="meta">'+p.kana+' / '+p.time+' / '+p.id+'</div></div><span class="status-pill"'+(cancelled?' style="background:var(--red2);color:var(--red)"':'')+'>'+p.status+'</span></div><div class="meta">'+p.birth+'　'+p.tel+'　診察券：'+p.card+'</div><div class="ops"><button>詳細</button>'+(cancelled?'<button>再予約</button>':'<button>時間変更</button><button class="danger">キャンセル</button>')+'</div></div>';
+          p=Path('status-settings.html')
+          s=p.read_text(encoding='utf-8')
+          marker='status-settings-ios-datetime-final'
+          if marker not in s:
+            css=r'''<style id="status-settings-ios-datetime-final">
+@media(max-width:900px){
+  #influenza-admin-mock .admin-setting-v1-field{
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    overflow:hidden!important;
   }
-
-  function selectDay(dayIndex){
-    if(dayIndex<0||dayIndex>6) return;
-    const d=days[dayIndex];
-    if(titlePill) titlePill.textContent=d.label;
-    if(list) list.innerHTML=d.patients.length?d.patients.map(patientHtml).join(''):'<div class="patient"><div class="meta">この日の予約はありません。</div></div>';
-
-    const cells=[...calendar.children];
-    cells.forEach((cell,i)=>{
-      const col=i%8;
-      cell.classList.toggle('selected-day',col===dayIndex+1);
-    });
+  #influenza-admin-mock .admin-setting-v1-field input[type="date"],
+  #influenza-admin-mock .admin-setting-v1-field input[type="time"]{
+    display:block!important;
+    position:relative!important;
+    width:calc(100% - 2px)!important;
+    min-width:0!important;
+    max-width:calc(100% - 2px)!important;
+    inline-size:calc(100% - 2px)!important;
+    min-inline-size:0!important;
+    max-inline-size:calc(100% - 2px)!important;
+    margin:0 auto!important;
+    padding:8px 10px!important;
+    box-sizing:border-box!important;
+    -webkit-appearance:none!important;
+    appearance:none!important;
+    text-align:center!important;
+    text-align-last:center!important;
+    overflow:hidden!important;
   }
-
-  calendar.addEventListener('click',function(e){
-    const cell=e.target.closest('.cell');
-    if(!cell||cell.parentElement!==calendar) return;
-    const cells=[...calendar.children];
-    const index=cells.indexOf(cell);
-    if(index<0) return;
-    const col=index%8;
-    if(col>=1&&col<=7) selectDay(col-1);
-  });
-
-  calendar.style.cursor='pointer';
-  selectDay(1);
-})();
-</script>
+  #influenza-admin-mock .admin-setting-v1-field input[type="date"]::-webkit-date-and-time-value,
+  #influenza-admin-mock .admin-setting-v1-field input[type="time"]::-webkit-date-and-time-value{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:0!important;
+    text-align:center!important;
+  }
+  #influenza-admin-mock .admin-setting-v1-field input[type="date"]::-webkit-datetime-edit,
+  #influenza-admin-mock .admin-setting-v1-field input[type="time"]::-webkit-datetime-edit{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:0!important;
+    text-align:center!important;
+  }
+  #influenza-admin-mock .admin-setting-v1-field input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+  #influenza-admin-mock .admin-setting-v1-field input[type="time"]::-webkit-datetime-edit-fields-wrapper{
+    display:flex!important;
+    width:100%!important;
+    min-width:0!important;
+    justify-content:center!important;
+    align-items:center!important;
+    padding:0!important;
+  }
+  #influenza-admin-mock .admin-setting-v1-field input[type="date"]::-webkit-calendar-picker-indicator,
+  #influenza-admin-mock .admin-setting-v1-field input[type="time"]::-webkit-calendar-picker-indicator{
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    margin:0!important;
+    padding:0!important;
+    opacity:0!important;
+  }
+}
+</style>
 '''
-          if '</body>' not in s:
-            raise SystemExit('body終了タグが見つかりません')
-          s=s.replace('</body>',addon+'</body>',1)
-          p.write_text(s)
+            s=s.replace('</head>',css+'</head>',1)
+            p.write_text(s,encoding='utf-8')
           PY
+      - name: 修正内容を確認
+        run: |
+          grep -q 'status-settings-ios-datetime-final' status-settings.html
+          grep -q '::-webkit-date-and-time-value' status-settings.html
+          grep -q 'justify-content:center' status-settings.html
       - name: 変更をコミット
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add tabs.html
+          git add status-settings.html
           git diff --cached --quiet && exit 0
-          git commit -m "曜日選択で患者一覧を切り替える"
+          git commit -m "iPhoneの日付時間入力幅と中央表示を修正"
           git push
