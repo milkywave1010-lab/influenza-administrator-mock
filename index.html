@@ -1,0 +1,559 @@
+<style>
+#influenza-admin-mock {
+  color-scheme: light dark;
+  --admin-bg: light-dark(#f7f4ed, #151a18);
+  --admin-surface: light-dark(#fffdf8, #202723);
+  --admin-surface-strong: light-dark(#ffffff, #29312d);
+  --admin-text: light-dark(#28312d, #edf3ef);
+  --admin-muted: light-dark(#66716c, #aeb9b3);
+  --admin-line: light-dark(#ded8cc, #3b4640);
+  --admin-green: light-dark(#2f7158, #69b997);
+  --admin-green-dark: light-dark(#235642, #b8e4d1);
+  --admin-green-soft: light-dark(#e5f1eb, #223b31);
+  --admin-red: light-dark(#a94444, #f28b8b);
+  --admin-red-soft: light-dark(#f9e9e7, #432626);
+  --admin-amber: light-dark(#9a611d, #edb968);
+  --admin-amber-soft: light-dark(#fff2dc, #3d3020);
+  --admin-blue: light-dark(#346b8c, #7bb9df);
+  --admin-shadow: light-dark(0 12px 30px rgba(54, 65, 59, .08), 0 12px 30px rgba(0, 0, 0, .24));
+  display: block;
+  width: 100%;
+  color: var(--admin-text);
+  background: var(--admin-bg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+  overflow: hidden;
+}
+#influenza-admin-mock * { box-sizing: border-box; }
+#influenza-admin-mock button,
+#influenza-admin-mock input,
+#influenza-admin-mock select { font: inherit; }
+#influenza-admin-mock button { cursor: pointer; }
+#influenza-admin-mock .admin-shell { min-height: 720px; }
+#influenza-admin-mock .admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 24px;
+  color: light-dark(#ffffff, #f4fbf7);
+  background: light-dark(#285b49, #203d32);
+}
+#influenza-admin-mock .admin-brand { display: flex; align-items: center; gap: 14px; }
+#influenza-admin-mock .admin-mark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.14);
+}
+#influenza-admin-mock .admin-brand-name { margin: 0; font-size: 18px; font-weight: 500; }
+#influenza-admin-mock .admin-brand-sub { margin: 2px 0 0; font-size: 12px; opacity: .76; }
+#influenza-admin-mock .admin-user { display: flex; align-items: center; gap: 9px; font-size: 13px; }
+#influenza-admin-mock .admin-user-dot { width: 9px; height: 9px; border-radius: 50%; background: #8bd8b5; }
+#influenza-admin-mock .admin-main { display: grid; gap: 18px; padding: 20px 24px 28px; }
+#influenza-admin-mock .admin-title-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; }
+#influenza-admin-mock .admin-title-row h1 { margin: 0; font-size: 26px; font-weight: 500; }
+#influenza-admin-mock .admin-title-row p { margin: 4px 0 0; color: var(--admin-muted); font-size: 13px; }
+#influenza-admin-mock .admin-refresh,
+#influenza-admin-mock .admin-secondary,
+#influenza-admin-mock .admin-danger,
+#influenza-admin-mock .admin-primary,
+#influenza-admin-mock .admin-segment button {
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid var(--admin-line);
+  border-radius: 8px;
+  color: var(--admin-text);
+  background: var(--admin-surface-strong);
+}
+#influenza-admin-mock .admin-refresh { display: inline-flex; align-items: center; gap: 8px; }
+#influenza-admin-mock .admin-refresh[data-loading="true"] i { animation: admin-spin .8s linear infinite; }
+@keyframes admin-spin { to { transform: rotate(360deg); } }
+#influenza-admin-mock .admin-status-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid var(--admin-line);
+  border-radius: 10px;
+  background: var(--admin-surface);
+  box-shadow: var(--admin-shadow);
+}
+#influenza-admin-mock .admin-status-cell { min-width: 0; padding: 14px 16px; border-right: 1px solid var(--admin-line); }
+#influenza-admin-mock .admin-status-cell:last-child { border-right: 0; }
+#influenza-admin-mock .admin-status-label { display: block; margin-bottom: 6px; color: var(--admin-muted); font-size: 12px; }
+#influenza-admin-mock .admin-status-value { display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 500; }
+#influenza-admin-mock .admin-ok-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--admin-green); }
+#influenza-admin-mock .admin-error-none { color: var(--admin-green-dark); }
+#influenza-admin-mock .admin-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+#influenza-admin-mock .admin-metric {
+  padding: 15px 17px;
+  border: 1px solid var(--admin-line);
+  border-radius: 10px;
+  background: var(--admin-surface);
+}
+#influenza-admin-mock .admin-metric span { display: block; color: var(--admin-muted); font-size: 12px; }
+#influenza-admin-mock .admin-metric strong { display: block; margin-top: 4px; font-size: 26px; font-weight: 500; }
+#influenza-admin-mock .admin-metric-link {
+  position: relative;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+#influenza-admin-mock .admin-metric-link::after {
+  content: "↗";
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  color: var(--admin-muted);
+  font-size: 15px;
+}
+#influenza-admin-mock .admin-metric-link:hover {
+  border-color: var(--admin-green);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--admin-green) 13%, transparent);
+  transform: translateY(-1px);
+}
+#influenza-admin-mock .admin-metric-link:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--admin-green) 35%, transparent);
+  outline-offset: 2px;
+}
+#influenza-admin-mock .admin-metric-link:not([data-unread-count="0"]) .admin-unread-count {
+  color: var(--admin-red);
+}
+#influenza-admin-mock .admin-workspace { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(280px, .75fr); gap: 18px; align-items: start; }
+#influenza-admin-mock .admin-panel {
+  border: 1px solid var(--admin-line);
+  border-radius: 10px;
+  background: var(--admin-surface);
+  box-shadow: var(--admin-shadow);
+  overflow: hidden;
+}
+#influenza-admin-mock .admin-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--admin-line); }
+#influenza-admin-mock .admin-panel-head h2 { margin: 0; font-size: 17px; font-weight: 500; }
+#influenza-admin-mock .admin-panel-body { padding: 16px 18px 18px; }
+#influenza-admin-mock .admin-filters { display: grid; gap: 10px; }
+#influenza-admin-mock .admin-filter-row { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; }
+#influenza-admin-mock .admin-date-row .admin-field,
+#influenza-admin-mock .admin-status-row .admin-field { min-width: 155px; }
+#influenza-admin-mock .admin-date-row button,
+#influenza-admin-mock .admin-status-row button { white-space: nowrap; }
+#influenza-admin-mock .admin-load-message { display: none; flex-basis: 100%; }
+#influenza-admin-mock .admin-load-message[data-show="true"] { display: block; }
+#influenza-admin-mock .admin-field { display: grid; gap: 5px; min-width: 0; }
+#influenza-admin-mock .admin-field label { color: var(--admin-muted); font-size: 12px; }
+#influenza-admin-mock .admin-field input,
+#influenza-admin-mock .admin-field select {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid var(--admin-line);
+  border-radius: 7px;
+  color: var(--admin-text);
+  background: var(--admin-surface-strong);
+}
+#influenza-admin-mock .admin-segment { display: inline-flex; padding: 3px; border-radius: 9px; background: var(--admin-green-soft); }
+#influenza-admin-mock .admin-segment button { min-height: 34px; border: 0; background: transparent; }
+#influenza-admin-mock .admin-segment button[aria-pressed="true"] { color: light-dark(#ffffff, #10221a); background: var(--admin-green); }
+#influenza-admin-mock .admin-range-label { margin: 14px 0 8px; color: var(--admin-green-dark); font-size: 13px; font-weight: 500; }
+#influenza-admin-mock .admin-calendar-shell {
+  margin-bottom: 18px;
+  border: 1px solid var(--admin-line);
+  border-radius: 9px;
+  background: var(--admin-surface-strong);
+  overflow-x: auto;
+}
+#influenza-admin-mock .admin-calendar {
+  display: grid;
+  grid-template-columns: 68px minmax(240px, 1fr);
+  min-width: 420px;
+}
+#influenza-admin-mock[data-range-view="week"] .admin-calendar {
+  grid-template-columns: 68px repeat(7, minmax(118px, 1fr));
+  min-width: 920px;
+}
+#influenza-admin-mock .admin-cal-day[data-day]:not([data-day="0"]),
+#influenza-admin-mock .admin-cal-cell[data-day]:not([data-day="0"]) { display: none; }
+#influenza-admin-mock[data-range-view="week"] .admin-cal-day[data-day],
+#influenza-admin-mock[data-range-view="week"] .admin-cal-cell[data-day] { display: block; }
+#influenza-admin-mock .admin-cal-corner,
+#influenza-admin-mock .admin-cal-day {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  min-height: 52px;
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--admin-line);
+  background: var(--admin-bg);
+  text-align: center;
+}
+#influenza-admin-mock .admin-cal-corner { left: 0; z-index: 3; display: grid; place-items: center; color: var(--admin-muted); font-size: 11px; }
+#influenza-admin-mock .admin-cal-day { border-left: 1px solid var(--admin-line); font-size: 12px; font-weight: 600; }
+#influenza-admin-mock .admin-cal-day span { display: block; margin-top: 2px; color: var(--admin-muted); font-size: 11px; font-weight: 400; }
+#influenza-admin-mock .admin-cal-time {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-height: 82px;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--admin-line);
+  background: var(--admin-bg);
+  color: var(--admin-muted);
+  font-size: 11px;
+  text-align: right;
+}
+#influenza-admin-mock .admin-cal-cell {
+  min-height: 82px;
+  padding: 5px;
+  border-left: 1px solid var(--admin-line);
+  border-bottom: 1px solid var(--admin-line);
+  background: linear-gradient(to bottom, transparent 49%, color-mix(in srgb, var(--admin-line) 42%, transparent) 50%, transparent 51%);
+}
+#influenza-admin-mock .admin-cal-event,
+#influenza-admin-mock .admin-cal-empty {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  text-align: left;
+  line-height: 1.35;
+}
+#influenza-admin-mock .admin-cal-event { color: var(--admin-green-dark); border-color: color-mix(in srgb, var(--admin-green) 32%, var(--admin-line)); background: var(--admin-green-soft); }
+#influenza-admin-mock .admin-cal-event[data-state="cancelled"] { color: var(--admin-red); border-color: color-mix(in srgb, var(--admin-red) 30%, var(--admin-line)); background: var(--admin-red-soft); text-decoration: line-through; }
+#influenza-admin-mock .admin-cal-event strong,
+#influenza-admin-mock .admin-cal-event span { display: block; }
+#influenza-admin-mock .admin-cal-event strong { font-size: 12px; }
+#influenza-admin-mock .admin-cal-event span { margin-top: 2px; font-size: 10px; opacity: .78; }
+#influenza-admin-mock .admin-cal-empty { color: var(--admin-muted); border-style: dashed; border-color: var(--admin-line); background: transparent; text-align: center; }
+#influenza-admin-mock .admin-list-title { margin: 0 0 8px; color: var(--admin-muted); font-size: 12px; font-weight: 500; }
+#influenza-admin-mock .admin-row-focus { outline: 2px solid var(--admin-green); outline-offset: -2px; }
+#influenza-admin-mock .admin-table-wrap { overflow-x: auto; }
+#influenza-admin-mock table { width: 100%; min-width: 720px; border-collapse: collapse; }
+#influenza-admin-mock th,
+#influenza-admin-mock td { padding: 11px 10px; border-bottom: 1px solid var(--admin-line); text-align: left; vertical-align: middle; }
+#influenza-admin-mock th { color: var(--admin-muted); font-size: 12px; font-weight: 500; background: var(--admin-bg); }
+#influenza-admin-mock td { font-size: 13px; }
+#influenza-admin-mock tbody tr:last-child td { border-bottom: 0; }
+#influenza-admin-mock .admin-patient { font-weight: 500; }
+#influenza-admin-mock .admin-subline { color: var(--admin-muted); font-size: 11px; }
+#influenza-admin-mock .admin-status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; font-size: 11px; font-weight: 500; }
+#influenza-admin-mock .admin-status-badge[data-state="reserved"] { color: var(--admin-green-dark); background: var(--admin-green-soft); }
+#influenza-admin-mock .admin-status-badge[data-state="cancelled"] { color: var(--admin-red); background: var(--admin-red-soft); }
+#influenza-admin-mock .admin-danger { min-height: 34px; padding: 6px 10px; color: var(--admin-red); border-color: color-mix(in srgb, var(--admin-red) 35%, var(--admin-line)); }
+#influenza-admin-mock .admin-danger:disabled { cursor: default; opacity: .45; }
+#influenza-admin-mock .admin-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+#influenza-admin-mock .admin-field-full { grid-column: 1 / -1; }
+#influenza-admin-mock .admin-address-pair { grid-column: 1 / -1; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:11px; min-width:0; }
+#influenza-admin-mock .admin-address-action { align-self:end; }
+#influenza-admin-mock .admin-address-action label { visibility:hidden; }
+#influenza-admin-mock .admin-address-search { width:100%; min-height:44px; border:1px solid var(--admin-green); border-radius:8px; background:var(--admin-green-soft); color:var(--admin-green-dark); font:inherit; font-weight:900; cursor:pointer; }
+#influenza-admin-mock .admin-primary { width: 100%; margin-top: 14px; color: light-dark(#ffffff, #10221a); border-color: var(--admin-green); background: var(--admin-green); font-weight: 500; }
+#influenza-admin-mock .admin-form-note { margin: 10px 0 0; color: var(--admin-muted); font-size: 11px; }
+#influenza-admin-mock .admin-toast { display: none; margin-top: 12px; padding: 10px 12px; border-radius: 7px; color: var(--admin-green-dark); background: var(--admin-green-soft); font-size: 12px; }
+#influenza-admin-mock .admin-toast[data-show="true"] { display: block; }
+#influenza-admin-mock .admin-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(10, 18, 14, .48);
+  z-index: 20;
+}
+#influenza-admin-mock .admin-modal-backdrop[data-open="true"] { display: flex; }
+#influenza-admin-mock .admin-modal {
+  width: min(430px, 100%);
+  padding: 20px;
+  border: 1px solid var(--admin-line);
+  border-radius: 11px;
+  color: var(--admin-text);
+  background: var(--admin-surface-strong);
+  box-shadow: 0 22px 60px rgba(0,0,0,.28);
+}
+#influenza-admin-mock .admin-modal h3 { margin: 0 0 8px; font-size: 19px; font-weight: 500; }
+#influenza-admin-mock .admin-modal p { margin: 0 0 14px; color: var(--admin-muted); font-size: 13px; }
+#influenza-admin-mock .admin-cancel-detail { margin-bottom: 16px; padding: 12px; border-radius: 8px; background: var(--admin-red-soft); font-size: 13px; }
+#influenza-admin-mock .admin-modal-actions { display: flex; justify-content: flex-end; gap: 9px; }
+#influenza-admin-mock .admin-modal-confirm { color: light-dark(#ffffff, #241111); border-color: var(--admin-red); background: var(--admin-red); }
+#influenza-admin-mock { position: relative; }
+@media (max-width: 840px) {
+  #influenza-admin-mock .admin-workspace { grid-template-columns: 1fr; }
+  #influenza-admin-mock .admin-status-strip { grid-template-columns: 1fr 1fr; }
+  #influenza-admin-mock .admin-status-cell:nth-child(2) { border-right: 0; }
+  #influenza-admin-mock .admin-status-cell:nth-child(-n+2) { border-bottom: 1px solid var(--admin-line); }
+}
+@media (max-width: 560px) {
+  #influenza-admin-mock .admin-header,
+  #influenza-admin-mock .admin-title-row { align-items: flex-start; flex-direction: column; }
+  #influenza-admin-mock .admin-main { padding: 16px 12px 22px; }
+  #influenza-admin-mock .admin-status-strip,
+  #influenza-admin-mock .admin-metrics { grid-template-columns: 1fr; }
+  #influenza-admin-mock .admin-status-cell { border-right: 0; border-bottom: 1px solid var(--admin-line); }
+  #influenza-admin-mock .admin-status-cell:last-child { border-bottom: 0; }
+  #influenza-admin-mock .admin-form-grid { grid-template-columns: 1fr; }
+  #influenza-admin-mock .admin-field-full { grid-column: auto; }
+}
+</style>
+
+<div id="influenza-admin-mock" data-range-view="day">
+  <div class="admin-shell">
+    <header class="admin-header">
+      <div class="admin-brand">
+        <div class="admin-mark"><i data-lucide="shield-check" aria-hidden="true"></i></div>
+        <div>
+          <p class="admin-brand-name">インフルエンザ予約 管理</p>
+          <p class="admin-brand-sub">管理画面モック</p>
+        </div>
+      </div>
+      <div class="admin-user"><span class="admin-user-dot"></span>管理者としてログイン中</div>
+    </header>
+
+    <main class="admin-main">
+      <div class="admin-title-row">
+        <div>
+          <h1>予約管理</h1>
+          <p>通信状態、予約一覧、キャンセル、代理予約を確認できます。</p>
+        </div>
+        <button class="admin-refresh" id="admin-refresh-status" type="button"><i data-lucide="refresh-cw" aria-hidden="true"></i>ステータス再検証</button>
+      </div>
+
+      <section class="admin-status-strip" aria-label="通信とエラーの状態">
+        <div class="admin-status-cell">
+          <span class="admin-status-label">GAS通信</span>
+          <span class="admin-status-value"><span class="admin-ok-dot"></span><span data-status-text>正常</span></span>
+        </div>
+        <div class="admin-status-cell">
+          <span class="admin-status-label">スプレッドシート</span>
+          <span class="admin-status-value"><span class="admin-ok-dot"></span><span data-status-text>正常</span></span>
+        </div>
+        <div class="admin-status-cell">
+          <span class="admin-status-label">Googleカレンダー</span>
+          <span class="admin-status-value"><span class="admin-ok-dot"></span><span data-status-text>正常</span></span>
+        </div>
+        <div class="admin-status-cell">
+          <span class="admin-status-label">エラーステータス</span>
+          <span class="admin-status-value admin-error-none"><i data-lucide="circle-check" aria-hidden="true"></i>異常なし</span>
+          <span class="admin-subline" id="admin-last-check">最終確認 21:42</span>
+        </div>
+      </section>
+
+      <section class="admin-metrics" aria-label="予約状況の集計">
+        <a class="admin-metric admin-metric-link" data-unread-count="0" href="https://mail.google.com/mail/u/0/#label/%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B" target="_blank" rel="noopener noreferrer" aria-label="問い合わせメールを開く（未読0件）"><span>問い合わせ</span><strong class="admin-unread-count">未読 0件</strong><span>メールを開く</span></a>
+        <div class="admin-metric"><span>本日の予約</span><strong>12</strong><span>うち新規 3件</span></div>
+        <div class="admin-metric"><span>今週のキャンセル</span><strong>2</strong><span>直近24時間 1件</span></div>
+      </section>
+
+      <div class="admin-workspace">
+        <section class="admin-panel">
+          <div class="admin-panel-head">
+            <h2>予約状況</h2>
+            <div class="admin-segment" aria-label="表示範囲">
+              <button type="button" data-range="day" aria-pressed="true">日付ごと</button>
+              <button type="button" data-range="week" aria-pressed="false">1週間</button>
+            </div>
+          </div>
+          <div class="admin-panel-body">
+            <div class="admin-filters">
+              <div class="admin-filter-row admin-date-row">
+                <button class="admin-secondary" id="admin-prev-period" type="button">前日</button>
+                <div class="admin-field">
+                  <label for="admin-date">基準日</label>
+                  <input id="admin-date" type="date" value="2026-10-05">
+                </div>
+                <button class="admin-secondary" id="admin-next-period" type="button">翌日</button>
+              </div>
+              <div class="admin-filter-row admin-status-row">
+                <div class="admin-field">
+                  <label for="admin-state-filter">状態</label>
+                  <select id="admin-state-filter">
+                    <option>すべて</option>
+                    <option>予約済み</option>
+                    <option>キャンセル済み</option>
+                  </select>
+                </div>
+                <button class="admin-secondary" id="admin-load-reservations" type="button">予約状況更新</button>
+                <div class="admin-subline admin-load-message" id="admin-load-message" role="status"></div>
+              </div>
+            </div>
+            <div class="admin-range-label" id="admin-range-label">2026年10月5日（月）の予約</div>
+            <div class="admin-calendar-shell" aria-label="予約カレンダー">
+              <div class="admin-calendar" role="grid">
+                <div class="admin-cal-corner">時間</div>
+                <div class="admin-cal-day" data-day="0">月<span>10/5</span></div>
+                <div class="admin-cal-day" data-day="1">火<span>10/6</span></div>
+                <div class="admin-cal-day" data-day="2">水<span>10/7</span></div>
+                <div class="admin-cal-day" data-day="3">木<span>10/8</span></div>
+                <div class="admin-cal-day" data-day="4">金<span>10/9</span></div>
+                <div class="admin-cal-day" data-day="5">土<span>10/10</span></div>
+                <div class="admin-cal-day" data-day="6">日<span>10/11</span></div>
+
+                <div class="admin-cal-time">09:00</div>
+                <div class="admin-cal-cell" data-day="0"><button class="admin-cal-event" type="button" data-reserve-id="R-20261005-0900-01"><strong>09:00 テスト 太郎</strong><span>予約済み・WEB</span></button></div>
+                <div class="admin-cal-cell" data-day="1"><button class="admin-cal-empty" type="button" data-book-date="2026-10-06" data-book-time="09:00">＋ 空き</button></div>
+                <div class="admin-cal-cell" data-day="2"><button class="admin-cal-event" type="button"><strong>09:00 見本 五郎</strong><span>予約済み・WEB</span></button></div>
+                <div class="admin-cal-cell" data-day="3"><button class="admin-cal-empty" type="button" data-book-date="2026-10-08" data-book-time="09:00">＋ 空き</button></div>
+                <div class="admin-cal-cell" data-day="4"><button class="admin-cal-event" type="button"><strong>09:00 確認 六郎</strong><span>予約済み・窓口</span></button></div>
+                <div class="admin-cal-cell" data-day="5"><button class="admin-cal-empty" type="button" data-book-date="2026-10-10" data-book-time="09:00">＋ 空き</button></div>
+                <div class="admin-cal-cell" data-day="6"><button class="admin-cal-empty" type="button" data-book-date="2026-10-11" data-book-time="09:00">＋ 空き</button></div>
+
+                <div class="admin-cal-time">09:30</div>
+                <div class="admin-cal-cell" data-day="0"><button class="admin-cal-event" type="button" data-reserve-id="R-20261005-0930-01"><strong>09:30 見本 花子</strong><span>予約済み・管理画面</span></button></div>
+                <div class="admin-cal-cell" data-day="1"><button class="admin-cal-event" type="button"><strong>09:30 予約 七子</strong><span>予約済み・WEB</span></button></div>
+                <div class="admin-cal-cell" data-day="2"><button class="admin-cal-empty" type="button" data-book-date="2026-10-07" data-book-time="09:30">＋ 空き</button></div>
+                <div class="admin-cal-cell" data-day="3"><button class="admin-cal-event" data-state="cancelled" type="button"><strong>09:30 取消 八郎</strong><span>キャンセル済み</span></button></div>
+                <div class="admin-cal-cell" data-day="4"><button class="admin-cal-empty" type="button" data-book-date="2026-10-09" data-book-time="09:30">＋ 空き</button></div>
+                <div class="admin-cal-cell" data-day="5"><button class="admin-cal-empty" type="button" data-book-date="2026-10-10" data-book-time="09:30">＋ 空き</button></div>
+                <div class="admin-cal-cell" data-day="6"><button class="admin-cal-event" type="button"><strong>09:30 週末 九子</strong><span>予約済み・WEB</span></button></div>
+
+                <div class="admin-cal-time">10:00</div>
+                <div class="admin-cal-cell" data-day="0"><button class="admin-cal-event" data-state="cancelled" type="button" data-reserve-id="R-20261005-1000-01"><strong>10:00 確認 次郎</strong><span>キャンセル済み</span></button></div>
+                <div class="admin-cal-cell" data-day="1"><button class="admin-cal-empty" type="button" data-book-date="2026-10-06" data-book-time="10:00">＋ 空き</button></div>
+                <div class="admin-cal-cell" data-day="2"><button class="admin-cal-event" type="button"><strong>10:00 模型 十郎</strong><span>予約済み・WEB</span></button></div>
+                <div class="admin-cal-cell" data-day="3"><button class="admin-cal-empty" type="button" data-book-date="2026-10-08" data-book-time="10:00">＋ 空き</button></div>
+                <div class="admin-cal-cell" data-day="4"><button class="admin-cal-empty" type="button" data-book-date="2026-10-09" data-book-time="10:00">＋ 空き</button></div>
+                <div class="admin-cal-cell" data-day="5"><button class="admin-cal-event" type="button"><strong>10:00 土曜 十一</strong><span>予約済み・窓口</span></button></div>
+                <div class="admin-cal-cell" data-day="6"><button class="admin-cal-empty" type="button" data-book-date="2026-10-11" data-book-time="10:00">＋ 空き</button></div>
+
+                <div class="admin-cal-time">10:30</div>
+                <div class="admin-cal-cell" data-day="0"><button class="admin-cal-event" type="button" data-reserve-id="R-20261005-1030-01"><strong>10:30 予約 三郎</strong><span>予約済み・窓口</span></button></div>
+                <div class="admin-cal-cell" data-day="1"><button class="admin-cal-empty" type="button" data-book-date="2026-10-06" data-book-time="10:30">＋ 空き</button></div>
+                <div class="admin-cal-cell" data-day="2"><button class="admin-cal-empty" type="button" data-book-date="2026-10-07" data-book-time="10:30">＋ 空き</button></div>
+                <div class="admin-cal-cell" data-day="3"><button class="admin-cal-event" type="button"><strong>10:30 見本 十二</strong><span>予約済み・WEB</span></button></div>
+                <div class="admin-cal-cell" data-day="4"><button class="admin-cal-event" type="button"><strong>10:30 確認 十三</strong><span>予約済み・WEB</span></button></div>
+                <div class="admin-cal-cell" data-day="5"><button class="admin-cal-empty" type="button" data-book-date="2026-10-10" data-book-time="10:30">＋ 空き</button></div>
+                <div class="admin-cal-cell" data-day="6"><button class="admin-cal-empty" type="button" data-book-date="2026-10-11" data-book-time="10:30">＋ 空き</button></div>
+
+                <div class="admin-cal-time">14:00</div>
+                <div class="admin-cal-cell" data-day="0"><button class="admin-cal-empty" type="button" data-book-date="2026-10-05" data-book-time="14:00">＋ 空き</button></div>
+                <div class="admin-cal-cell" data-day="1"><button class="admin-cal-event" type="button"><strong>14:00 午後 十四</strong><span>予約済み・WEB</span></button></div>
+                <div class="admin-cal-cell" data-day="2"><button class="admin-cal-empty" type="button" data-book-date="2026-10-07" data-book-time="14:00">＋ 空き</button></div>
+                <div class="admin-cal-cell" data-day="3"><button class="admin-cal-empty" type="button" data-book-date="2026-10-08" data-book-time="14:00">＋ 空き</button></div>
+                <div class="admin-cal-cell" data-day="4"><button class="admin-cal-event" type="button"><strong>14:00 午後 十五</strong><span>予約済み・管理画面</span></button></div>
+                <div class="admin-cal-cell" data-day="5"><button class="admin-cal-empty" type="button" data-book-date="2026-10-10" data-book-time="14:00">＋ 空き</button></div>
+                <div class="admin-cal-cell" data-day="6"><button class="admin-cal-empty" type="button" data-book-date="2026-10-11" data-book-time="14:00">＋ 空き</button></div>
+              </div>
+            </div>
+            <h3 class="admin-list-title">予約一覧</h3>
+            <div class="admin-table-wrap">
+              <table aria-label="予約一覧">
+                <thead><tr><th>日時</th><th>患者</th><th>予約ID</th><th>登録元</th><th>状態</th><th>操作</th></tr></thead>
+                <tbody id="admin-reservation-rows">
+                  <tr data-status="予約済み" data-reservation-id="R-20261005-0900-01">
+                    <td><strong>09:00</strong><div class="admin-subline">10月5日（月）</div></td>
+                    <td><span class="admin-patient">テスト 太郎</span><div class="admin-subline">090-****-1201</div></td>
+                    <td>R-20261005-0900-01</td><td>WEB</td>
+                    <td><span class="admin-status-badge" data-state="reserved">● 予約済み</span></td>
+                    <td><button class="admin-danger" type="button" data-cancel-name="テスト 太郎" data-cancel-id="R-20261005-0900-01" data-cancel-time="10月5日（月）09:00">キャンセル</button></td>
+                  </tr>
+                  <tr data-status="予約済み" data-reservation-id="R-20261005-0930-01">
+                    <td><strong>09:30</strong><div class="admin-subline">10月5日（月）</div></td>
+                    <td><span class="admin-patient">見本 花子</span><div class="admin-subline">080-****-8870</div></td>
+                    <td>R-20261005-0930-01</td><td>管理画面</td>
+                    <td><span class="admin-status-badge" data-state="reserved">● 予約済み</span></td>
+                    <td><button class="admin-danger" type="button" data-cancel-name="見本 花子" data-cancel-id="R-20261005-0930-01" data-cancel-time="10月5日（月）09:30">キャンセル</button></td>
+                  </tr>
+                  <tr data-status="キャンセル済み" data-reservation-id="R-20261005-1000-01">
+                    <td><strong>10:00</strong><div class="admin-subline">10月5日（月）</div></td>
+                    <td><span class="admin-patient">確認 次郎</span><div class="admin-subline">070-****-4432</div></td>
+                    <td>R-20261005-1000-01</td><td>WEB</td>
+                    <td><span class="admin-status-badge" data-state="cancelled">● キャンセル済み</span></td>
+                    <td><button class="admin-danger" type="button" disabled>処理済み</button></td>
+                  </tr>
+                  <tr data-status="予約済み" data-reservation-id="R-20261005-1030-01">
+                    <td><strong>10:30</strong><div class="admin-subline">10月5日（月）</div></td>
+                    <td><span class="admin-patient">予約 三郎</span><div class="admin-subline">090-****-9914</div></td>
+                    <td>R-20261005-1030-01</td><td>窓口</td>
+                    <td><span class="admin-status-badge" data-state="reserved">● 予約済み</span></td>
+                    <td><button class="admin-danger" type="button" data-cancel-name="予約 三郎" data-cancel-id="R-20261005-1030-01" data-cancel-time="10月5日（月）10:30">キャンセル</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-panel">
+          <div class="admin-panel-head"><h2>日付・時間から予約</h2></div>
+          <div class="admin-panel-body">
+            <form id="admin-manual-form">
+              <div class="admin-form-grid">
+                <div class="admin-field"><label for="admin-book-date">接種日</label><input id="admin-book-date" type="date" value="2026-10-06" required></div>
+                <div class="admin-field"><label for="admin-book-time">時間</label><select id="admin-book-time" required><option>09:30</option><option>10:00</option><option>10:30</option><option>14:00</option></select></div>
+                <div class="admin-field admin-field-full"><label for="admin-book-name">氏名</label><input id="admin-book-name" type="text" value="テスト 患者" required></div>
+                <div class="admin-field admin-field-full"><label for="admin-book-postal">郵便番号</label><input id="admin-book-postal" type="text" inputmode="numeric" placeholder="例：1000001"></div>
+                <div class="admin-address-pair">
+                  <div class="admin-field"><label for="admin-book-address">住所</label><select id="admin-book-address"><option value="" selected>郵便番号から住所を取得してください</option></select></div>
+                  <div class="admin-field admin-address-action"><label for="admin-book-address-search">住所自動入力</label><button class="admin-address-search" id="admin-book-address-search" type="button">郵便番号から住所を自動入力</button></div>
+                </div>
+                <div class="admin-field admin-field-full"><label for="admin-book-address-detail">番地・号</label><input id="admin-book-address-detail" type="text" placeholder="例：33-11"></div>
+                <div class="admin-field admin-field-full"><label for="admin-book-building">マンション名・部屋番号</label><input id="admin-book-building" type="text" placeholder="例：○○マンション101号室"></div>
+                <div class="admin-field admin-field-full"><label for="admin-book-tel">電話番号</label><input id="admin-book-tel" type="tel" value="09000000000" required></div>
+                <div class="admin-field"><label for="admin-book-birth">生年月日</label><input id="admin-book-birth" type="text" value="19800123" required></div>
+                <div class="admin-field"><label for="admin-book-card">診察券</label><select id="admin-book-card"><option>無</option><option>有</option><option>紛失</option></select></div>
+                <div class="admin-field admin-field-full"><label for="admin-book-staff">登録者</label><input id="admin-book-staff" type="text" value="受付担当A" required></div>
+              </div>
+              <button class="admin-primary" type="submit">予約内容を確認</button>
+              <p class="admin-form-note">登録元は「管理画面」として記録されます。</p>
+              <div class="admin-toast" id="admin-book-toast" role="status">10月6日 09:30の予約内容を確認できます。</div>
+            </form>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div class="admin-modal-backdrop" id="admin-cancel-modal" data-open="false" role="dialog" aria-modal="true" aria-labelledby="admin-cancel-title">
+    <div class="admin-modal">
+      <h3 id="admin-cancel-title">予約をキャンセルしますか？</h3>
+      <p>スプレッドシートとGoogleカレンダーの予約情報を更新します。</p>
+      <div class="admin-cancel-detail" id="admin-cancel-detail"></div>
+      <div class="admin-modal-actions">
+        <button class="admin-secondary" id="admin-cancel-close" type="button">戻る</button>
+        <button class="admin-danger admin-modal-confirm" id="admin-cancel-confirm" type="button">キャンセルを実行</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(()=>{
+const root=document.getElementById('influenza-admin-mock'),refresh=root.querySelector('#admin-refresh-status'),statusTexts=root.querySelectorAll('[data-status-text]'),lastCheck=root.querySelector('#admin-last-check'),rangeLabel=root.querySelector('#admin-range-label'),rangeButtons=root.querySelectorAll('[data-range]'),dateInput=root.querySelector('#admin-date'),prev=root.querySelector('#admin-prev-period'),next=root.querySelector('#admin-next-period'),load=root.querySelector('#admin-load-reservations'),loadMessage=root.querySelector('#admin-load-message'),filter=root.querySelector('#admin-state-filter'),rows=root.querySelectorAll('#admin-reservation-rows tr'),modal=root.querySelector('#admin-cancel-modal'),detail=root.querySelector('#admin-cancel-detail'),close=root.querySelector('#admin-cancel-close'),confirmButton=root.querySelector('#admin-cancel-confirm');
+let active=null,view='day';
+const wd=['日','月','火','水','木','金','土'],pad=v=>String(v).padStart(2,'0'),parse=v=>{const p=String(v).split('-').map(Number);return new Date(p[0],p[1]-1,p[2])},input=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`,add=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x},jp=d=>`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${wd[d.getDay()]}）`;
+const mockPostal=root.querySelector('#admin-book-postal'),mockAddress=root.querySelector('#admin-book-address'),mockAddressSearch=root.querySelector('#admin-book-address-search'),mockDetail=root.querySelector('#admin-book-address-detail'),mockBuilding=root.querySelector('#admin-book-building');
+const setMockAddress=candidates=>{
+  if(!mockAddress)return;
+  const values=Array.isArray(candidates)?candidates.filter(Boolean):[];
+  mockAddress.innerHTML='<option value="">郵便番号から住所を取得してください</option>';
+  values.forEach(value=>{const op=document.createElement('option');op.value=value;op.textContent=value;mockAddress.appendChild(op);});
+  mockAddress.value=values.length===1?values[0]:'';
+};
+setMockAddress([]);
+if(mockPostal&&mockAddress)mockPostal.addEventListener('input',()=>{setMockAddress([]);if(mockDetail)mockDetail.value='';if(mockBuilding)mockBuilding.value='';});
+if(mockAddressSearch)mockAddressSearch.addEventListener('click',()=>{
+  const code=String((mockPostal&&mockPostal.value)||'').replace(/\D/g,'');
+  if(!/^\d{7}$/.test(code)){alert('郵便番号を7桁で入力してください。');return;}
+  mockAddressSearch.disabled=true;mockAddressSearch.textContent='住所を検索中…';
+  setTimeout(()=>{setMockAddress(['東京都千代田区千代田','東京都千代田区千代田','東京都千代田区千代田']);mockAddressSearch.disabled=false;mockAddressSearch.textContent='郵便番号から住所を自動入力';},250);
+});
+function display(){const base=parse(dateInput.value),finish=add(base,6);rangeLabel.textContent=view==='week'?`${jp(base)}〜${jp(finish)}の予約`:`${jp(base)}の予約`;root.querySelectorAll('.admin-cal-day[data-day]').forEach(h=>{const d=add(base,Number(h.dataset.day));h.innerHTML=`${wd[d.getDay()]}<span>${d.getMonth()+1}/${d.getDate()}</span>`});root.querySelectorAll('.admin-cal-cell[data-day] [data-book-date]').forEach(b=>{b.dataset.bookDate=input(add(base,Number(b.closest('.admin-cal-cell').dataset.day)))})}
+function labels(){prev.textContent=view==='week'?'前週':'前日';next.textContent=view==='week'?'翌週':'翌日'}
+function fetchRows(){load.disabled=true;load.textContent='呼び出し中…';loadMessage.dataset.show='true';loadMessage.textContent='予約状況を更新しています。';setTimeout(()=>{display();load.disabled=false;load.textContent='予約状況更新';loadMessage.textContent=`予約状況を表示しました（${new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}）。`},450)}
+refresh.addEventListener('click',()=>{refresh.dataset.loading='true';statusTexts.forEach(n=>n.textContent='確認中…');setTimeout(()=>{statusTexts.forEach(n=>n.textContent='正常');lastCheck.textContent=`最終確認 ${new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}`;refresh.dataset.loading='false'},450)});
+rangeButtons.forEach(b=>b.addEventListener('click',()=>{rangeButtons.forEach(x=>x.setAttribute('aria-pressed',String(x===b)));view=b.dataset.range;root.dataset.rangeView=view;labels();display()}));
+prev.addEventListener('click',()=>{dateInput.value=input(add(parse(dateInput.value),view==='week'?-7:-1));fetchRows()});
+next.addEventListener('click',()=>{dateInput.value=input(add(parse(dateInput.value),view==='week'?7:1));fetchRows()});
+dateInput.addEventListener('change',()=>{display();loadMessage.textContent='基準日を変更しました。予約状況を更新してください。'});
+load.addEventListener('click',fetchRows);
+root.querySelectorAll('[data-reserve-id]').forEach(b=>b.addEventListener('click',()=>{const row=root.querySelector(`[data-reservation-id="${b.dataset.reserveId}"]`);if(!row)return;rows.forEach(x=>x.classList.remove('admin-row-focus'));row.classList.add('admin-row-focus');row.scrollIntoView({behavior:'smooth',block:'center'})}));
+root.querySelectorAll('[data-book-date]').forEach(b=>b.addEventListener('click',()=>{root.querySelector('#admin-book-date').value=b.dataset.bookDate;root.querySelector('#admin-book-time').value=b.dataset.bookTime;root.querySelector('#admin-manual-form').scrollIntoView({behavior:'smooth',block:'center'})}));
+filter.addEventListener('change',()=>rows.forEach(r=>{r.hidden=filter.value!=='すべて'&&r.dataset.status!==filter.value}));
+root.querySelectorAll('[data-cancel-id]').forEach(b=>b.addEventListener('click',()=>{active=b;confirmButton.disabled=false;confirmButton.textContent='キャンセルを実行';close.disabled=false;detail.innerHTML=`<strong>${b.dataset.cancelName}</strong><br>${b.dataset.cancelTime}<br>${b.dataset.cancelId}`;modal.dataset.open='true';close.focus()}));
+close.addEventListener('click',()=>{modal.dataset.open='false';active=null});
+confirmButton.addEventListener('click',()=>{if(!active)return;confirmButton.disabled=true;confirmButton.textContent='キャンセル処理中…';close.disabled=true;detail.insertAdjacentHTML('beforeend','<br><strong>キャンセル処理中です。</strong>');setTimeout(()=>{const row=active.closest('tr'),badge=row.querySelector('.admin-status-badge');row.dataset.status='キャンセル済み';badge.dataset.state='cancelled';badge.textContent='● キャンセル済み';active.textContent='処理済み';active.disabled=true;modal.dataset.open='false';active=null},450)});
+root.querySelector('#admin-manual-form').addEventListener('submit',e=>{e.preventDefault();const toast=root.querySelector('#admin-book-toast'),staff=root.querySelector('#admin-book-staff').value.trim();toast.textContent='予約を登録中…';toast.dataset.show='true';setTimeout(()=>{toast.textContent=`予約を登録しました。登録者：${staff}（予約シートO列）`},450)});
+labels();display();
+})();
+</script>
+
