@@ -7,6 +7,7 @@ Object.entries(plan).forEach(([d,ts])=>{const c={};ts.forEach(t=>{const hm=t.rep
 rows.push([`R-${d}-${hm}-${c[hm]}`,`S-${d}-${hm}`,__NAMES[(n-1)%__NAMES.length],'てすと','1980-01-01',46,'男性','000-0000 東京都サンプル区1-1','09000000000','無','','WEB','予約処理確定','2026-09-20 10:00:00','','']);});});
 const slots=[];days.forEach(d=>times.forEach(t=>slots.push({slotId:`S-${d}-${t.replace(':','')}`,date:d,time:t,capacity:5,confirmed:0,remain:5,closed:false,mark:'○',label:''})));
 function respond(name,args){
+ if(name==='app_adminReserve'){const a=args[0];const id='R-NEW-'+(++n);rows.push([id,a.slotId,a.nameKanji,'','',null,'','','','無','','管理画面','予約処理確定','','','']);return {ok:true,reserveId:id};}
  if(name==='api_getAdminDashboard'){const keys=args[0]||[];return {ok:true,slots:slots.filter(s=>keys.includes(s.date)),data:rows.filter(r=>keys.includes(r[1].slice(2,10))),schedule:{times}};}
  if(name==='api_getReservations'){return {ok:true,data:rows.filter(r=>r[1].slice(2,10)===args[0])};}
  return {ok:true,data:[],count:0,total:0,logs:[]};
@@ -14,7 +15,7 @@ function respond(name,args){
 function runner(){let s=()=>{},f=()=>{};const p=new Proxy({},{get(_,k){if(k==='withSuccessHandler')return h=>{s=h;return p};if(k==='withFailureHandler')return h=>{f=h;return p};if(k==='withUserObject')return ()=>p;return (...a)=>{(window.__calls=window.__calls||[]).push([Math.round(performance.now()),k,JSON.stringify(a).slice(0,60)]);setTimeout(()=>s(respond(k,a)),(window.__delay||120));}}});return p;}
 window.google={script:{run:new Proxy({},{get(_,k){return runner()[k];}})}};
 })();
-</script><div style="position:sticky;top:0;z-index:99999;background:#1f4d3f;color:#fff;font:700 14px/1.6 sans-serif;padding:8px 16px;text-align:center">パラレルワールド（修正版）　｜　ダミーデータ・通信1回2.5秒で再現中</div><!--
+</script><div style="position:sticky;top:0;z-index:99999;background:#1f4d3f;color:#fff;font:700 14px/1.6 sans-serif;padding:8px 16px;text-align:center">パラレルワールド（修正版）　｜　ダミーデータ・通信1回2.5秒で再現中<br>予約状況の読み込み回数：<span id="__cnt">0</span>回</div><script>setInterval(function(){var c=(window.__calls||[]).filter(function(x){return x[1]==="api_getAdminDashboard"}).length;var e=document.getElementById("__cnt");if(e)e.textContent=c;},300);</script><!--
  * DEV dev.html 変更履歴
  * 【恒常・絶対条件】修正時はこの変更履歴を必ず追記する。既存履歴は削除・省略しない。
  * - 2026.9.30 日本郵便API v2連携：窓口予約に郵便番号検索、返却住所候補選択、番地・号、建物名入力を追加
@@ -924,7 +925,8 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
   const rangeButtons =
     root.querySelectorAll("[data-range]");
 
-  let currentView = "day";
+  // [検索ワード: adminInitialLoadOnceV1] 画面は最初から「週間」表示なので、初回から週で読み込む（1日分の無駄な読み込みをなくす）
+  let currentView = "week";
   let currentReservations = [];
   let currentSlots = [];
   let currentScheduleMeta = {
@@ -2427,6 +2429,95 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
     loadButton.classList.toggle("is-loading-hidden", !!on);
   }
 
+  // [検索ワード: adminBookLocalAddV1]
+  // 窓口予約で登録できた1件を、読み直しを待たずに画面のカレンダーへ足す（表示中の週の分だけ）。
+  function adminAddReservationLocally(payload, reserveId) {
+    if (!payload || !reserveId) return;
+    const slotId = String(payload.slotId || "");
+    const match = /^S-(\d{8})-(\d{4})$/.exec(slotId);
+    if (!match) return;
+    const shownKeys = getDates().map(dateToKey);
+    if (!shownKeys.includes(match[1])) return;
+    if (currentReservations.some(item => item.reserveId === String(reserveId))) return;
+
+    let birthFmt = "";
+    let age = "";
+    const birthStr = String(payload.birth || "").replace(/[^\d]/g, "");
+    if (/^\d{8}$/.test(birthStr)) {
+      const by = Number(birthStr.slice(0, 4));
+      const bm = Number(birthStr.slice(4, 6));
+      const bd = Number(birthStr.slice(6, 8));
+      birthFmt = `${birthStr.slice(0, 4)}-${birthStr.slice(4, 6)}-${birthStr.slice(6, 8)}`;
+      const today = new Date();
+      age = today.getFullYear() - by;
+      if (today < new Date(today.getFullYear(), bm - 1, bd)) age--;
+    }
+    const addressText = [
+      (String(payload.addressBase || "") + String(payload.addressDetail || "")).trim(),
+      String(payload.building || "").trim()
+    ].filter(Boolean).join(" ");
+    const address = `${String(payload.postal || "")} ${addressText}`.trim();
+    const cardFlag = String(payload.cardFlag || "無") === "紛失"
+      ? "有（診察券紛失）"
+      : String(payload.cardFlag || "無");
+    const now = new Date();
+    const pad = value => String(value).padStart(2, "0");
+    const nowStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+    const row = [
+      String(reserveId), slotId,
+      String(payload.nameKanji || ""), String(payload.nameKana || ""),
+      birthFmt, age, String(payload.gender || ""), address,
+      String(payload.tel || ""), cardFlag, String(payload.cardNo || ""),
+      "管理画面", "予約処理確定", nowStr,
+      String(payload.staff || ""), String(payload.note || "")
+    ];
+    currentReservations.push(parseReservation(row));
+
+    const slot = currentSlots.find(item => String(item.slotId) === slotId);
+    if (slot) slot.remain = Math.max(0, Number(slot.remain || 0) - 1);
+
+    renderCalendar();
+    renderRows();
+  }
+
+  // [検索ワード: adminBookLocalAddV1]
+  // 登録後の読み直しを裏で行う。読み込み案内は出さず、窓口予約の入力欄（日付・時間の選択肢も含む）には触れない。
+  async function adminRefreshCalendarInBackground() {
+    // 他の読み込みを止めないよう番号は進めず、途中で週の切り替えや更新があったら結果を捨てる
+    const requestId = activeDashboardRequest;
+    const dateKeys = getDates().map(dateToKey);
+    try {
+      const result = await requestAdminDashboard(dateKeys, true);
+      if (
+        requestId !== activeDashboardRequest ||
+        getDates().map(dateToKey).join(",") !== dateKeys.join(",")
+      ) return;
+      currentSlots = Array.isArray(result.slots) ? result.slots : [];
+      currentScheduleMeta =
+        result.schedule && typeof result.schedule === "object"
+          ? {
+              times: Array.isArray(result.schedule.times) ? result.schedule.times : [],
+              activeTimes: Array.isArray(result.schedule.activeTimes) ? result.schedule.activeTimes : [],
+              collapseInactive: result.schedule.collapseInactive === true,
+              intervalMinutes: Number(result.schedule.intervalMinutes || 30),
+              startTime: String(result.schedule.startTime || ""),
+              endTime: String(result.schedule.endTime || "")
+            }
+          : {
+              times: [], activeTimes: [], collapseInactive: false,
+              intervalMinutes: 30, startTime: "", endTime: ""
+            };
+      currentReservations = Array.isArray(result.data) ? result.data.map(parseReservation) : [];
+      renderCalendar();
+      renderRows();
+      prefetchAdjacentDashboards();
+      await updateMetrics(true);
+    } catch (error) {
+      console.error("登録後の裏読み直しエラー", error);
+    }
+  }
+
   async function reloadAll(forceRefresh = false, onRendered) {
 
     const requestId = ++activeDashboardRequest;
@@ -2870,22 +2961,18 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
             const selectedInfo = document.getElementById("admin-counter-selected");
             if (selectedInfo) window.adminRenderCounterSelected(selectedInfo, "", "");
             clearDashboardCache();
-            // ② カレンダーに反映されるまで登録ボタンはロック。反映された時点で解除する
-            //    （未読数・合計などの取り直しは待たない）[検索ワード: adminBookUnlockOnRenderV1]
-            let bookUnlocked = false;
-            const unlockBooking = () => {
-              if (bookUnlocked) return;
-              bookUnlocked = true;
-              bookSubmit.disabled = false;
-              bookSubmit.textContent =
-                "予約内容を確認";
-              setBookingNotice(false);
-            };
+            // ② 登録できた1件をその場でカレンダーに足して、すぐ登録ボタンを戻す。
+            //    全体の読み直しは裏で行い、窓口予約の入力欄には一切触れない [検索ワード: adminBookLocalAddV1]
             try {
-              await reloadAll(true, unlockBooking);
-            } finally {
-              unlockBooking();
+              adminAddReservationLocally(payload, result.reserveId);
+            } catch (localAddError) {
+              console.error(localAddError);
             }
+            bookSubmit.disabled = false;
+            bookSubmit.textContent =
+              "予約内容を確認";
+            setBookingNotice(false);
+            adminRefreshCalendarInBackground();
           }
         )
         .withFailureHandler(
@@ -2921,7 +3008,9 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
     if (
       adminCalendarOnlyRefreshing ||
       document.visibilityState !== "visible" ||
-      root.dataset.adminMainTab !== "manage"
+      root.dataset.adminMainTab !== "manage" ||
+      // [検索ワード: adminInitialLoadOnceV1] ほかの読み込み中は同じ週を二重に取りに行かない
+      refreshButton.dataset.loading === "true"
     ) return;
 
     adminCalendarOnlyRefreshing = true;
