@@ -2692,6 +2692,19 @@ window.google={script:{run:new Proxy({},{get(_,k){return runner()[k];}})}};
   );
 
 
+  // [検索ワード: adminBookEnterBlockV1]
+  // 窓口予約の入力欄でエンターを押しても登録確認を出さない。「予約内容を確認」ボタンを押したときだけ出す。
+  // （日本語入力の変換確定のエンターには影響しない。備考欄の改行はそのまま使える）
+  manualForm.addEventListener(
+    "keydown",
+    event => {
+      if (event.key !== "Enter" || event.isComposing || event.keyCode === 229) return;
+      const target = event.target;
+      if (!target || target.tagName === "TEXTAREA" || target.tagName === "BUTTON") return;
+      event.preventDefault();
+    }
+  );
+
   manualForm.addEventListener(
     "submit",
     event => {
