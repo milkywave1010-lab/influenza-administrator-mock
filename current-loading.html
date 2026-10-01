@@ -40,6 +40,32 @@ window.google={script:{run:new Proxy({},{get(_,k){return runner()[k];}})}};
  * - 2026.10.1 ステータス・設定：接種増減枠の例を「家族でまとめて接種したいが枠が足りない時・検診等が入って減らしたい時」へ変更
  * - 既存表記・既存レイアウトは無断変更しない
  -->
+<script id="admin-counter-selected-card-v1">
+/* [検索ワード: adminCounterSelectedCardV1]
+ * 窓口予約の選択日時を、予約画面（EXEC）と同じカード表示にする（曜日付きの大きな日時＋枠ID）。
+ */
+window.adminRenderCounterSelected = function(el, dateValue, timeValue){
+  if(!el) return;
+  const d = String(dateValue || '').trim();
+  const t = String(timeValue || '').trim();
+  const m = d.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const ok = !!(m && /^\d{1,2}:\d{2}$/.test(t));
+  const esc = v => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  el.dataset.state = ok ? 'selected' : 'empty';
+  if(!ok){
+    el.innerHTML = '<div class="acs-main"><div class="acs-label">選択した接種日時</div><div class="acs-date">未選択</div><div class="acs-msg">カレンダーの空き枠か、日付・時間から接種日時を選んでください。</div></div>';
+    return;
+  }
+  const y = +m[1], mo = +m[2], da = +m[3];
+  const w = ['日','月','火','水','木','金','土'][new Date(y, mo-1, da).getDay()];
+  const hhmm = t.length === 4 ? '0' + t : t;
+  const slotId = 'S-' + m[1] + m[2] + m[3] + '-' + hhmm.replace(':','');
+  el.innerHTML = '<div class="acs-main"><div class="acs-label">選択した接種日時</div>'
+    + '<div class="acs-date">' + esc(y + '年' + mo + '月' + da + '日（' + w + '） ' + hhmm) + '</div>'
+    + '<div class="acs-msg">接種日時を選択しました。患者さん情報を入力してください。</div></div>'
+    + '<div class="acs-slot"><span>枠ID</span><b>' + esc(slotId) + '</b></div>';
+};
+</script>
 <style>
 #influenza-admin-mock {
   color-scheme: light dark;
@@ -2147,6 +2173,7 @@ window.google={script:{run:new Proxy({},{get(_,k){return runner()[k];}})}};
   }
 
 
+  let adminSideMetricsLoaded = false;
   async function updateMetrics(forceRefresh = false) {
 
     try {
@@ -2186,6 +2213,11 @@ window.google={script:{run:new Proxy({},{get(_,k){return runner()[k];}})}};
         r.status === "キャンセル処理確定"
       ).length;
 
+      // [検索ワード: adminSideMetricsOnceV1]
+      // 問い合わせ未読数・今日までのトータルは、初回表示と強制更新（予約状況更新ボタン・自分の操作後）のときだけ取得する。
+      // 次週・前週などの週移動では取り直さない。
+      if (forceRefresh || !adminSideMetricsLoaded) {
+      adminSideMetricsLoaded = true;
       try {
         const inquiryResult = await new Promise((resolve, reject) => {
           google.script.run
@@ -2263,6 +2295,7 @@ window.google={script:{run:new Proxy({},{get(_,k){return runner()[k];}})}};
         const totalEl = document.getElementById("admin-season-total-count");
         if (totalEl) totalEl.textContent = "取得失敗";
         console.error("今日までのトータル取得エラー", totalError);
+      }
       }
 
       document.getElementById(
@@ -2449,10 +2482,19 @@ window.google={script:{run:new Proxy({},{get(_,k){return runner()[k];}})}};
 
       populateBookTimes();
 
+      // [検索ワード: adminNoticeEarlyHideV1]
+      // カレンダーを表示した時点で読み込み案内を消してボタンを戻す。未読数・合計は案内を消したあとに取得する。
+      if (requestId === activeDashboardRequest) {
+        refreshButton.dataset.loading = "false";
+        loadButton.disabled = false;
+        loadButton.textContent = "予約状況更新";
+        setAdminLoadingNotice(false);
+      }
+      prefetchAdjacentDashboards();
+
       await updateMetrics(forceRefresh);
 
       setStatus(true);
-      prefetchAdjacentDashboards();
       loadMessage.textContent =
         "予約状況を更新しました（" +
         new Date().toLocaleTimeString(
@@ -2676,6 +2718,19 @@ window.google={script:{run:new Proxy({},{get(_,k){return runner()[k];}})}};
   );
 
 
+  // [検索ワード: adminBookEnterBlockV1]
+  // 窓口予約の入力欄でエンターを押しても登録確認を出さない。「予約内容を確認」ボタンを押したときだけ出す。
+  // （日本語入力の変換確定のエンターには影響しない。備考欄の改行はそのまま使える）
+  manualForm.addEventListener(
+    "keydown",
+    event => {
+      if (event.key !== "Enter" || event.isComposing || event.keyCode === 229) return;
+      const target = event.target;
+      if (!target || target.tagName === "TEXTAREA" || target.tagName === "BUTTON") return;
+      event.preventDefault();
+    }
+  );
+
   manualForm.addEventListener(
     "submit",
     event => {
@@ -2809,7 +2864,7 @@ window.google={script:{run:new Proxy({},{get(_,k){return runner()[k];}})}};
             bookCard.value = "無";
             bookCard.dispatchEvent(new Event("change", { bubbles: true }));
             const selectedInfo = document.getElementById("admin-counter-selected");
-            if (selectedInfo) selectedInfo.textContent = "選択日時：未選択 未選択";
+            if (selectedInfo) window.adminRenderCounterSelected(selectedInfo, "", "");
             clearDashboardCache();
             // ② カレンダーの読み込み直しが終わるまで、登録ボタンはロックしたまま
             try {
@@ -3282,7 +3337,7 @@ window.google={script:{run:new Proxy({},{get(_,k){return runner()[k];}})}};
     const syncCard=()=>{const show=card&&card.value==='有';cardNoField.hidden=!show;if(!show)cardNo.value='';};
     if(card) card.addEventListener('change',syncCard);syncCard();
     const bookDate=byId('admin-book-date'),bookTime=byId('admin-book-time');
-    const syncSelected=()=>{const d=bookDate&&bookDate.value?bookDate.value:'未選択';const t=bookTime&&bookTime.value?bookTime.value:'未選択';selected.textContent=`選択日時：${d} ${t}`;};
+    const syncSelected=()=>{const d=bookDate&&bookDate.value?bookDate.value:'未選択';const t=bookTime&&bookTime.value?bookTime.value:'未選択';window.adminRenderCounterSelected(selected,bookDate&&bookDate.value,bookTime&&bookTime.value);};
     if(bookDate) bookDate.addEventListener('change',syncSelected);if(bookTime) bookTime.addEventListener('change',syncSelected);
     root.addEventListener('click',e=>{if(e.target.closest('.admin-cal-empty'))setTimeout(syncSelected,0);});
     syncSelected();
@@ -3351,6 +3406,19 @@ window.google={script:{run:new Proxy({},{get(_,k){return runner()[k];}})}};
 #influenza-admin-mock .admin-status-badge{font-weight:900}
 #influenza-admin-mock .admin-danger{border-color:#edbcbc;background:#fffafa;color:var(--admin-red);font-weight:900}
 #influenza-admin-mock .admin-counter-selected{border-color:#cfe3d8;background:var(--admin-green-soft);color:var(--admin-green);font-weight:900}
+/* [検索ワード: adminCounterSelectedCardV1] 予約画面（EXEC）の「選択した接種日時」と同じカード表示 */
+#influenza-admin-mock #admin-counter-selected{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:0 0 14px;padding:16px 20px;border:2px solid var(--admin-green);border-radius:12px;background:linear-gradient(135deg,var(--admin-surface-strong),var(--admin-green-soft));color:var(--admin-text);font-weight:400}
+#influenza-admin-mock #admin-counter-selected[data-state="empty"]{border-color:var(--admin-line);background:var(--admin-surface)}
+#influenza-admin-mock #admin-counter-selected .acs-main{min-width:0;flex:1 1 260px}
+#influenza-admin-mock #admin-counter-selected .acs-label{font-size:12px;font-weight:700;color:var(--admin-muted)}
+#influenza-admin-mock #admin-counter-selected .acs-date{margin:4px 0 6px;font-size:28px;line-height:1.3;font-weight:900;color:var(--admin-green-dark)}
+#influenza-admin-mock #admin-counter-selected[data-state="empty"] .acs-date{color:var(--admin-muted)}
+#influenza-admin-mock #admin-counter-selected .acs-msg{font-size:13px;font-weight:700;color:var(--admin-green-dark)}
+#influenza-admin-mock #admin-counter-selected[data-state="empty"] .acs-msg{color:var(--admin-muted)}
+#influenza-admin-mock #admin-counter-selected .acs-slot{flex:0 0 auto;min-width:180px;padding:12px 16px;border-radius:8px;background:var(--admin-amber-soft)}
+#influenza-admin-mock #admin-counter-selected .acs-slot span{display:block;font-size:12px;font-weight:700;color:var(--admin-muted)}
+#influenza-admin-mock #admin-counter-selected .acs-slot b{display:block;margin-top:4px;font-size:15px;font-weight:900;color:var(--admin-text)}
+@media(max-width:760px){#influenza-admin-mock #admin-counter-selected .acs-date{font-size:22px}#influenza-admin-mock #admin-counter-selected .acs-slot{flex:1 1 100%}}
 #influenza-admin-mock .admin-counter-form-list{gap:11px}
 #influenza-admin-mock .admin-field label{font-size:13px;font-weight:900;color:var(--admin-text)}
 #influenza-admin-mock .admin-counter-extra textarea{border-color:#d8d0c3;background:#fff;color:var(--admin-text)}
@@ -5336,7 +5404,7 @@ window.google={script:{run:new Proxy({},{get(_,k){return runner()[k];}})}};
           const selected=document.getElementById('admin-counter-selected');
           const d=document.getElementById('admin-book-date');
           const t=document.getElementById('admin-book-time');
-          if(selected&&d&&t)selected.textContent=`選択日時：${d.value||'未選択'} ${t.value||'未選択'}`;
+          if(selected&&d&&t)window.adminRenderCounterSelected(selected,d.value,t.value);
           if(selected){const bar=root.querySelector('.admin-main-tabs');const offset=(bar?bar.getBoundingClientRect().height:0)+12;const top=window.pageYOffset+selected.getBoundingClientRect().top-offset;window.scrollTo({top:Math.max(0,top),behavior:'auto'});}
         }));
       },0);

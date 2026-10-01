@@ -2427,7 +2427,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
     loadButton.classList.toggle("is-loading-hidden", !!on);
   }
 
-  async function reloadAll(forceRefresh = false) {
+  async function reloadAll(forceRefresh = false, onRendered) {
 
     const requestId = ++activeDashboardRequest;
     const dateKeys = getDates().map(dateToKey);
@@ -2489,6 +2489,10 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
         loadButton.disabled = false;
         loadButton.textContent = "予約状況更新";
         setAdminLoadingNotice(false);
+      }
+      // [検索ワード: adminRenderedCallbackV1] カレンダー表示が終わった時点で呼び出し元へ知らせる（窓口予約の登録中表示の解除など）
+      if (typeof onRendered === "function") {
+        try { onRendered(); } catch (callbackError) { console.error(callbackError); }
       }
       prefetchAdjacentDashboards();
 
@@ -2866,14 +2870,21 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
             const selectedInfo = document.getElementById("admin-counter-selected");
             if (selectedInfo) window.adminRenderCounterSelected(selectedInfo, "", "");
             clearDashboardCache();
-            // ② カレンダーの読み込み直しが終わるまで、登録ボタンはロックしたまま
-            try {
-              await reloadAll(true);
-            } finally {
+            // ② カレンダーに反映されるまで登録ボタンはロック。反映された時点で解除する
+            //    （未読数・合計などの取り直しは待たない）[検索ワード: adminBookUnlockOnRenderV1]
+            let bookUnlocked = false;
+            const unlockBooking = () => {
+              if (bookUnlocked) return;
+              bookUnlocked = true;
               bookSubmit.disabled = false;
               bookSubmit.textContent =
                 "予約内容を確認";
               setBookingNotice(false);
+            };
+            try {
+              await reloadAll(true, unlockBooking);
+            } finally {
+              unlockBooking();
             }
           }
         )
