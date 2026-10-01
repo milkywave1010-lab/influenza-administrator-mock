@@ -1,4 +1,4 @@
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><!-- 見え方・動作確認用モック：GAS通信をダミーに置き換え、通信1回あたり2.5秒の遅延で再現 --><script>window.__delay=2500;window.__NAMES=["山田 太郎", "佐藤 花子", "鈴木 一郎", "高橋 実", "田中 恵", "伊藤 和也", "渡辺 幸子", "中村 健", "小林 由美", "加藤 誠", "吉田 裕子", "山本 茂", "松本 直子"];</script><script>(function(){
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><!-- 見え方・動作確認用モック：GAS通信をダミーに置き換え、本番の体感に合わせた待ち時間で再現（予約状況6.5秒・窓口予約の登録15秒・その他2.5秒） --><script>window.__delay=2500;window.__delayFor={api_getAdminDashboard:6500,app_adminReserve:15000};window.__NAMES=["山田 太郎", "佐藤 花子", "鈴木 一郎", "高橋 実", "田中 恵", "伊藤 和也", "渡辺 幸子", "中村 健", "小林 由美", "加藤 誠", "吉田 裕子", "山本 茂", "松本 直子"];</script><script>(function(){
 const days=['20260927','20260928','20260929','20260930','20261001','20261002','20261003'];
 const times=['09:30','10:00','10:30','11:00','11:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00'];
 const plan={'20260929':['09:30','11:00'],'20261001':['09:30','09:30','11:00'],'20261002':['09:30'],'20261003':['09:30','10:00','10:00','14:00','14:00','14:30','15:00']};
@@ -12,10 +12,10 @@ function respond(name,args){
  if(name==='api_getReservations'){return {ok:true,data:rows.filter(r=>r[1].slice(2,10)===args[0])};}
  return {ok:true,data:[],count:0,total:0,logs:[]};
 }
-function runner(){let s=()=>{},f=()=>{};const p=new Proxy({},{get(_,k){if(k==='withSuccessHandler')return h=>{s=h;return p};if(k==='withFailureHandler')return h=>{f=h;return p};if(k==='withUserObject')return ()=>p;return (...a)=>{(window.__calls=window.__calls||[]).push([Math.round(performance.now()),k,JSON.stringify(a).slice(0,60)]);setTimeout(()=>s(respond(k,a)),(window.__delay||120));}}});return p;}
+function runner(){let s=()=>{},f=()=>{};const p=new Proxy({},{get(_,k){if(k==='withSuccessHandler')return h=>{s=h;return p};if(k==='withFailureHandler')return h=>{f=h;return p};if(k==='withUserObject')return ()=>p;return (...a)=>{(window.__calls=window.__calls||[]).push([Math.round(performance.now()),k,JSON.stringify(a).slice(0,60)]);setTimeout(()=>s(respond(k,a)),((window.__delayFor&&window.__delayFor[k])||window.__delay||120));}}});return p;}
 window.google={script:{run:new Proxy({},{get(_,k){return runner()[k];}})}};
 })();
-</script><div style="position:sticky;top:0;z-index:99999;background:#1f4d3f;color:#fff;font:700 14px/1.6 sans-serif;padding:8px 16px;text-align:center">パラレルワールド（修正版）　｜　ダミーデータ・通信1回2.5秒で再現中<br>予約状況の読み込み回数：<span id="__cnt">0</span>回</div><script>setInterval(function(){var c=(window.__calls||[]).filter(function(x){return x[1]==="api_getAdminDashboard"}).length;var e=document.getElementById("__cnt");if(e)e.textContent=c;},300);</script><!--
+</script><div style="position:sticky;top:0;z-index:99999;background:#1f4d3f;color:#fff;font:700 14px/1.6 sans-serif;padding:8px 16px;text-align:center">パラレルワールド（修正版）　｜　ダミーデータ・本番に近い待ち時間（予約状況6.5秒／登録15秒）<br>予約状況の読み込み回数：<span id="__cnt">0</span>回</div><script>setInterval(function(){var c=(window.__calls||[]).filter(function(x){return x[1]==="api_getAdminDashboard"}).length;var e=document.getElementById("__cnt");if(e)e.textContent=c;},300);</script><!--
  * DEV dev.html 変更履歴
  * 【恒常・絶対条件】修正時はこの変更履歴を必ず追記する。既存履歴は削除・省略しない。
  * - 2026.9.30 日本郵便API v2連携：窓口予約に郵便番号検索、返却住所候補選択、番地・号、建物名入力を追加
