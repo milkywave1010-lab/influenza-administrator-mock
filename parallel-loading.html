@@ -47,7 +47,9 @@ window.google={script:{run:new Proxy({},{get(_,k){return runner()[k];}})}};
  * - 2026.10.1 窓口予約：Enterキーで確認ポップが出ないよう変更（「予約内容を確認」ボタンを押した時のみ）
  * - 2026.10.1 窓口予約：選択した日時をEXECと同じカード表示（曜日付きの日時・枠ID）に変更
  * - 2026.10.1 窓口予約：登録できた1件をその場でカレンダーへ追加し、すぐ次の予約を入力できるよう変更。最新の読み直しは裏で行い、入力欄には触れない
- * - 2026.10.2 窓口予約：氏名だけ必須に変更。氏名が空・スペースのみの場合は「予約内容を確認」ボタンのすぐ上に「氏名を入力してください。」をボタンと同じ大きさの赤枠で表示して止める（確認ポップ・登録なし。氏名を打ち始めたら消える）。氏名欄に「必須」の印を追加。他の項目は任意のまま
+ * - 2026.10.2 窓口予約：氏名だけ必須に変更。氏名が空・スペースのみの場合は「氏名を入力してください。」を表示して止める（確認ポップ・登録なし。氏名を打ち始めたら消える）。氏名欄に「必須」の印を追加。他の項目は任意のまま
+ * - 2026.10.2 窓口予約：案内（日時未選択・氏名未入力・登録完了・登録失敗）を「予約内容を確認」ボタンの下の小さい表示から、ボタンのすぐ上・ボタンと同じ大きさの枠表示（エラーは赤、完了は緑）へ変更。登録中は「登録中　操作しないでください」のみ表示
+ * - 2026.10.2 窓口予約：画面が「未選択」なのに内部の初期値（今日の日付・最初の時間）で先へ進める不具合を修正。未選択のまま押した時は必ず「予約可能な日時を選択し、予約状況を再度呼び出してください。」で止める（日時を選ぶと消える）
  * - 既存表記・既存レイアウトは無断変更しない
  -->
 <script id="admin-counter-selected-card-v1">
@@ -340,9 +342,10 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
 #influenza-admin-mock .admin-loading-notice[hidden] { display: none; }
 #influenza-admin-mock .admin-booking-notice { text-align: center; padding: 14px 8px; font-weight: 700; font-size: 18px; line-height: 1.6; color: var(--admin-red); }
 #influenza-admin-mock .admin-booking-notice[hidden] { display: none; }
-/* [検索ワード: adminBookNameRequiredV1] 氏名未入力の案内：「予約内容を確認」ボタンのすぐ上に、ボタンと同じ大きさで表示 */
-#influenza-admin-mock .admin-book-name-error { display: flex; align-items: center; justify-content: center; box-sizing: border-box; min-height: 46px; text-align: center; margin: 12px 0 10px; padding: 8px 14px; font-weight: 900; font-size: 16px; color: var(--admin-red); background: #fdeeee; border: 2px solid var(--admin-red); border-radius: 8px; }
-#influenza-admin-mock .admin-book-name-error[hidden] { display: none; }
+/* [検索ワード: adminBookToastAboveV1] 窓口予約の案内（日時未選択・氏名未入力・登録完了・登録失敗）は、「予約内容を確認」ボタンのすぐ上に、ボタンと同じ大きさで表示 */
+#influenza-admin-mock #admin-book-toast { box-sizing: border-box; min-height: 46px; margin: 12px 0 10px; padding: 8px 14px; align-items: center; justify-content: center; flex-wrap: wrap; text-align: center; font-size: 16px; font-weight: 900; border: 2px solid var(--admin-green-dark); border-radius: 8px; }
+#influenza-admin-mock #admin-book-toast[data-show="true"] { display: flex; }
+#influenza-admin-mock #admin-book-toast[data-state="error"] { border-color: var(--admin-red); }
 #influenza-admin-mock #admin-book-submit.is-booking-hidden { display: none !important; }
 @media (max-width: 760px) { #influenza-admin-mock .admin-loading-notice span { display: block; } }
 #influenza-admin-mock #admin-load-reservations.is-loading-hidden { display: none !important; }
@@ -934,21 +937,26 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
     bookSubmit.classList.toggle("is-booking-hidden", !!on);
   }
 
-  // [検索ワード: adminBookNameRequiredV1]
-  // 氏名が空のまま押された時は、「予約内容を確認」ボタンのすぐ上に大きく案内を出す。氏名を打ち始めたら消す
-  function setBookNameError(on) {
-    if (!bookSubmit) return;
-    let box = bookSubmit.parentNode.querySelector(":scope > .admin-book-name-error");
-    if (!box) {
-      box = document.createElement("div");
-      box.className = "admin-book-name-error";
-      box.setAttribute("role", "alert");
-      box.textContent = "氏名を入力してください。";
-      bookSubmit.insertAdjacentElement("beforebegin", box);
-    }
-    box.hidden = !on;
+  // [検索ワード: adminBookToastAboveV1]
+  // 窓口予約の案内は「予約内容を確認」ボタンのすぐ上に出す（ボタンと同じ大きさ）。
+  if (bookToast && bookSubmit) bookSubmit.insertAdjacentElement("beforebegin", bookToast);
+  const BOOK_MSG_SLOT = "予約可能な日時を選択し、予約状況を再度呼び出してください。";
+  const BOOK_MSG_NAME = "氏名を入力してください。";
+  function showBookError(text) {
+    bookToast.textContent = text;
+    bookToast.dataset.state = "error";
+    bookToast.dataset.show = "true";
   }
-  if (bookName) bookName.addEventListener("input", () => setBookNameError(false));
+  // 直したら案内を消す：氏名を打ち始めたら氏名の案内、日時を選んだら日時の案内
+  function clearBookError(text) {
+    if (bookToast.dataset.show === "true" && bookToast.textContent === text) bookToast.dataset.show = "false";
+  }
+  if (bookName) bookName.addEventListener("input", () => clearBookError(BOOK_MSG_NAME));
+  if (bookDate) bookDate.addEventListener("change", () => clearBookError(BOOK_MSG_SLOT));
+  if (bookTime) bookTime.addEventListener("change", () => clearBookError(BOOK_MSG_SLOT));
+  root.addEventListener("click", event => {
+    if (event.target.closest(".admin-cal-empty")) clearBookError(BOOK_MSG_SLOT);
+  });
 
   const rangeButtons =
     root.querySelectorAll("[data-range]");
@@ -2859,6 +2867,14 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
 
       event.preventDefault();
 
+      // [検索ワード: adminBookSlotUnselectedV1]
+      // 画面が「未選択」の時は、内部に日付・時間の初期値が入っていても必ず日時の案内で止める
+      const selectedCard = document.getElementById("admin-counter-selected");
+      if (selectedCard && selectedCard.dataset.state !== "selected") {
+        showBookError(BOOK_MSG_SLOT);
+        return;
+      }
+
       const selectedDate =
         bookDate.value;
 
@@ -2878,23 +2894,16 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
         );
 
       if (!selectedSlot) {
-        bookToast.textContent =
-          "予約可能な日時を選択し、予約状況を再度呼び出してください。";
-        bookToast.dataset.state =
-          "error";
-        bookToast.dataset.show =
-          "true";
+        showBookError(BOOK_MSG_SLOT);
         return;
       }
 
       // [検索ワード: adminBookNameRequiredV1] 窓口予約は氏名だけ必須（スペースだけの入力は空として扱う）
       if (!String(bookName.value || "").replace(/[\s\u3000]/g, "")) {
-        bookToast.dataset.show =
-          "false";
-        setBookNameError(true);
+        showBookError(BOOK_MSG_NAME);
         return;
       }
-      setBookNameError(false);
+      bookToast.dataset.show = "false";
 
       const date =
         parseDateInput(selectedDate);
@@ -2912,12 +2921,13 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
       setBookingNotice(true);
       bookSubmit.textContent =
         "予約を登録中…";
+      // 登録中は「登録中　操作しないでください」がボタンの位置に出るので、上の案内は出さない
       bookToast.textContent =
-        "予約を登録しています。";
+        "";
       bookToast.dataset.state =
         "";
       bookToast.dataset.show =
-        "true";
+        "false";
 
       const payload = {
         slotId: selectedSlot.slotId,
@@ -2965,8 +2975,12 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
 
             // ① 登録できた時点で、すぐ「予約を登録しました」を表示
             bookToast.textContent =
-              "予約を登録しました。予約ID：" +
-              result.reserveId;
+              "予約を登録しました。";
+            // 予約IDは途中で折り返さない（幅が足りない時は「予約ID：」の前で改行）
+            const reserveIdText = document.createElement("span");
+            reserveIdText.style.whiteSpace = "nowrap";
+            reserveIdText.textContent = "予約ID：" + result.reserveId;
+            bookToast.appendChild(reserveIdText);
             bookToast.dataset.state =
               "";
             bookToast.dataset.show =
