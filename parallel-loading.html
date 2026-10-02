@@ -48,7 +48,9 @@ window.google={script:{run:new Proxy({},{get(_,k){return runner()[k];}})}};
  * - 2026.10.1 窓口予約：選択した日時をEXECと同じカード表示（曜日付きの日時・枠ID）に変更
  * - 2026.10.1 窓口予約：登録できた1件をその場でカレンダーへ追加し、すぐ次の予約を入力できるよう変更。最新の読み直しは裏で行い、入力欄には触れない
  * - 2026.10.2 窓口予約：氏名だけ必須に変更。氏名が空・スペースのみの場合は「氏名を入力してください。」を表示して止める（確認ポップ・登録なし。氏名を打ち始めたら消える）。氏名欄に「必須」の印を追加。他の項目は任意のまま
- * - 2026.10.2 窓口予約：案内（日時未選択・氏名未入力・登録完了・登録失敗）を「予約内容を確認」ボタンの下の小さい表示から、ボタンのすぐ上・ボタンと同じ大きさの枠表示（エラーは赤、完了は緑）へ変更。登録中は、ボタンを「予約を登録しています。」に変えて薄く・押せない状態にし、その上の赤枠に「登録中　操作しないでください」を表示（枠はそのまま、文字だけ1秒点灯・0.5秒で薄くなって戻る点滅）
+ * - 2026.10.2 窓口予約：ボタン名を「予約内容を確認」から「予約登録」へ変更
+ * - 2026.10.2 窓口予約：案内（日時未選択・氏名未入力・登録完了・登録失敗）を、ボタンの下の小さい表示から、「予約登録」ボタンのすぐ上・ボタンと同じ大きさの枠表示（エラーは赤、完了は緑）へ変更
+ * - 2026.10.2 窓口予約：登録中は「予約登録」ボタンを押せない2段表示に変更（1段目「予約を登録しています。」、2段目は赤字で「登録中　操作しないでください」。文字だけ1秒点灯・0.5秒で薄くなって戻る点滅）
  * - 2026.10.2 窓口予約：画面が「未選択」なのに内部の初期値（今日の日付・最初の時間）で先へ進める不具合を修正。未選択のまま押した時は必ず「予約可能な日時を選択し、予約状況を再度呼び出してください。」で止める（日時を選ぶと消える）
  * - 既存表記・既存レイアウトは無断変更しない
  -->
@@ -340,11 +342,11 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
 /* [検索ワード: adminLoadingNoticeExecV1] EXECの #loading と同じ見た目（中央・赤・太字） */
 #influenza-admin-mock .admin-loading-notice { text-align: center; margin: 12px 0 4px; font-weight: 700; font-size: 18px; line-height: 1.6; color: var(--admin-red); }
 #influenza-admin-mock .admin-loading-notice[hidden] { display: none; }
-/* [検索ワード: adminBookingNoticeV1] 登録中：ボタンは「予約を登録しています。」に変えて薄く・押せない状態にし、その上の赤枠に「登録中　操作しないでください」を表示。枠はそのままで、文字だけ「1秒点灯 → 0.5秒でぼやっと薄くなって戻る」を繰り返す */
-#influenza-admin-mock #admin-book-submit.is-booking-busy { opacity: .45; cursor: default; }
-#influenza-admin-mock #admin-book-toast .admin-book-pulse { animation: adminBookPulse 1.5s ease-in-out infinite; }
+/* [検索ワード: adminBookingNoticeV1] 登録中：「予約登録」ボタンを押せない2段表示に変える。1段目「予約を登録しています。」、2段目は赤字で「登録中　操作しないでください」（文字だけ 1秒点灯 → 0.5秒でぼやっと薄くなって戻る を繰り返す）。赤字が読めるよう、登録中だけボタンを白っぽい色にする */
+#influenza-admin-mock #admin-book-submit.is-booking-busy { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; opacity: 1; cursor: default; background: var(--admin-surface-strong); color: var(--admin-muted); border: 2px solid var(--admin-line); }
+#influenza-admin-mock #admin-book-submit.is-booking-busy .admin-book-busy-warn { color: var(--admin-red); animation: adminBookPulse 1.5s ease-in-out infinite; }
 @keyframes adminBookPulse { 0%, 66.6% { opacity: 1; } 83.3% { opacity: .15; } 100% { opacity: 1; } }
-/* [検索ワード: adminBookToastAboveV1] 窓口予約の案内（日時未選択・氏名未入力・登録完了・登録失敗）は、「予約内容を確認」ボタンのすぐ上に、ボタンと同じ大きさで表示 */
+/* [検索ワード: adminBookToastAboveV1] 窓口予約の案内（日時未選択・氏名未入力・登録完了・登録失敗）は、「予約登録」ボタンのすぐ上に、ボタンと同じ大きさで表示 */
 #influenza-admin-mock #admin-book-toast { box-sizing: border-box; min-height: 46px; margin: 12px 0 10px; padding: 8px 14px; align-items: center; justify-content: center; flex-wrap: wrap; text-align: center; font-size: 16px; font-weight: 900; border: 2px solid var(--admin-green-dark); border-radius: 8px; }
 #influenza-admin-mock #admin-book-toast[data-show="true"] { display: flex; }
 #influenza-admin-mock #admin-book-toast[data-state="error"] { border-color: var(--admin-red); }
@@ -765,7 +767,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
                 class="admin-primary"
                 id="admin-book-submit"
                 type="submit">
-                予約内容を確認
+                予約登録
               </button>
 
               <p class="admin-form-note">
@@ -922,27 +924,27 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
   const bookSubmit =
     document.getElementById("admin-book-submit");
   // [検索ワード: adminBookingNoticeV1]
-  // 窓口予約の登録中は、ボタンを薄く・押せない状態にし、ボタンのすぐ上の赤枠に「登録中　操作しないでください」を出す（文字だけゆっくり点滅）
+  // 窓口予約の登録中は、「予約登録」ボタンを押せない2段表示にする（1段目：予約を登録しています。／2段目：赤字で 登録中　操作しないでください）
   function setBookingNotice(on) {
     if (!bookSubmit) return;
     bookSubmit.classList.toggle("is-booking-busy", !!on);
     if (on) {
-      bookToast.textContent = "";
-      const pulse = document.createElement("span");
-      pulse.className = "admin-book-pulse";
-      pulse.textContent = "登録中　操作しないでください";
-      bookToast.appendChild(pulse);
-      bookToast.dataset.state = "error";
-      bookToast.dataset.show = "true";
-    } else if (bookToast.querySelector(".admin-book-pulse")) {
-      // 登録中の表示が残っている時だけ消す（登録完了・失敗の案内に替わっていればそのまま残す）
-      bookToast.textContent = "";
+      bookSubmit.textContent = "";
+      const line1 = document.createElement("span");
+      line1.textContent = "予約を登録しています。";
+      const line2 = document.createElement("span");
+      line2.className = "admin-book-busy-warn";
+      line2.textContent = "登録中　操作しないでください";
+      bookSubmit.append(line1, line2);
+      // 上の案内（エラーなど）は登録中は消す
       bookToast.dataset.show = "false";
+    } else {
+      bookSubmit.textContent = "予約登録";
     }
   }
 
   // [検索ワード: adminBookToastAboveV1]
-  // 窓口予約の案内は「予約内容を確認」ボタンのすぐ上に出す（ボタンと同じ大きさ）。
+  // 窓口予約の案内は「予約登録」ボタンのすぐ上に出す（ボタンと同じ大きさ）。
   if (bookToast && bookSubmit) bookSubmit.insertAdjacentElement("beforebegin", bookToast);
   const BOOK_MSG_SLOT = "予約可能な日時を選択し、予約状況を再度呼び出してください。";
   const BOOK_MSG_NAME = "氏名を入力してください。";
@@ -2853,7 +2855,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
 
 
   // [検索ワード: adminBookEnterBlockV1]
-  // 窓口予約の入力欄でエンターを押しても登録確認を出さない。「予約内容を確認」ボタンを押したときだけ出す。
+  // 窓口予約の入力欄でエンターを押しても登録確認を出さない。「予約登録」ボタンを押したときだけ出す。
   // （日本語入力の変換確定のエンターには影響しない。備考欄の改行はそのまま使える）
   manualForm.addEventListener(
     "keydown",
@@ -2922,8 +2924,6 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
       if (!confirmed) return;
 
       bookSubmit.disabled = true;
-      bookSubmit.textContent =
-        "予約を登録しています。";
       setBookingNotice(true);
 
       const payload = {
@@ -2956,7 +2956,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
             ) {
               bookSubmit.disabled = false;
               bookSubmit.textContent =
-                "予約内容を確認";
+                "予約登録";
               setBookingNotice(false);
               bookToast.textContent =
                 result &&
@@ -2982,8 +2982,6 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
               "";
             bookToast.dataset.show =
               "true";
-            bookSubmit.textContent =
-              "登録済み（読み込み中…）";
             // ③ 選んだ日時も含め、窓口予約の入力欄を全部空にする（残った内容での二重登録防止）
             [
               "admin-book-date", "admin-book-time",
@@ -3017,7 +3015,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
             }
             bookSubmit.disabled = false;
             bookSubmit.textContent =
-              "予約内容を確認";
+              "予約登録";
             setBookingNotice(false);
             adminRefreshCalendarInBackground();
           }
@@ -3026,7 +3024,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
           error => {
             bookSubmit.disabled = false;
             bookSubmit.textContent =
-              "予約内容を確認";
+              "予約登録";
             setBookingNotice(false);
             bookToast.textContent =
               "予約登録に失敗しました：" +
