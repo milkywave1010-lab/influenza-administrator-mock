@@ -47,7 +47,7 @@ window.google={script:{run:new Proxy({},{get(_,k){return runner()[k];}})}};
  * - 2026.10.1 窓口予約：Enterキーで確認ポップが出ないよう変更（「予約内容を確認」ボタンを押した時のみ）
  * - 2026.10.1 窓口予約：選択した日時をEXECと同じカード表示（曜日付きの日時・枠ID）に変更
  * - 2026.10.1 窓口予約：登録できた1件をその場でカレンダーへ追加し、すぐ次の予約を入力できるよう変更。最新の読み直しは裏で行い、入力欄には触れない
- * - 2026.10.2 窓口予約：氏名だけ必須に変更。氏名が空・スペースのみの場合は「予約内容を確認」ボタンのすぐ上に「氏名を入力してください。」を大きく赤枠で表示して止める（確認ポップ・登録なし。氏名を打ち始めたら消える）。氏名欄に「必須」の印を追加。他の項目は任意のまま
+ * - 2026.10.2 窓口予約：氏名だけ必須に変更。氏名が空・スペースのみの場合は「予約内容を確認」ボタンのすぐ上に「氏名を入力してください。」をボタンと同じ大きさの赤枠で表示して止める（確認ポップ・登録なし。氏名を打ち始めたら消える）。氏名欄に「必須」の印を追加。他の項目は任意のまま
  * - 既存表記・既存レイアウトは無断変更しない
  -->
 <script id="admin-counter-selected-card-v1">
@@ -340,8 +340,8 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
 #influenza-admin-mock .admin-loading-notice[hidden] { display: none; }
 #influenza-admin-mock .admin-booking-notice { text-align: center; padding: 14px 8px; font-weight: 700; font-size: 18px; line-height: 1.6; color: var(--admin-red); }
 #influenza-admin-mock .admin-booking-notice[hidden] { display: none; }
-/* [検索ワード: adminBookNameRequiredV1] 氏名未入力の案内：「予約内容を確認」ボタンのすぐ上に大きく表示 */
-#influenza-admin-mock .admin-book-name-error { text-align: center; margin: 12px 0 10px; padding: 14px 8px; font-weight: 900; font-size: 22px; line-height: 1.5; color: var(--admin-red); background: #fdeeee; border: 2px solid var(--admin-red); border-radius: 10px; }
+/* [検索ワード: adminBookNameRequiredV1] 氏名未入力の案内：「予約内容を確認」ボタンのすぐ上に、ボタンと同じ大きさで表示 */
+#influenza-admin-mock .admin-book-name-error { display: flex; align-items: center; justify-content: center; box-sizing: border-box; min-height: 46px; text-align: center; margin: 12px 0 10px; padding: 8px 14px; font-weight: 900; font-size: 16px; color: var(--admin-red); background: #fdeeee; border: 2px solid var(--admin-red); border-radius: 8px; }
 #influenza-admin-mock .admin-book-name-error[hidden] { display: none; }
 #influenza-admin-mock #admin-book-submit.is-booking-hidden { display: none !important; }
 @media (max-width: 760px) { #influenza-admin-mock .admin-loading-notice span { display: block; } }
