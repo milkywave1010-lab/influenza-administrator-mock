@@ -50,7 +50,7 @@ window.google={script:{run:new Proxy({},{get(_,k){return runner()[k];}})}};
  * - 2026.10.2 窓口予約：氏名だけ必須に変更。氏名が空・スペースのみの場合は「氏名を入力してください。」を表示して止める（確認ポップ・登録なし。氏名を打ち始めたら消える）。氏名欄に「必須」の印を追加。他の項目は任意のまま
  * - 2026.10.2 窓口予約：ボタン名を「予約内容を確認」から「予約登録」へ変更
  * - 2026.10.2 窓口予約：案内（日時未選択・氏名未入力・登録完了・登録失敗）を、ボタンの下の小さい表示から、「予約登録」ボタンのすぐ上・ボタンと同じ大きさの枠表示（エラーは赤、完了は緑）へ変更
- * - 2026.10.2 窓口予約：登録中は「予約登録」ボタンを押せない2段表示に変更（1段目「予約を登録しています。」、2段目は赤字で「登録中　操作しないでください」。文字だけ1秒点灯・0.5秒で薄くなって戻る点滅）
+ * - 2026.10.2 窓口予約：登録中は「予約登録」ボタンを押せない2段表示に変更（ボタンの色・文字はそのまま、枠だけ縦に拡大。1段目「予約を登録しています」、2段目は薄い赤で「登録中　操作しないでください」を1秒点灯・0.5秒消灯の繰り返しで表示）
  * - 2026.10.2 窓口予約：画面が「未選択」なのに内部の初期値（今日の日付・最初の時間）で先へ進める不具合を修正。未選択のまま押した時は必ず「予約可能な日時を選択し、予約状況を再度呼び出してください。」で止める（日時を選ぶと消える）
  * - 既存表記・既存レイアウトは無断変更しない
  -->
@@ -342,10 +342,10 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
 /* [検索ワード: adminLoadingNoticeExecV1] EXECの #loading と同じ見た目（中央・赤・太字） */
 #influenza-admin-mock .admin-loading-notice { text-align: center; margin: 12px 0 4px; font-weight: 700; font-size: 18px; line-height: 1.6; color: var(--admin-red); }
 #influenza-admin-mock .admin-loading-notice[hidden] { display: none; }
-/* [検索ワード: adminBookingNoticeV1] 登録中：「予約登録」ボタンを押せない2段表示に変える。1段目「予約を登録しています。」、2段目は赤字で「登録中　操作しないでください」（文字だけ 1秒点灯 → 0.5秒でぼやっと薄くなって戻る を繰り返す）。赤字が読めるよう、登録中だけボタンを白っぽい色にする */
-#influenza-admin-mock #admin-book-submit.is-booking-busy { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; opacity: 1; cursor: default; background: var(--admin-surface-strong); color: var(--admin-muted); border: 2px solid var(--admin-line); }
-#influenza-admin-mock #admin-book-submit.is-booking-busy .admin-book-busy-warn { color: var(--admin-red); animation: adminBookPulse 1.5s ease-in-out infinite; }
-@keyframes adminBookPulse { 0%, 66.6% { opacity: 1; } 83.3% { opacity: .15; } 100% { opacity: 1; } }
+/* [検索ワード: adminBookingNoticeV1] 登録中：「予約登録」ボタンを押せない2段表示に変える。ボタンの色（緑）・文字（白・同じ大きさ）はそのままで、枠だけ縦に大きくする。1段目「予約を登録しています」、2段目は薄い赤（赤に白を足した色）で「登録中　操作しないでください」を 1秒点灯 → 0.5秒消灯 の繰り返しで表示 */
+#influenza-admin-mock #admin-book-submit.is-booking-busy { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 12px 14px; opacity: 1; cursor: default; }
+#influenza-admin-mock #admin-book-submit.is-booking-busy .admin-book-busy-warn { color: #ffb0b0; animation: adminBookBlink 1.5s step-end infinite; }
+@keyframes adminBookBlink { 0% { opacity: 1; } 66.667% { opacity: 0; } }
 /* [検索ワード: adminBookToastAboveV1] 窓口予約の案内（日時未選択・氏名未入力・登録完了・登録失敗）は、「予約登録」ボタンのすぐ上に、ボタンと同じ大きさで表示 */
 #influenza-admin-mock #admin-book-toast { box-sizing: border-box; min-height: 46px; margin: 12px 0 10px; padding: 8px 14px; align-items: center; justify-content: center; flex-wrap: wrap; text-align: center; font-size: 16px; font-weight: 900; border: 2px solid var(--admin-green-dark); border-radius: 8px; }
 #influenza-admin-mock #admin-book-toast[data-show="true"] { display: flex; }
@@ -924,14 +924,14 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
   const bookSubmit =
     document.getElementById("admin-book-submit");
   // [検索ワード: adminBookingNoticeV1]
-  // 窓口予約の登録中は、「予約登録」ボタンを押せない2段表示にする（1段目：予約を登録しています。／2段目：赤字で 登録中　操作しないでください）
+  // 窓口予約の登録中は、「予約登録」ボタンを押せない2段表示にする（1段目：予約を登録しています／2段目：薄い赤で 登録中　操作しないでください）
   function setBookingNotice(on) {
     if (!bookSubmit) return;
     bookSubmit.classList.toggle("is-booking-busy", !!on);
     if (on) {
       bookSubmit.textContent = "";
       const line1 = document.createElement("span");
-      line1.textContent = "予約を登録しています。";
+      line1.textContent = "予約を登録しています";
       const line2 = document.createElement("span");
       line2.className = "admin-book-busy-warn";
       line2.textContent = "登録中　操作しないでください";
