@@ -147,6 +147,8 @@ function app_adminSearchReservations(query) {
   }
 }
 return app_adminSearchReservations;})();
+/* 「4. グラフ」の見本：架空の接種済みデータ（2026年度240件・2025年度1000件・2024年度300件）を、本体（graph.gs）の集計にそのまま通した結果 */
+var MOCK_GRAPH={"ok":true,"source":"接種済み（自動）","cancelled":0,"noSlot":0,"seasons":[{"year":2026,"title":"2026年度","total":240,"range":"2026/9/24〜2026/10/5","sections":[{"name":"受付方法","type":"pie","rows":[{"label":"WEB","count":150,"percent":62.5,"color":"#9fc5e8"},{"label":"管理画面","count":90,"percent":37.5,"color":"#b6d7a8"}]},{"name":"診察券","type":"pie","rows":[{"label":"無","count":46,"percent":19.2,"color":"#ea9999"},{"label":"有","count":186,"percent":77.5,"color":"#9fc5e8"},{"label":"有（紛失）","count":8,"percent":3.3,"color":"#ffe599"}]},{"name":"性別","type":"pie","rows":[{"label":"男性","count":104,"percent":43.3,"color":"#9fc5e8"},{"label":"女性","count":136,"percent":56.7,"color":"#ea9999"}]},{"name":"住所分布","type":"bar","rows":[{"label":"練馬区","count":118,"percent":49.2},{"label":"杉並区","count":86,"percent":35.8},{"label":"中野区","count":9,"percent":3.8},{"label":"西東京市","count":7,"percent":2.9},{"label":"武蔵野市","count":6,"percent":2.5},{"label":"板橋区","count":4,"percent":1.7},{"label":"豊島区","count":3,"percent":1.3},{"label":"世田谷区","count":2,"percent":0.8},{"label":"新宿区","count":2,"percent":0.8},{"label":"三鷹市","count":1,"percent":0.4},{"label":"未記入","count":2,"percent":0.8}]},{"name":"年代","type":"bar","rows":[{"label":"10歳未満","count":6,"percent":2.5},{"label":"10代","count":9,"percent":3.8},{"label":"20代","count":12,"percent":5},{"label":"30代","count":18,"percent":7.5},{"label":"40代","count":24,"percent":10},{"label":"50代","count":31,"percent":12.9},{"label":"60代","count":38,"percent":15.8},{"label":"70代","count":52,"percent":21.7},{"label":"80代","count":39,"percent":16.3},{"label":"90歳以上","count":8,"percent":3.3},{"label":"未記入","count":3,"percent":1.3}],"note":"未記入 3件のうち、管理画面での受付：3件"}],"trend":{"prevYear":2025,"prevTitle":"2025年度","untilLabel":"10/5","count":240,"prevCount":198,"prevTotal":1000,"diffCount":42,"rate":121.2,"same":1,"up":[{"section":"受付方法","label":"WEB","diff":7.5},{"section":"住所分布","label":"杉並区","diff":2.6},{"section":"年代","label":"70代","diff":2.2}],"down":[{"section":"受付方法","label":"管理画面","diff":-7.5},{"section":"診察券","label":"無","diff":-2.8},{"section":"住所分布","label":"練馬区","diff":-1.8}],"tables":[{"name":"受付方法","type":"pie","rows":[{"label":"WEB","now":62.5,"prev":55,"diff":7.5},{"label":"管理画面","now":37.5,"prev":45,"diff":-7.5}]},{"name":"診察券","type":"pie","rows":[{"label":"無","now":19.2,"prev":22,"diff":-2.8},{"label":"有","now":77.5,"prev":75.5,"diff":2},{"label":"有（紛失）","now":3.3,"prev":2.5,"diff":0.8}]},{"name":"性別","type":"pie","rows":[{"label":"男性","now":43.3,"prev":44.1,"diff":-0.8},{"label":"女性","now":56.7,"prev":55.9,"diff":0.8}]},{"name":"住所分布","type":"bar","rows":[{"label":"練馬区","now":49.2,"prev":51,"diff":-1.8},{"label":"杉並区","now":35.8,"prev":33.2,"diff":2.6},{"label":"中野区","now":3.8,"prev":4.1,"diff":-0.3},{"label":"西東京市","now":2.9,"prev":2.4,"diff":0.5},{"label":"武蔵野市","now":2.5,"prev":2.9,"diff":-0.4},{"label":"板橋区","now":1.7,"prev":1.5,"diff":0.2},{"label":"豊島区","now":1.3,"prev":1.6,"diff":-0.3},{"label":"世田谷区","now":0.8,"prev":0.9,"diff":-0.1},{"label":"新宿区","now":0.8,"prev":0.6,"diff":0.2},{"label":"三鷹市","now":0.4,"prev":0.7,"diff":-0.3},{"label":"未記入","now":0.8,"prev":1.1,"diff":-0.3}]},{"name":"年代","type":"bar","rows":[{"label":"10歳未満","now":2.5,"prev":3.1,"diff":-0.6},{"label":"10代","now":3.8,"prev":4.4,"diff":-0.6},{"label":"20代","now":5,"prev":4.6,"diff":0.4},{"label":"30代","now":7.5,"prev":8.3,"diff":-0.8},{"label":"40代","now":10,"prev":11.2,"diff":-1.2},{"label":"50代","now":12.9,"prev":12.1,"diff":0.8},{"label":"60代","now":15.8,"prev":17,"diff":-1.2},{"label":"70代","now":21.7,"prev":19.5,"diff":2.2},{"label":"80代","now":16.3,"prev":15.4,"diff":0.9},{"label":"90歳以上","now":3.3,"prev":3,"diff":0.3},{"label":"未記入","now":1.3,"prev":1.4,"diff":-0.1}]}]}},{"year":2025,"title":"2025年度","total":1000,"range":"2025/10/1〜2026/1/10","sections":[{"name":"受付方法","type":"pie","rows":[{"label":"WEB","count":550,"percent":55,"color":"#9fc5e8"},{"label":"窓口","count":450,"percent":45,"color":"#b6d7a8"}]},{"name":"診察券","type":"pie","rows":[{"label":"無","count":220,"percent":22,"color":"#ea9999"},{"label":"有","count":755,"percent":75.5,"color":"#9fc5e8"},{"label":"有（紛失）","count":25,"percent":2.5,"color":"#ffe599"}]},{"name":"性別","type":"pie","rows":[{"label":"男性","count":441,"percent":44.1,"color":"#9fc5e8"},{"label":"女性","count":559,"percent":55.9,"color":"#ea9999"}]},{"name":"住所分布","type":"bar","rows":[{"label":"練馬区","count":510,"percent":51},{"label":"杉並区","count":332,"percent":33.2},{"label":"中野区","count":41,"percent":4.1},{"label":"武蔵野市","count":29,"percent":2.9},{"label":"西東京市","count":24,"percent":2.4},{"label":"豊島区","count":16,"percent":1.6},{"label":"板橋区","count":15,"percent":1.5},{"label":"世田谷区","count":9,"percent":0.9},{"label":"三鷹市","count":7,"percent":0.7},{"label":"新宿区","count":6,"percent":0.6},{"label":"未記入","count":11,"percent":1.1}]},{"name":"年代","type":"bar","rows":[{"label":"10歳未満","count":31,"percent":3.1},{"label":"10代","count":44,"percent":4.4},{"label":"20代","count":46,"percent":4.6},{"label":"30代","count":83,"percent":8.3},{"label":"40代","count":112,"percent":11.2},{"label":"50代","count":121,"percent":12.1},{"label":"60代","count":170,"percent":17},{"label":"70代","count":195,"percent":19.5},{"label":"80代","count":154,"percent":15.4},{"label":"90歳以上","count":30,"percent":3},{"label":"未記入","count":14,"percent":1.4}],"note":"未記入 14件のうち、窓口での受付：8件"}],"trend":{"prevYear":2024,"prevTitle":"2024年度","untilLabel":"1/10","count":1000,"prevCount":300,"prevTotal":300,"diffCount":700,"rate":333.3,"same":1,"up":[{"section":"受付方法","label":"WEB","diff":15},{"section":"診察券","label":"有","diff":3.8},{"section":"住所分布","label":"武蔵野市","diff":2.9}],"down":[{"section":"受付方法","label":"窓口","diff":-15},{"section":"診察券","label":"無","diff":-4.7},{"section":"性別","label":"男性","diff":-2.6}],"tables":[{"name":"受付方法","type":"pie","rows":[{"label":"WEB","now":55,"prev":40,"diff":15},{"label":"窓口","now":45,"prev":60,"diff":-15}]},{"name":"診察券","type":"pie","rows":[{"label":"無","now":22,"prev":26.7,"diff":-4.7},{"label":"有","now":75.5,"prev":71.7,"diff":3.8},{"label":"有（紛失）","now":2.5,"prev":1.7,"diff":0.8}]},{"name":"性別","type":"pie","rows":[{"label":"男性","now":44.1,"prev":46.7,"diff":-2.6},{"label":"女性","now":55.9,"prev":53.3,"diff":2.6}]},{"name":"住所分布","type":"bar","rows":[{"label":"練馬区","now":51,"prev":53.3,"diff":-2.3},{"label":"杉並区","now":33.2,"prev":33.3,"diff":-0.1},{"label":"中野区","now":4.1,"prev":6.7,"diff":-2.6},{"label":"武蔵野市","now":2.9,"prev":0,"diff":2.9},{"label":"西東京市","now":2.4,"prev":0,"diff":2.4},{"label":"豊島区","now":1.6,"prev":0,"diff":1.6},{"label":"板橋区","now":1.5,"prev":0,"diff":1.5},{"label":"世田谷区","now":0.9,"prev":0,"diff":0.9},{"label":"三鷹市","now":0.7,"prev":0,"diff":0.7},{"label":"新宿区","now":0.6,"prev":0,"diff":0.6},{"label":"未記入","now":1.1,"prev":6.7,"diff":-5.6}]},{"name":"年代","type":"bar","rows":[{"label":"10歳未満","now":3.1,"prev":3.3,"diff":-0.2},{"label":"10代","now":4.4,"prev":3.3,"diff":1.1},{"label":"20代","now":4.6,"prev":6.7,"diff":-2.1},{"label":"30代","now":8.3,"prev":10,"diff":-1.7},{"label":"40代","now":11.2,"prev":13.3,"diff":-2.1},{"label":"50代","now":12.1,"prev":13.3,"diff":-1.2},{"label":"60代","now":17,"prev":16.7,"diff":0.3},{"label":"70代","now":19.5,"prev":16.7,"diff":2.8},{"label":"80代","now":15.4,"prev":13.3,"diff":2.1},{"label":"90歳以上","now":3,"prev":1.7,"diff":1.3},{"label":"未記入","now":1.4,"prev":1.7,"diff":-0.3}]}]}},{"year":2024,"title":"2024年度","total":300,"range":"2024/10/10〜2024/12/10","sections":[{"name":"受付方法","type":"pie","rows":[{"label":"WEB","count":120,"percent":40,"color":"#9fc5e8"},{"label":"窓口","count":180,"percent":60,"color":"#b6d7a8"}]},{"name":"診察券","type":"pie","rows":[{"label":"無","count":80,"percent":26.7,"color":"#ea9999"},{"label":"有","count":215,"percent":71.7,"color":"#9fc5e8"},{"label":"有（紛失）","count":5,"percent":1.7,"color":"#ffe599"}]},{"name":"性別","type":"pie","rows":[{"label":"男性","count":140,"percent":46.7,"color":"#9fc5e8"},{"label":"女性","count":160,"percent":53.3,"color":"#ea9999"}]},{"name":"住所分布","type":"bar","rows":[{"label":"練馬区","count":160,"percent":53.3},{"label":"杉並区","count":100,"percent":33.3},{"label":"中野区","count":20,"percent":6.7},{"label":"未記入","count":20,"percent":6.7}]},{"name":"年代","type":"bar","rows":[{"label":"10歳未満","count":10,"percent":3.3},{"label":"10代","count":10,"percent":3.3},{"label":"20代","count":20,"percent":6.7},{"label":"30代","count":30,"percent":10},{"label":"40代","count":40,"percent":13.3},{"label":"50代","count":40,"percent":13.3},{"label":"60代","count":50,"percent":16.7},{"label":"70代","count":50,"percent":16.7},{"label":"80代","count":40,"percent":13.3},{"label":"90歳以上","count":5,"percent":1.7},{"label":"未記入","count":5,"percent":1.7}],"note":"未記入 5件のうち、窓口での受付：3件"}],"trend":null}]};
 function respond(name,args){
  if(name==='api_getAdminDashboard'){var keys=args[0]||[];return {ok:true,slots:slotsFor(keys),data:rows.filter(function(r){return keys.indexOf(r[1].slice(2,10))>=0;}),marks:marksFor(keys),schedule:{times:times,activeTimes:times,collapseInactive:false,intervalMinutes:30,startTime:'09:30',endTime:'17:00'}};}
  if(name==='api_getReservations')return {ok:true,data:rows.filter(function(r){return r[1].slice(2,10)===args[0];})};
@@ -166,6 +168,7 @@ function respond(name,args){
  if(name==='app_adminSaveBaseSettings')return {ok:true,base:Object.assign(ST.base,args[0])};
  if(name==='app_adminSaveBaseSchedule')return {ok:true,schedule:ST.schedule};
  if(name==='app_adminSearchReservations')return mockSearch(args[0]);
+ if(name==='app_adminGetGraphData'){var g=JSON.parse(JSON.stringify(MOCK_GRAPH));var gn=new Date();g.generatedAt=gn.getFullYear()+'/'+(gn.getMonth()+1)+'/'+gn.getDate()+' '+gn.getHours()+':'+p2(gn.getMinutes());return g;}
  return NO;
 }
 function runner(){var s=function(){},f=function(){};var p=new Proxy({},{get:function(_,k){if(k==='withSuccessHandler')return function(h){s=h;return p;};if(k==='withFailureHandler')return function(h){f=h;return p;};if(k==='withUserObject')return function(){return p;};
@@ -225,6 +228,7 @@ window.google={script:{run:new Proxy({},{get:function(_,k){return runner()[k];}}
  * - 2026.10.6 予約状況：「患者情報一覧」の上に「予約を検索」の窓を追加。入れた文字が予約シートのどこか（氏名・ふりがな・生年月日・住所・電話番号・診察券番号・予約ID・受付担当・備考など全項目）に含まれている予約を一覧で出す（シートの Ctrl+F と同じ考え方。空白の有無・全角と半角・ひらがなとカタカナ・ハイフンの有無は気にしなくてよい）。探すのは予約シートだけ。「検索」ボタンか Enter で探す（1文字ごとには探さない）。結果を押すと、その予約の週を読み込み、カレンダーの患者名を押したときと同じ動きで患者カードへ移動する（状態の絞り込みは「すべて」に戻す）。「消す」で窓と結果を空にする。今までの表示・動きは変更なし（窓を足しただけ）[検索ワード: adminReservationSearchV1]
  * - 2026.10.6 予約状況：「予約を検索」の見た目をモックで決めた形に変更。検索の枠全体を太い黒縁にして患者一覧との境目をはっきりさせる／「予約を検索」の文字を「患者情報一覧」と同じ大きさ・太さ・色にする／入力欄は、選んだとき（カーソルを入れたとき）も太い黒線にせず細い緑の線にする。動きは変更なし [検索ワード: adminReservationSearchV1]
  * - 2026.10.6 予約状況：右の枠の並びをモックで決めた形に変更。もともと「患者情報一覧」があった見出しの場所を「予約を検索」にし、そのすぐ下に黒縁の検索の枠（入力欄・検索・消す・結果。枠の中の「予約を検索」の文字は無くす）、その下に「患者情報一覧」の見出し、その下に〇月〇日の予約一覧、の順にする（検索の上に「一覧」の文字があると違和感があるため）。窓口予約タブは今までどおり（見出しは「患者情報入力」。検索は出さない）。動きは変更なし [検索ワード: adminReservationSearchV1]
+ * - 2026.10.6 上のボタンに「4. グラフ」を追加（紫のボタン。PCは4つ横並び、スマホは今までどおり縦に積み、スクロールすると選んでいるボタンだけ残る）。押すと、「接種済み（自動）」の集計を年度ごとに表示する：受付方法・診察券・性別（輪の形の円グラフ）、住所分布・年代（横棒）、傾向（1つ前の年度との比較：同じ日までの件数の差、割合が大きく増えた・減った項目、項目ごとの割合の差）。年度は右上のボタンで切り替え（新しい年度のデータが入ると自動でボタンが増える）。数字は「グラフ」シートと同じ集計で、件数と割合だけ（氏名・電話番号・番地は出ない）。読み込みは「4. グラフ」を開いたときだけで、ほかの3つの画面の読み込みは増えない。サーバー側は graph.gs の app_adminGetGraphData [検索ワード: adminGraphTabV1]
  * - 既存表記・既存レイアウトは無断変更しない
  -->
 <script id="admin-counter-selected-card-v1">
@@ -6575,5 +6579,363 @@ DEVスマホ上部3タブ：EXECと同じsticky位置を維持するため、親
     const item = lastResults[Number(button.dataset.resvSearchIndex)];
     if (item) jumpTo(item, button);
   });
+})();
+</script>
+
+<!--
+[検索ワード: adminGraphTabV1] 2026.10.6
+上のボタンに「4. グラフ」を追加。「接種済み（自動）」の集計（「グラフ」シートと同じ数字）を、年度ごとに画面で見られる。
+-->
+<style id="admin-graph-tab-v1">
+/* 上のボタンを4つ並べる（PC。900px以下は今までどおり縦に積む） */
+@media(min-width:900.01px){#influenza-admin-mock .admin-main-tabs{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+#influenza-admin-mock .admin-main-tab[data-admin-tab="graph"][aria-selected="false"]{background:#f1ecf8!important;border-color:#cfc3e3!important;color:#5b4688!important}
+#influenza-admin-mock .admin-main-tab[data-admin-tab="graph"][aria-selected="true"]{background:#6b4f93!important;border-color:#6b4f93!important;color:#fff!important}
+/* 「4. グラフ」を開いている間は、上のボタンとグラフのページだけを出す（aria-hidden の目印は、スマホで上のボタンをたたむ計算に使うので消さない） */
+#influenza-admin-mock[data-admin-graph-tab="on"] .admin-main > :not(.admin-main-tabs):not(.admin-graph-page):not([aria-hidden="true"]){display:none!important}
+#influenza-admin-mock .admin-graph-page{display:none}
+#influenza-admin-mock[data-admin-graph-tab="on"] .admin-graph-page{display:block}
+#influenza-admin-mock .admin-graph-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin:6px 0 14px}
+#influenza-admin-mock .admin-graph-head h2{margin:0;font-size:22px;font-weight:900;color:var(--admin-text)}
+#influenza-admin-mock .admin-graph-head p{margin:0;color:var(--admin-muted);font-size:14px}
+#influenza-admin-mock .admin-graph-seasons{display:flex;flex-wrap:wrap;gap:8px;margin-left:auto}
+#influenza-admin-mock .admin-graph-seasons button{min-height:40px;padding:0 18px;border-radius:999px;border:1px solid var(--admin-line);background:var(--admin-surface-strong);color:var(--admin-text);font:inherit;font-size:15px;font-weight:800;cursor:pointer}
+#influenza-admin-mock .admin-graph-seasons button[aria-pressed="true"]{background:var(--admin-green);border-color:var(--admin-green);color:#fff}
+#influenza-admin-mock .admin-graph-message{margin:18px 0;padding:16px 18px;border:1px solid var(--admin-line);border-radius:12px;background:var(--admin-surface-strong);color:var(--admin-text);font-size:16px}
+#influenza-admin-mock .admin-graph-message.is-error{border-color:var(--admin-red);color:var(--admin-red);background:var(--admin-red-soft)}
+#influenza-admin-mock .admin-graph-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+#influenza-admin-mock .admin-graph-card{grid-column:span 2;min-width:0;background:var(--admin-surface-strong);border:1px solid var(--admin-line);border-radius:12px;padding:16px 18px;box-shadow:var(--admin-shadow)}
+#influenza-admin-mock .admin-graph-card.is-wide{grid-column:span 3}
+#influenza-admin-mock .admin-graph-card.is-trend{grid-column:1/-1}
+#influenza-admin-mock .admin-graph-card h3{margin:0 0 12px;font-size:18px;font-weight:900;color:var(--admin-green-dark)}
+#influenza-admin-mock .admin-graph-pie{display:flex;align-items:center;gap:18px}
+#influenza-admin-mock .admin-graph-donut{width:150px;height:150px;flex:none}
+#influenza-admin-mock .admin-graph-donut-num{font-size:34px;font-weight:900;fill:var(--admin-text)}
+#influenza-admin-mock .admin-graph-donut-unit{font-size:15px;fill:var(--admin-muted)}
+#influenza-admin-mock .admin-graph-legend,#influenza-admin-mock .admin-graph-bars{list-style:none;margin:0;padding:0;flex:1;min-width:0}
+#influenza-admin-mock .admin-graph-legend li{display:grid;grid-template-columns:16px minmax(0,1fr) auto 56px;align-items:center;gap:8px;padding:7px 0;border-bottom:1px dashed var(--admin-line);font-size:16px}
+#influenza-admin-mock .admin-graph-legend li:last-child{border-bottom:0}
+#influenza-admin-mock .admin-graph-dot{width:14px;height:14px;border-radius:4px;display:block}
+#influenza-admin-mock .admin-graph-name{min-width:0;overflow-wrap:anywhere}
+#influenza-admin-mock .admin-graph-pct{color:var(--admin-muted);text-align:right;font-variant-numeric:tabular-nums}
+#influenza-admin-mock .admin-graph-bars li{display:grid;grid-template-columns:minmax(86px,auto) minmax(0,1fr) 58px 56px;align-items:center;gap:8px;padding:5px 0;font-size:15px}
+#influenza-admin-mock .admin-graph-bars b,#influenza-admin-mock .admin-graph-legend b{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+#influenza-admin-mock .admin-graph-track{display:block;height:16px;border-radius:8px;background:var(--admin-green-soft);overflow:hidden}
+#influenza-admin-mock .admin-graph-fill{display:block;height:100%;border-radius:8px;background:var(--admin-green)}
+#influenza-admin-mock .admin-graph-note{margin:8px 0 0;font-size:13px;color:var(--admin-muted)}
+#influenza-admin-mock .admin-graph-count{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}
+#influenza-admin-mock .admin-graph-count>div{border:1px solid var(--admin-line);border-radius:10px;padding:10px 14px;background:var(--admin-surface)}
+#influenza-admin-mock .admin-graph-count span{display:block;font-size:13px;color:var(--admin-muted)}
+#influenza-admin-mock .admin-graph-count b{font-size:26px;font-weight:900;color:var(--admin-text)}
+#influenza-admin-mock .admin-graph-count em{font-style:normal;font-size:14px;color:var(--admin-muted);margin-left:10px}
+#influenza-admin-mock .admin-graph-count b.is-up{color:var(--admin-red)}
+#influenza-admin-mock .admin-graph-count b.is-down{color:var(--admin-blue)}
+#influenza-admin-mock .admin-graph-moves{display:grid;gap:8px;margin-bottom:16px}
+#influenza-admin-mock .admin-graph-moves>div{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+#influenza-admin-mock .admin-graph-moves-label{flex:none;width:96px;font-size:14px;font-weight:800;color:var(--admin-text)}
+#influenza-admin-mock .admin-graph-chip{display:inline-block;padding:5px 12px;border-radius:999px;font-size:14px;font-weight:800}
+#influenza-admin-mock .admin-graph-chip.is-up{background:var(--admin-red-soft);color:var(--admin-red)}
+#influenza-admin-mock .admin-graph-chip.is-down{background:#e6f0f7;color:var(--admin-blue)}
+#influenza-admin-mock .admin-graph-chip.is-none{background:transparent;color:var(--admin-muted);font-weight:500;padding-left:0}
+#influenza-admin-mock .admin-graph-tgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px}
+#influenza-admin-mock .admin-graph-ttable{margin-bottom:14px}
+#influenza-admin-mock .admin-graph-ttable h4{margin:0 0 4px;font-size:15px;font-weight:900;color:var(--admin-green-dark)}
+#influenza-admin-mock .admin-graph-trow{display:grid;grid-template-columns:minmax(0,1fr) 64px 64px 78px;gap:8px;align-items:center;padding:5px 0;border-bottom:1px dashed var(--admin-line);font-size:15px}
+#influenza-admin-mock .admin-graph-trow>*{text-align:right;font-variant-numeric:tabular-nums}
+#influenza-admin-mock .admin-graph-trow .admin-graph-tname{text-align:left;min-width:0;overflow-wrap:anywhere}
+#influenza-admin-mock .admin-graph-thead{font-size:12px;color:var(--admin-muted);border-bottom:1px solid var(--admin-line)}
+#influenza-admin-mock .admin-graph-thead span{white-space:nowrap}
+#influenza-admin-mock .admin-graph-tprev{color:var(--admin-muted)}
+#influenza-admin-mock .admin-graph-diff{font-weight:800;white-space:nowrap}
+#influenza-admin-mock .admin-graph-diff.is-up{color:var(--admin-red)}
+#influenza-admin-mock .admin-graph-diff.is-down{color:var(--admin-blue)}
+#influenza-admin-mock .admin-graph-diff.is-same{color:var(--admin-muted);font-weight:500}
+#influenza-admin-mock .admin-graph-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:10px 14px;margin:14px 0 4px;color:var(--admin-muted);font-size:13px}
+#influenza-admin-mock .admin-graph-foot button{min-height:38px;padding:0 16px;border-radius:8px;border:1px solid var(--admin-line);background:var(--admin-surface-strong);color:var(--admin-text);font:inherit;font-size:14px;font-weight:800;cursor:pointer}
+#influenza-admin-mock .admin-graph-foot button:disabled{opacity:.55;cursor:default}
+@media(max-width:1100px){
+  #influenza-admin-mock .admin-graph-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #influenza-admin-mock .admin-graph-card{grid-column:auto}
+  #influenza-admin-mock .admin-graph-card.is-wide,#influenza-admin-mock .admin-graph-card.is-trend{grid-column:1/-1}
+}
+@media(max-width:900px){
+  #influenza-admin-mock .admin-graph-tgrid{grid-template-columns:1fr;gap:4px}
+}
+@media(max-width:760px){
+  #influenza-admin-mock .admin-graph-grid{grid-template-columns:1fr}
+  #influenza-admin-mock .admin-graph-card,#influenza-admin-mock .admin-graph-card.is-wide{grid-column:auto;padding:14px}
+  #influenza-admin-mock .admin-graph-head h2{font-size:20px}
+  #influenza-admin-mock .admin-graph-seasons{margin-left:0;width:100%}
+  #influenza-admin-mock .admin-graph-seasons button{flex:1 1 40%}
+  #influenza-admin-mock .admin-graph-pie{gap:12px}
+  #influenza-admin-mock .admin-graph-donut{width:104px;height:104px}
+  #influenza-admin-mock .admin-graph-legend li{font-size:14px;gap:6px;grid-template-columns:12px minmax(0,1fr) auto 46px}
+  #influenza-admin-mock .admin-graph-dot{width:12px;height:12px}
+  #influenza-admin-mock .admin-graph-bars li{grid-template-columns:minmax(76px,auto) minmax(0,1fr) 50px 50px;font-size:14px}
+  #influenza-admin-mock .admin-graph-count{grid-template-columns:1fr 1fr}
+  #influenza-admin-mock .admin-graph-count>div:last-child{grid-column:1/-1}
+  #influenza-admin-mock .admin-graph-count b{font-size:22px}
+  #influenza-admin-mock .admin-graph-moves-label{width:100%}
+  #influenza-admin-mock .admin-graph-trow{grid-template-columns:minmax(0,1fr) 60px 60px 72px;font-size:14px}
+  #influenza-admin-mock .admin-graph-thead{font-size:11px}
+}
+</style>
+<script id="admin-graph-tab-v1-script">
+/* [検索ワード: adminGraphTabV1]
+ * 上のボタンに「4. グラフ」を足し、押すとグラフのページを出す。
+ * ・数字はサーバー側（graph.gs の app_adminGetGraphData）が返す。「グラフ」シートと同じ集計で、件数と割合だけ（氏名・電話番号・番地は来ない）。
+ * ・読むのは「4. グラフ」を開いたときだけ（ほかの3つの画面の読み込みは増えない）。開き直したとき、前に読んでから10分たっていれば読み直す。
+ * ・年度のボタンで切り替える。傾向は「選んだ年度」と「その1つ前の年度」の比較。
+ * ・今ある処理には手を入れていない。「4. グラフ」を押すと、今ある処理は予約状況の表示に戻すが、その上からグラフのページだけを見せている。
+ */
+(() => {
+  const root = document.getElementById('influenza-admin-mock');
+  if (!root || root.dataset.adminGraphTabV1 === 'true') return;
+  const tabs = root.querySelector('.admin-main-tabs');
+  if (!tabs || !tabs.parentNode) return;
+  root.dataset.adminGraphTabV1 = 'true';
+
+  const REFRESH_MS = 10 * 60 * 1000;
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'admin-main-tab';
+  button.setAttribute('role', 'tab');
+  button.dataset.adminTab = 'graph';
+  button.setAttribute('aria-selected', 'false');
+  button.textContent = '4. グラフ';
+  tabs.appendChild(button);
+
+  const page = document.createElement('section');
+  page.className = 'admin-graph-page';
+  tabs.parentNode.insertBefore(page, tabs.nextSibling);
+
+  let data = null;
+  let loading = false;
+  let errorText = '';
+  let loadedAt = 0;
+  let selectedYear = null;
+
+  const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const num = v => Number(v || 0).toLocaleString('ja-JP');
+  const pct = v => { const n = Number(v || 0); return (Math.round(n * 10) % 10 === 0 ? String(Math.round(n)) : n.toFixed(1)) + '%'; };
+  const pct1 = v => Number(v || 0).toFixed(1) + '%';
+  const signed = v => { const n = Number(v || 0); return (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(n).toFixed(1); };
+
+  // スマホでは、選んでいないボタンに「はこちら」を付ける（ほかの3つのボタンと同じ決まり）
+  const phoneDevice = /iPhone|iPod|Android.*Mobile/i.test(navigator.userAgent || '');
+  function syncLabel() {
+    const mobile = phoneDevice && window.matchMedia('(max-width:760px)').matches;
+    const selected = button.getAttribute('aria-selected') === 'true';
+    button.textContent = mobile && !selected ? '4. グラフはこちら' : '4. グラフ';
+    // 「4. グラフ」を選んだ直後は、ほかの3つのボタンの名前がまだ選択中の形のままなので、「はこちら」を付ける
+    // （ほかの3つを押したときの名前の切り替えは、今ある処理がやる）
+    if (mobile && selected) {
+      tabs.querySelectorAll('.admin-main-tab').forEach(other => {
+        if (other === button || other.getAttribute('aria-selected') === 'true') return;
+        const text = other.textContent;
+        if (text && text.slice(-4) !== 'はこちら') other.textContent = text + 'はこちら';
+      });
+    }
+  }
+
+  function arcPath(cx, cy, rOuter, rInner, a0, a1) {
+    const pt = (a, r) => [(cx + r * Math.sin(a)).toFixed(2), (cy - r * Math.cos(a)).toFixed(2)];
+    const large = (a1 - a0) > Math.PI ? 1 : 0;
+    const p0 = pt(a0, rOuter), p1 = pt(a1, rOuter), p2 = pt(a1, rInner), p3 = pt(a0, rInner);
+    return 'M' + p0[0] + ',' + p0[1] + 'A' + rOuter + ',' + rOuter + ' 0 ' + large + ' 1 ' + p1[0] + ',' + p1[1] +
+      'L' + p2[0] + ',' + p2[1] + 'A' + rInner + ',' + rInner + ' 0 ' + large + ' 0 ' + p3[0] + ',' + p3[1] + 'Z';
+  }
+
+  function donutSvg(section, total) {
+    const rows = (section.rows || []).filter(r => Number(r.count) > 0);
+    let paths = '';
+    if (!rows.length || !(total > 0)) {
+      paths = '<circle cx="100" cy="100" r="75" fill="none" stroke="#e7e2d6" stroke-width="42"/>';
+    } else {
+      let angle = 0;
+      rows.forEach(r => {
+        const span = Number(r.count) / total * Math.PI * 2;
+        const tip = '<title>' + esc(r.label) + '：' + num(r.count) + '件（' + pct(r.percent) + '）</title>';
+        const color = esc(r.color || '#b7b7b7');
+        if (span >= Math.PI * 2 - 0.0001) {
+          // 1つの項目だけで全部のとき（円を半分ずつ2回描く）
+          paths += '<path d="' + arcPath(100, 100, 96, 54, 0, Math.PI) + '" fill="' + color + '">' + tip + '</path>' +
+                   '<path d="' + arcPath(100, 100, 96, 54, Math.PI, Math.PI * 2) + '" fill="' + color + '">' + tip + '</path>';
+        } else {
+          paths += '<path d="' + arcPath(100, 100, 96, 54, angle, angle + span) + '" fill="' + color + '" stroke="#fff" stroke-width="2">' + tip + '</path>';
+        }
+        angle += span;
+      });
+    }
+    return '<svg viewBox="0 0 200 200" class="admin-graph-donut" role="img" aria-label="' + esc(section.name) + 'の円グラフ">' + paths +
+      '<text x="100" y="96" text-anchor="middle" class="admin-graph-donut-num">' + num(total) + '</text>' +
+      '<text x="100" y="118" text-anchor="middle" class="admin-graph-donut-unit">件</text></svg>';
+  }
+
+  function pieCard(section, total) {
+    const legend = (section.rows || []).map(r =>
+      '<li><span class="admin-graph-dot" style="background:' + esc(r.color || '#b7b7b7') + '"></span>' +
+      '<span class="admin-graph-name">' + esc(r.label) + '</span><b>' + num(r.count) + '件</b>' +
+      '<span class="admin-graph-pct">' + pct(r.percent) + '</span></li>').join('');
+    return '<article class="admin-graph-card"><h3>' + esc(section.name) + '</h3><div class="admin-graph-pie">' +
+      donutSvg(section, total) + '<ul class="admin-graph-legend">' + legend + '</ul></div></article>';
+  }
+
+  function barCard(section) {
+    const rows = section.rows || [];
+    const max = rows.reduce((m, r) => Math.max(m, Number(r.count) || 0), 0);
+    const items = rows.map(r => {
+      const width = max > 0 && Number(r.count) > 0 ? Math.max(1, Number(r.count) / max * 100) : 0;
+      return '<li title="' + esc(r.label) + '：' + num(r.count) + '件（' + pct(r.percent) + '）"><span class="admin-graph-name">' + esc(r.label) + '</span>' +
+        '<span class="admin-graph-track"><span class="admin-graph-fill" style="width:' + width.toFixed(2) + '%"></span></span>' +
+        '<b>' + num(r.count) + '件</b><span class="admin-graph-pct">' + pct(r.percent) + '</span></li>';
+    }).join('');
+    return '<article class="admin-graph-card is-wide"><h3>' + esc(section.name) + '</h3><ul class="admin-graph-bars">' + items + '</ul>' +
+      (section.note ? '<p class="admin-graph-note">' + esc(section.note) + '</p>' : '') + '</article>';
+  }
+
+  function diffCell(diff, same) {
+    const d = Number(diff || 0);
+    if (Math.abs(d) < same) return '<span class="admin-graph-diff is-same">→ ' + signed(d) + '</span>';
+    return d > 0
+      ? '<span class="admin-graph-diff is-up">▲ ' + signed(d) + '</span>'
+      : '<span class="admin-graph-diff is-down">▼ ' + signed(d) + '</span>';
+  }
+
+  function trendTable(table, season, trend) {
+    const rows = (table.rows || []).map(r =>
+      '<div class="admin-graph-trow"><span class="admin-graph-tname">' + esc(r.label) + '</span><b>' + pct1(r.now) + '</b>' +
+      '<span class="admin-graph-tprev">' + pct1(r.prev) + '</span>' + diffCell(r.diff, trend.same) + '</div>').join('');
+    return '<div class="admin-graph-ttable"><h4>' + esc(table.name) + '</h4>' +
+      '<div class="admin-graph-trow admin-graph-thead"><span></span><span>' + esc(season.title) + '</span><span>' + esc(trend.prevTitle) + '</span><span>差</span></div>' +
+      rows + '</div>';
+  }
+
+  function trendCard(season) {
+    const trend = season.trend;
+    if (!trend) {
+      return '<article class="admin-graph-card is-trend"><h3>傾向</h3><p class="admin-graph-note">' +
+        esc(season.title) + 'より前の年度のデータがないため、比較はありません。</p></article>';
+    }
+    const same = Number(trend.same || 1);
+    const diffCount = Number(trend.diffCount || 0);
+    const diffClass = diffCount > 0 ? 'is-up' : diffCount < 0 ? 'is-down' : '';
+    const diffMark = diffCount > 0 ? '▲ +' : diffCount < 0 ? '▼ −' : '→ ±';
+    const rateText = trend.rate == null ? '' : '<em>' + esc(trend.prevTitle) + 'の ' + pct1(trend.rate) + '</em>';
+    const chips = (list, cls) => (list && list.length)
+      ? list.map(r => '<span class="admin-graph-chip ' + cls + '">' + esc(r.section) + '：' + esc(r.label) + ' ' + signed(r.diff) + '</span>').join('')
+      : '<span class="admin-graph-chip is-none">' + same.toFixed(1) + ' 以上動いた項目はありません</span>';
+    const pieTables = (trend.tables || []).filter(t => t.type === 'pie');
+    const barTables = (trend.tables || []).filter(t => t.type !== 'pie');
+    const columns = [];
+    if (pieTables.length) columns.push('<div>' + pieTables.map(t => trendTable(t, season, trend)).join('') + '</div>');
+    barTables.forEach(t => columns.push('<div>' + trendTable(t, season, trend) + '</div>'));
+    return '<article class="admin-graph-card is-trend"><h3>傾向（' + esc(trend.prevTitle) + 'との比較）</h3>' +
+      '<div class="admin-graph-count">' +
+        '<div><span>' + esc(season.title) + '（' + esc(trend.untilLabel) + 'まで）</span><b>' + num(trend.count) + '件</b></div>' +
+        '<div><span>' + esc(trend.prevTitle) + 'の同じ日まで</span><b>' + num(trend.prevCount) + '件</b></div>' +
+        '<div><span>差</span><b class="' + diffClass + '">' + diffMark + num(Math.abs(diffCount)) + '件</b>' + rateText + '</div>' +
+      '</div>' +
+      '<div class="admin-graph-moves">' +
+        '<div><span class="admin-graph-moves-label">割合が増えた</span>' + chips(trend.up, 'is-up') + '</div>' +
+        '<div><span class="admin-graph-moves-label">割合が減った</span>' + chips(trend.down, 'is-down') + '</div>' +
+      '</div>' +
+      '<div class="admin-graph-tgrid">' + columns.join('') + '</div>' +
+      '<p class="admin-graph-note">差は「割合の差」です（単位はポイント）。' + same.toFixed(1) + ' 未満の動きは「→」で表示しています。</p></article>';
+  }
+
+  function render() {
+    if (!data) {
+      page.innerHTML = '<div class="admin-graph-head"><h2>グラフ</h2></div>' +
+        (errorText
+          ? '<p class="admin-graph-message is-error">' + esc(errorText) + '</p><div class="admin-graph-foot"><button type="button" data-graph-reload>もう一度読み込む</button></div>'
+          : '<p class="admin-graph-message">読み込み中です…</p>');
+      return;
+    }
+    const seasons = data.seasons || [];
+    if (!seasons.length) {
+      page.innerHTML = '<div class="admin-graph-head"><h2>グラフ</h2></div>' +
+        '<p class="admin-graph-message">「' + esc(data.source || '接種済み（自動）') + '」にデータがまだありません。</p>' + foot();
+      return;
+    }
+    let season = seasons.find(s => s.year === selectedYear);
+    if (!season) { season = seasons[0]; selectedYear = season.year; }
+    const seasonButtons = seasons.map(s =>
+      '<button type="button" data-graph-year="' + esc(s.year) + '" aria-pressed="' + (s.year === season.year ? 'true' : 'false') + '">' + esc(s.title) + '</button>').join('');
+    const pies = (season.sections || []).filter(s => s.type === 'pie').map(s => pieCard(s, season.total)).join('');
+    const bars = (season.sections || []).filter(s => s.type !== 'pie').map(s => barCard(s)).join('');
+    page.innerHTML =
+      '<div class="admin-graph-head"><h2>' + esc(season.title) + 'の集計</h2>' +
+      '<p>接種済み ' + num(season.total) + '件' + (season.range ? '（' + esc(season.range) + '）' : '') + '　元データ：「' + esc(data.source || '接種済み（自動）') + '」</p>' +
+      '<div class="admin-graph-seasons" role="group" aria-label="年度">' + seasonButtons + '</div></div>' +
+      (errorText ? '<p class="admin-graph-message is-error">' + esc(errorText) + '</p>' : '') +
+      '<div class="admin-graph-grid">' + pies + bars + trendCard(season) + '</div>' + foot();
+  }
+
+  function foot() {
+    return '<div class="admin-graph-foot"><span>' + (loading ? '読み込み中です…' : (data && data.generatedAt ? '集計した時刻：' + esc(data.generatedAt) : '')) + '</span>' +
+      '<button type="button" data-graph-reload' + (loading ? ' disabled' : '') + '>最新にする</button></div>';
+  }
+
+  function load() {
+    if (loading) return;
+    if (!(window.google && google.script && google.script.run)) {
+      errorText = 'グラフを読み込めませんでした。';
+      render();
+      return;
+    }
+    loading = true;
+    errorText = '';
+    render();
+    google.script.run
+      .withSuccessHandler(result => {
+        loading = false;
+        if (!result || result.ok !== true) {
+          errorText = (result && result.message) || 'グラフを読み込めませんでした。';
+        } else {
+          data = result;
+          loadedAt = Date.now();
+        }
+        render();
+      })
+      .withFailureHandler(error => {
+        loading = false;
+        errorText = 'グラフを読み込めませんでした。' + (error && error.message ? '（' + error.message + '）' : '');
+        render();
+      })
+      .app_adminGetGraphData();
+  }
+
+  function openGraph() {
+    root.dataset.adminGraphTab = 'on';
+    if (!data || Date.now() - loadedAt > REFRESH_MS) load();
+    else render();
+  }
+
+  function closeGraph() {
+    delete root.dataset.adminGraphTab;
+  }
+
+  // 上のボタン：今ある処理（選択中の色・予約状況などの表示）が動いたあとで、グラフのページを出す／しまう
+  tabs.addEventListener('click', event => {
+    const target = event.target.closest('[data-admin-tab]');
+    if (!target || !tabs.contains(target)) return;
+    if (target === button) openGraph();
+    else closeGraph();
+    setTimeout(syncLabel, 0);
+  });
+
+  page.addEventListener('click', event => {
+    const yearButton = event.target.closest('[data-graph-year]');
+    if (yearButton && page.contains(yearButton)) {
+      selectedYear = Number(yearButton.dataset.graphYear);
+      render();
+      return;
+    }
+    if (event.target.closest('[data-graph-reload]')) load();
+  });
+
+  window.addEventListener('resize', syncLabel);
+  syncLabel();
 })();
 </script>
