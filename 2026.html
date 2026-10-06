@@ -60,7 +60,11 @@ var HEAD=['予約ID','枠ID','氏名（漢字）','氏名（ふりがな）','�
 var sheet={getLastRow:function(){return rows.length+1;},getLastColumn:function(){return 16;},getRange:function(r,c,n,m){return {getDisplayValues:function(){return [HEAD].concat(rows).slice(r-1,r-1+n).map(function(x){var o=[];for(var i=c-1;i<c-1+m;i++)o.push(x[i]==null?'':String(x[i]));return o;});}};}};
 var SH_RESV='予約';var SpreadsheetApp={getActive:function(){return {getSheetByName:function(n){return n===SH_RESV?sheet:null;}};}};function adminStatusSettingsAuthorize_(){}
 const ADMIN_SEARCH_MAX_RESULTS_ = 50;   // 画面へ返す件数の上限
-const ADMIN_SEARCH_COLUMNS_ = 16;       // A〜P列（Q列は並べ替えの一時用なので探さない）
+const ADMIN_SEARCH_COLUMNS_ = 16;       // 読むのはA〜P列（結果の表示に状態などを使うため。Q列は並べ替えの一時用なので読まない）
+// [検索ワード: adminReservationSearchColumnsV1]
+// 探す列（0始まり）：A 予約ID／B 枠ID／C 氏名／D ふりがな／E 生年月日／H 住所／I 電話番号／K 診察券番号／O 受付担当
+// 探さない列：F 年齢／G 性別／J 診察券有無／L 申込経路／M 状態／N 登録日時／P 備考（当たっても探す役に立たない・関係ない予約が大量に出るため）
+const ADMIN_SEARCH_TARGET_COLUMNS_ = [0, 1, 2, 3, 4, 7, 8, 10, 14];
 
 /** 比べる前に文字をそろえる：全角→半角、カタカナ→ひらがな、大文字→小文字、空白を取る */
 function adminSearchNormalize_(value) {
@@ -104,7 +108,9 @@ function app_adminSearchReservations(query) {
       if (!reserveId && !slotId) continue; // 空の行は対象外
 
       let hitIndex = -1;
-      for (let c = 0; c < row.length; c++) {
+      for (let t = 0; t < ADMIN_SEARCH_TARGET_COLUMNS_.length; t++) {
+        const c = ADMIN_SEARCH_TARGET_COLUMNS_[t];
+        if (c >= row.length) continue;
         const text = adminSearchNormalize_(row[c]);
         if (!text) continue;
         if (text.indexOf(needle) >= 0 || (needlePlain && adminSearchStripHyphen_(text).indexOf(needlePlain) >= 0)) {
