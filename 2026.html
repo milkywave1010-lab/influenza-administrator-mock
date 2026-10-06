@@ -152,7 +152,7 @@ var MOCK_GRAPH={"ok":true,"source":"接種済み（自動）","cancelled":0,"noS
 /* 管理画面の版の番号の見本。ふつうは同じ番号を返す。
    アドレスの最後に ?stale=1 を付けて開くと、「開いたあとに書き換えてデプロイされた」ことにして、数秒後に古い画面の案内を出す（本体の仕組みをそのまま動かす） */
 var MOCK_STALE_DEMO=/[?&]stale=1(&|$)/.test(location.search);var mockOpenedAt=new Date().getTime();
-function mockScreenVersion(){return (MOCK_STALE_DEMO&&new Date().getTime()-mockOpenedAt>3500)?'2026.10.07-01':'2026.10.06-01';}
+function mockScreenVersion(){return (MOCK_STALE_DEMO&&new Date().getTime()-mockOpenedAt>3500)?'2026.10.07-01':'2026.10.06-03';}
 if(MOCK_STALE_DEMO){setTimeout(function(){var realNow=Date.now;Date.now=function(){return realNow.call(Date)+2*60000;};try{window.dispatchEvent(new Event('focus'));}finally{Date.now=realNow;}},5000);}
 function respond(name,args){
  if(name==='api_getAdminDashboard'){var keys=args[0]||[];return {ok:true,slots:slotsFor(keys),data:rows.filter(function(r){return keys.indexOf(r[1].slice(2,10))>=0;}),marks:marksFor(keys),schedule:{times:times,activeTimes:times,collapseInactive:false,intervalMinutes:30,startTime:'09:30',endTime:'17:00'}};}
@@ -238,6 +238,8 @@ window.google={script:{run:new Proxy({},{get:function(_,k){return runner()[k];}}
  * - 2026.10.6 「4. グラフ」の傾向：色を入れ替え。▲（増えた）＝青、▼（減った）＝赤（これまでは▲＝赤、▼＝青）。記号・数字・並びは変更なし [検索ワード: adminGraphTabV1]
  * - 2026.10.6 「4. グラフ」：「未記入 ◯件のうち、管理画面での受付：◯件」の案内を、未記入がある項目の全部（住所分布・診察券・性別・年代）の下に出す（これまでは年代だけ）。円グラフの枠にも案内を出せるようにした [検索ワード: adminGraphBlankNoteV1]
  * - 2026.10.6 書き換えてデプロイしたあと、開きっぱなしの古い管理画面に「管理画面のバージョンが古いため実行できません。／管理画面を一度閉じ、再度開き直してからやり直してください。」を出して、操作（押す・Enter・送信）を止める。開いたときの版の番号を覚え、5分ごとと、ほかの画面から戻ってきたときに今の番号（code.gs の ADMIN_SCREEN_VERSION_）と比べる。勝手に読み込み直しはしない。打ってある文字も消さない（案内のうしろに透けて見える）。番号を聞けなかったときは何もしない。今ある処理には手を入れていない [検索ワード: adminScreenVersionNoticeV1]
+ * - 2026.10.6 古い画面の案内：文面を「管理画面のバージョンが更新されました。」「管理画面を1度閉じ、再度開き直してからやり直してください。」に変更（モックで決めた形）。スマホでは、1段目を1行、2段目を「管理画面を1度閉じ、再度開き直してから」「やり直してください。」の2行にして中央にそろえる（文の途中では折り返さない）。「管理者としてログイン中」の下に、開いたときの版の番号を「バージョン 〇〇」と表示（スマホは診療所名の下の右側）。今あるもの（題名・「管理者としてログイン中」・上のボタン）の位置は動かしていない。番号を上げるのは code.gs か dev.html を直したときだけ [検索ワード: adminScreenVersionNoticeV1／adminVersionLabelV1]
+ * - 2026.10.6 「4. グラフ」：「未記入 ◯件のうち、管理画面での受付：◯件」の案内の文字を、灰色からふつうの文字色に変更（読みにくかったため。大きさ・太さ・位置はそのまま。傾向の枠の下の注釈は灰色のまま）。モックで決めた形 [検索ワード: adminGraphNoteColorV1]
  * - 既存表記・既存レイアウトは無断変更しない
  -->
 <script id="admin-counter-selected-card-v1">
@@ -6633,7 +6635,7 @@ DEVスマホ上部3タブ：EXECと同じsticky位置を維持するため、親
 #influenza-admin-mock .admin-graph-track{display:block;height:16px;border-radius:8px;background:var(--admin-green-soft);overflow:hidden}
 #influenza-admin-mock .admin-graph-fill{display:block;height:100%;border-radius:8px;background:var(--admin-green)}
 #influenza-admin-mock .admin-graph-note{margin:8px 0 0;font-size:13px;color:var(--admin-muted)}
-/* [モック先行：本体（dev.html）には未反映] 「未記入 ◯件のうち…」の案内だけ、灰色をやめてふつうの文字色にする（大きさ・太さはそのまま。傾向の枠の注釈は灰色のまま） */
+/* 「未記入 ◯件のうち…」の案内だけ、灰色をやめてふつうの文字色にする（大きさ・太さはそのまま。傾向の枠の注釈は灰色のまま） [検索ワード: adminGraphNoteColorV1] 2026.10.6 */
 #influenza-admin-mock .admin-graph-card:not(.is-trend) .admin-graph-note{color:var(--admin-text)}
 #influenza-admin-mock .admin-graph-count{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}
 #influenza-admin-mock .admin-graph-count>div{border:1px solid var(--admin-line);border-radius:10px;padding:10px 14px;background:var(--admin-surface)}
@@ -6967,12 +6969,21 @@ DEVスマホ上部3タブ：EXECと同じsticky位置を維持するため、親
 /* スマホ：1段目「管理画面のバージョンが更新されました。」は1行（2段目より1px小さい17pxまで）。2段目は「管理画面を1度閉じ、再度開き直してから」を1行に収め、「やり直してください。」と2行で中央にそろえる（画面の幅に合わせて文字の大きさを決める） */
 @media(max-width:760px){.admin-version-stale-box{padding:22px 10px}.admin-version-stale-box p{font-size:clamp(12px,calc((100vw - 64px) / 20.6),17px)}.admin-version-stale-box p + p{font-size:clamp(13px,calc((100vw - 64px) / 19.6),18px)}.admin-version-stale-box p span{white-space:nowrap}}
 </style>
+<style id="admin-version-label-v1">
+/* 今あるもの（題名・「管理者としてログイン中」・上のボタン）の位置は動かさない。番号は、見出しの枠の右下のすき間に重ねて置く */
+#influenza-admin-mock .admin-header{position:relative}
+#influenza-admin-mock .admin-version-label{position:absolute;right:4px;bottom:-6px;margin:0;font-size:12px;line-height:16px;color:var(--admin-muted);font-variant-numeric:tabular-nums;white-space:nowrap;pointer-events:none}
+@media(max-width:900px){#influenza-admin-mock .admin-version-label{bottom:-10px;right:2px}}
+</style>
 <script id="admin-screen-version-notice-v1-script">
 /* [検索ワード: adminScreenVersionNoticeV1]
  * 管理画面の版の番号を見張る。
  * ・開いたときに、サーバー（code.gs の app_adminGetScreenVersion）から版の番号をもらって覚える。
  * ・そのあと5分ごと（画面が表に出ているときだけ）と、ほかの画面から戻ってきたときに、今の番号を聞く。
  * ・覚えている番号と違っていたら（＝コードが書き換えられてデプロイされた）、画面の上に案内を出し、押す・Enter・送信を止める。
+ *   文面：「管理画面のバージョンが更新されました。」「管理画面を1度閉じ、再度開き直してからやり直してください。」
+ * ・番号を上げるのは、code.gs か dev.html を直したときだけ（web.html・graph.gs・privacy.html だけを直したときは上げない＝案内は出ない）。
+ * ・開いたときの番号を、「管理者としてログイン中」の下に「バージョン 〇〇」と出す [検索ワード: adminVersionLabelV1]。
  * ・勝手に読み込み直しはしない。打ってある文字も消さない（うしろに透けて見える）。閉じて開き直すのは使っている人がやる。
  * ・番号を聞けなかったとき（通信の失敗・サーバー側がまだ古いとき）は、何もしない（今までどおり使える）。
  * ・今ある処理には手を入れていない。
@@ -6993,6 +7004,17 @@ DEVスマホ上部3タブ：EXECと同じsticky位置を維持するため、親
   let stale = false;     // 古いと分かったら true（そのあとは戻さない）
   let checking = false;
   let lastCheckAt = 0;
+
+  // [検索ワード: adminVersionLabelV1] 「管理者としてログイン中」の下に「バージョン 〇〇」を出す（開いたときの番号）。
+  // 今あるもの（題名・「管理者としてログイン中」・上のボタン）の位置は動かさない。番号を聞けなかったときは何も出さない
+  function showVersionLabel(version) {
+    const header = root.querySelector('.admin-header');
+    if (!header || header.querySelector('.admin-version-label')) return;
+    const label = document.createElement('p');
+    label.className = 'admin-version-label';
+    label.textContent = 'バージョン ' + version;
+    header.appendChild(label);
+  }
 
   function showStale() {
     if (stale) return;
@@ -7029,7 +7051,7 @@ DEVスマホ上部3タブ：EXECと同じsticky位置を維持するため、親
         checking = false;
         const version = result && result.ok === true ? String(result.version || '') : '';
         if (!version) return;
-        if (baseline === null) { baseline = version; return; }
+        if (baseline === null) { baseline = version; showVersionLabel(version); return; }
         if (version !== baseline) showStale();
       })
       .withFailureHandler(() => { checking = false; })
@@ -7069,45 +7091,5 @@ DEVスマホ上部3タブ：EXECと同じsticky位置を維持するため、親
   window.addEventListener('focus', checkOnReturn);
   setInterval(() => { if (document.visibilityState === 'visible') check(); }, CHECK_INTERVAL_MS);
   check();
-})();
-</script>
-
-<!--
-[モック先行：本体（dev.html）には未反映] 2026.10.6
-「管理者としてログイン中」の下に、管理画面の版の番号を出す見本。
--->
-<style id="admin-version-label-v1">
-/* 今あるもの（題名・「管理者としてログイン中」・上のボタン）の位置は動かさない。番号は、見出しの枠の右下のすき間に重ねて置く */
-#influenza-admin-mock .admin-header{position:relative}
-#influenza-admin-mock .admin-version-label{position:absolute;right:4px;bottom:-6px;margin:0;font-size:12px;line-height:16px;color:var(--admin-muted);font-variant-numeric:tabular-nums;white-space:nowrap;pointer-events:none}
-@media(max-width:900px){#influenza-admin-mock .admin-version-label{bottom:-10px;right:2px}}
-</style>
-<script id="admin-version-label-v1-script">
-/* [検索ワード: adminVersionLabelV1]
- * 「管理者としてログイン中」の下に「バージョン 〇〇」を出す。番号は code.gs の ADMIN_SCREEN_VERSION_（開いたときの番号）。
- * 今ある処理には手を入れていない。番号を聞けなかったときは何も出さない。
- */
-(() => {
-  const root = document.getElementById('influenza-admin-mock');
-  if (!root || root.dataset.adminVersionLabelV1 === 'true') return;
-  const header = root.querySelector('.admin-header');
-  if (!header) return;
-  root.dataset.adminVersionLabelV1 = 'true';
-
-  const label = document.createElement('p');
-  label.className = 'admin-version-label';
-  label.hidden = true;
-  header.appendChild(label);
-
-  if (!(window.google && google.script && google.script.run)) return;
-  google.script.run
-    .withSuccessHandler(result => {
-      const version = result && result.ok === true ? String(result.version || '') : '';
-      if (!version) return;
-      label.textContent = 'バージョン ' + version;
-      label.hidden = false;
-    })
-    .withFailureHandler(() => {})
-    .app_adminGetScreenVersion();
 })();
 </script>
