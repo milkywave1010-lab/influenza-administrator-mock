@@ -24,16 +24,30 @@ function add(day,time,opt){opt=opt||{};var i=seq%names.length;seq++;var d=key(da
  add(addDays(s,6),'09:30');add(addDays(s,6),'10:00');add(addDays(s,6),'10:00');add(addDays(s,6),'14:00');add(addDays(s,6),'14:30');
 });
 rows.forEach(function(r){if(r[1].slice(2,10)<todayKey&&r[12]==='予約処理確定')r[15]='受付済 事務';});
-function slotsFor(keys){var out=[];var now=new Date();keys.forEach(function(d){var day=new Date(+d.slice(0,4),+d.slice(4,6)-1,+d.slice(6,8));if(day.getDay()===0)return;
+function slotsFor(keys){var out=[];var now=new Date();keys.forEach(function(d){var day=new Date(+d.slice(0,4),+d.slice(4,6)-1,+d.slice(6,8));
+ if(ST.holiday.some(function(h){return kOf(h.date)===d;}))return;
  var dl=new Date(day);dl.setDate(dl.getDate()-1);dl.setHours(12,0,0,0);
- times.forEach(function(t){var id='S-'+d+'-'+t.replace(':','');var c=rows.filter(function(r){return r[1]===id&&r[12]==='予約処理確定';}).length;var remain=Math.max(0,5-c);
-  out.push({slotId:id,date:d,time:t,capacity:5,confirmed:c,remain:remain,closed:now>=dl||remain<=0,mark:remain===0?'×':(remain<=3?'▲':'○'),label:''});});});return out;}
+ times.forEach(function(t){var id='S-'+d+'-'+t.replace(':','');var c=rows.filter(function(r){return r[1]===id&&r[12]==='予約処理確定';}).length;
+  var ex=0;ST.extra.forEach(function(e){if(kOf(e.date)===d&&e.time===t)ex+=Number(e.delta||0);});
+  var ad=ST.adhoc.filter(function(a){return kOf(a.date)===d&&a.time===t;})[0];
+  if(ad){var acap=Math.max(0,Number(ad.capacity||0)+ex);var ar=Math.max(0,acap-c);out.push({slotId:id,date:d,time:t,capacity:acap,adhocCapacity:Number(ad.capacity||0),adhocAdjustedCapacity:acap,confirmed:c,remain:ar,closed:ar<=0,mark:ar===0?'×':(ar<=3?'▲':'○'),label:''});return;}
+  if(day.getDay()===0)return;
+  if(ST.block.some(function(b){return kOf(b.date)===d&&t>=b.start&&t<=b.end;}))return;
+  var cap=Math.max(0,5+ex);var remain=Math.max(0,cap-c);
+  out.push({slotId:id,date:d,time:t,capacity:cap,confirmed:c,remain:remain,closed:now>=dl||remain<=0,mark:remain===0?'×':(remain<=3?'▲':'○'),label:''});});});return out;}
 var ST={base:{startDate:'2026-09-24',endDate:'2027-01-31',startTime:'09:30',endTime:'17:00',interval:30,capacity:5,displayMonths:2,flexible:true},
  schedule:{headers:['月','火','水','木','金','土','日'],weekdays:[true,true,true,true,true,true,false],rows:times.map(function(t){return {time:t,days:[true,true,true,true,true,true,false]};})},
- holiday:[{row:2,date:iso(addDays(sunday,22)),note:'祝日',registrant:'事務'}],
- block:[{row:2,date:iso(addDays(sunday,13)),start:'09:30',end:'11:30',note:'往診',registrant:'事務'}],
- adhoc:[{row:2,date:iso(addDays(sunday,13)),time:'10:00',capacity:2,force:'実行',note:'',registrant:'事務'}],
- extra:[{row:2,date:iso(addDays(sunday,9)),time:'10:00',delta:2,note:'家族でまとめて接種',registrant:'事務'}]};
+ holiday:[{row:2,date:iso(addDays(sunday,3)),note:'祝日',registrant:'事務'}],
+ block:[{row:2,date:iso(addDays(sunday,5)),start:'15:00',end:'16:30',note:'往診のため枠クローズ',registrant:'事務'}],
+ adhoc:[{row:2,date:iso(addDays(sunday,2)),time:'17:00',capacity:3,force:'実行',note:'',registrant:'事務'}],
+ extra:[{row:2,date:iso(addDays(sunday,4)),time:'10:00',delta:2,note:'家族でまとめて接種',registrant:'事務'},{row:3,date:iso(addDays(sunday,6)),time:'10:30',delta:-2,note:'検診のため',registrant:'事務'}]};
+/* 休診日にした日の予約は、見本では置かない */
+rows=rows.filter(function(r){return r[1].slice(2,10)!==key(addDays(sunday,3));});
+function kOf(s){return String(s||'').replace(/[^0-9]/g,'');}
+function marksFor(keys){var has=function(d){return keys.indexOf(d)>=0;};var sum={};ST.extra.forEach(function(e){var id=kOf(e.date)+'|'+e.time;sum[id]=(sum[id]||0)+Number(e.delta||0);});
+ return {holidays:ST.holiday.filter(function(h){return has(kOf(h.date));}).map(function(h){return {date:kOf(h.date),note:h.note||''};}),
+  blocks:ST.block.filter(function(b){return has(kOf(b.date));}).map(function(b){return {date:kOf(b.date),start:b.start,end:b.end,note:b.note||''};}),
+  extras:Object.keys(sum).filter(function(id){return has(id.split('|')[0])&&sum[id]!==0;}).map(function(id){return {date:id.split('|')[0],time:id.split('|')[1],delta:sum[id]};})};}
 function logs(){var t=new Date();function at(m){var d=new Date(t.getTime()-m*60000);return d.getFullYear()+'/'+p2(d.getMonth()+1)+'/'+p2(d.getDate())+' '+p2(d.getHours())+':'+p2(d.getMinutes())+':00';}
  return [{time:at(35),type:'新規予約',actor:'WEB利用者',source:'WEB',target:rows[20]?rows[20][0]:'',before:'未登録',after:'予約処理確定',action:'予約を登録',message:'',state:'正常'},
   {time:at(120),type:'受付済',actor:'事務',source:'管理画面',target:rows[18]?rows[18][0]:'',before:'未受付',after:'受付済',action:'カルテ受付済みに変更',message:'',state:'正常'},
@@ -41,7 +55,7 @@ function logs(){var t=new Date();function at(m){var d=new Date(t.getTime()-m*600
   {time:at(1500),type:'新規予約',actor:'事務',source:'管理画面',target:rows[19]?rows[19][0]:'',before:'未登録',after:'予約処理確定',action:'予約を登録',message:'',state:'正常'}];}
 var NO={ok:false,error:'表示確認用モックのため、この操作は行えません。',message:'表示確認用モックのため、この操作は行えません。'};
 function respond(name,args){
- if(name==='api_getAdminDashboard'){var keys=args[0]||[];return {ok:true,slots:slotsFor(keys),data:rows.filter(function(r){return keys.indexOf(r[1].slice(2,10))>=0;}),schedule:{times:times,activeTimes:times,collapseInactive:false,intervalMinutes:30,startTime:'09:30',endTime:'17:00'}};}
+ if(name==='api_getAdminDashboard'){var keys=args[0]||[];return {ok:true,slots:slotsFor(keys),data:rows.filter(function(r){return keys.indexOf(r[1].slice(2,10))>=0;}),marks:marksFor(keys),schedule:{times:times,activeTimes:times,collapseInactive:false,intervalMinutes:30,startTime:'09:30',endTime:'17:00'}};}
  if(name==='api_getReservations')return {ok:true,data:rows.filter(function(r){return r[1].slice(2,10)===args[0];})};
  if(name==='api_slots')return {ok:true,slots:slotsFor([0,1,2,3,4,5,6].map(function(i){return key(addDays(sunday,i));}))};
  if(name==='app_adminGetSeasonTotal')return {ok:true,count:rows.filter(function(r){return r[12]==='予約処理確定'&&r[1].slice(2,10)<=todayKey;}).length};
@@ -50,6 +64,7 @@ function respond(name,args){
   var id='R-'+m[1]+'-'+m[2]+'-'+(rows.filter(function(r){return r[1]===a.slotId;}).length+1);rows.push([id,a.slotId,String(a.nameKanji||''),String(a.nameKana||''),'','', String(a.gender||''),'','','無','','管理画面','予約処理確定','',String(a.staff||''),'']);return {ok:true,reserveId:id};}
  if(name==='app_adminGetStatusSettings')return {ok:true,checkedAt:p2(new Date().getHours())+':'+p2(new Date().getMinutes()),status:{},settings:ST,logs:logs(),errors:[]};
  if(name==='app_adminGetOperationLogs')return {ok:true,logs:logs()};
+ if(name==='app_adminMonitorSettingsAll'){var all={ok:true};['holiday','block','adhoc','extra'].forEach(function(x){all[x]=respond('app_adminMonitor'+x.charAt(0).toUpperCase()+x.slice(1),[]);});return all;}
  if(/^app_adminMonitor/.test(name)){var k=name==='app_adminMonitorSetting'?args[0]:name.replace('app_adminMonitor','').toLowerCase();if(k==='basesettings')k='base';if(k==='spreadsheet')k='sheet';
   var MK={gas:['通信','RPC応答','GAS RPC応答を確認しました'],sheet:['読み込み','接続・読込','必要シート6種の接続・読込を確認しました'],calendar:['外部サービス','接続・読込','接続確認済み'],logs:['読み込み','ログ取得','ログ取得正常'],base:['反映','読込・枠生成','基本設定・曜日時間表・表示期間の処理を確認しました']}[k]||['反映','予約枠反映確認','読込・処理反映を確認しました'];
   return {ok:true,monitor:{key:k,label:k,state:'正常',category:MK[0],stage:MK[1],message:MK[2],checkedAt:p2(new Date().getHours())+':'+p2(new Date().getMinutes())},rows:ST[k]||[],logs:logs(),base:ST.base,schedule:ST.schedule};}
@@ -104,6 +119,13 @@ window.google={script:{run:new Proxy({},{get:function(_,k){return runner()[k];}}
  * - 2026.10.2 ステータス・設定：保存・削除の二重押し防止。「追加」「基本設定を保存」「曜日・時間表を保存」を押したら、ボタンを薄くして押せなくし（色・大きさは変えない）、ボタンの中の文字を「保存中…」の点滅（1秒点灯→0.5秒消灯）に変える。終わったら元に戻る。ボタンの外に出していた小さい字の「保存中…」は廃止。「削除」は同じ形で「削除中…」。処理中はほかの保存・削除も受け付けない [検索ワード: adminSettingBusyV1]
  * - 2026.10.2 ステータス・設定：設定カード上部の案内に、シートの優先順（休診日＞臨時枠＞臨時休診時間＞基本設定＞接種増減枠）を追加
  * - 2026.10.3 予約状況：「前週」「次週」を押したあと、表から予約も空き枠も全部消えることがある不具合を修正。「1.予約状況」タブを押した直後・画面に戻った直後・10分ごとの自動読み直しの途中で週を切り替えると、古い週のデータが新しい週の表に上書きされていた。途中で週が変わったら古い結果を捨てるよう変更 [検索ワード: adminAutoRefreshWeekGuardV1]
+ * - 2026.10.5 予約一覧：「カルテ未処理」ボタンの二重押し防止。処理中に一覧が描き直されると（行をクリックして詳細を開け閉めした・「1.予約状況」タブを押した・別の画面から戻ってきた、など）、押せる「カルテ未処理」ボタンがもう一度出てきて2回押せていた。処理中の予約は、描き直しても「処理中…」のまま押せないよう変更（文言・見た目は変更なし）[検索ワード: adminChartPendingLockV1]
+ * - 2026.10.5 窓口予約：「登録者」を必須に変更。空・スペースだけのまま「予約登録」を押すと、登録せず「担当者名を入力してください。」を表示（確認の順番は 日時→氏名→登録者）。操作ログに誰が登録したかを必ず残すため [検索ワード: adminBookStaffRequiredV1]
+ * - 2026.10.5 ステータス・設定：「削除」「編集→保存」で、画面で見えていた行の中身も一緒に送るよう変更。シートの同じ行番号の中身と違っていたら（一覧を読み込んだあとにシートの行がずれていたら）、何も変えずに案内を出し（削除はポップアップ、保存は赤字）、その場で一覧を今の中身に入れ替える。案内は、その設定が別の行にまだあるときは「休診日 2026-10-12 は、削除に失敗しました。／自動更新し、一覧を並び直しました／再度、2026-10-12 の削除作業を行ってください」、もう無いときは「休診日 2026-10-12 は、現在のシートには存在しません。／（すでに消されたか、内容が変えられています）」（編集のときは「削除」が「編集」になる）。編集の途中だった入力欄は空に戻す（古い行番号のまま保存し直さないため）[検索ワード: adminSettingRowMatchV1]
+ * - 2026.10.5 ステータス・設定：サーバー側（code.gs）が、行の中身を送ってこない「削除」「編集→保存」を実行しないようになった（この画面の動き・文言は変更なし。この画面は行の中身を必ず送る）。この修正より前から開いたままの管理画面で設定の削除・編集を押すと、「管理画面のバージョンが古いため実行できません。／管理画面を一度閉じ、再度開き直してからやり直してください。」と出て止まる [検索ワード: adminSettingRowMatchStrictV1]
+ * - 2026.10.5 予約状況のカレンダー：どの設定が効いているかを表示。休診日＝無地のグレーに「休診日」と備考／臨時休診時間＝ピンクの斜め線に「休診時間」・時間・備考（どちらも枠も予約もないマスが対象で、上下に続くマスは1つにまとめる。「受付なし」の帯では分かれる）／臨時枠＝紫の札「臨時枠 〇枠」／接種増減枠＝薄い青の札「増減 +〇」「増減 −〇」。予約のカード・「＋ 空き」ボタンの動きは変更なし。サーバーがしるしの情報を返さないときは、今までどおりの表示 [検索ワード: adminCalendarMarksV1]
+ * - 2026.10.5 窓口予約：「受付担当」の見出しに、氏名と同じ赤い「必須」の印を追加（受付担当を必須にしたのに印が無かったため）[検索ワード: adminBookStaffRequiredV1]
+ * - 2026.10.6 ステータス・設定（スマホ）：設定カードの「正常」が1文字ずつ縦に並ぶのを修正。「正常」などの状態の文字は折り返さないようにし、臨時枠・接種増減枠の説明文はスマホのときだけ決まった位置で改行する（臨時枠：「…新しく枠を作る／（開始15分前まで予約可能）」、接種増減枠：「例）家族でまとめて接種したいが／枠が足りない時・検診等が入って減らしたい時」）。文言とPCの見え方は変更なし [検索ワード: adminSettingStateNoWrapV1]
  * - 既存表記・既存レイアウトは無断変更しない
  -->
 <script id="admin-counter-selected-card-v1">
@@ -359,6 +381,25 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
 #influenza-admin-mock .admin-cal-event strong { font-size: 12px; }
 #influenza-admin-mock .admin-cal-event span { margin-top: 2px; font-size: 10px; opacity: .78; }
 #influenza-admin-mock .admin-cal-empty { color: var(--admin-muted); border-style: dashed; border-color: var(--admin-line); background: transparent; text-align: center; }
+/* [検索ワード: adminCalendarMarksV1] カレンダーの「設定のしるし」。予約（枠つきのカード）と見分けがつくよう、枠なしの塗り・札で出す。
+   休診日＝無地のグレー／休診時間＝ピンクの斜め線（どちらも続くマスを1つにまとめる）／臨時枠＝紫の札／接種増減枠＝薄い青の札 */
+#influenza-admin-mock .admin-cal-cell.admin-cal-mark { display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 7px 8px; font-size: 12px; line-height: 1.35; overflow: hidden; }
+#influenza-admin-mock .admin-cal-cell.admin-cal-mark b { font-size: 12.5px; font-weight: 800; letter-spacing: .02em; }
+#influenza-admin-mock .admin-cal-cell.admin-cal-mark span { font-size: 12px; font-weight: 700; }
+#influenza-admin-mock .admin-cal-cell.admin-cal-mark small { font-size: 11px; font-weight: 600; overflow-wrap: anywhere; }
+#influenza-admin-mock .admin-cal-cell.admin-cal-mark-holiday { background: #e9e4da; color: #7d776c; }
+#influenza-admin-mock .admin-cal-cell.admin-cal-mark-holiday b { color: #8a5a4a; }
+#influenza-admin-mock .admin-cal-cell.admin-cal-mark-block { background: repeating-linear-gradient(135deg, #fdeef2 0 7px, #f7d9e2 7px 14px); color: #8a4a5e; }
+#influenza-admin-mock .admin-cal-tag { display: inline-block; margin: 0 0 4px 2px; padding: 1px 8px; border: 1px solid; border-radius: 999px; font-size: 11px; font-weight: 800; line-height: 1.5; }
+#influenza-admin-mock .admin-cal-tag-adhoc { background: #efe9fa; border-color: #cbbbe8; color: #5d4b85; }
+#influenza-admin-mock .admin-cal-tag-extra { background: #e6f1fb; border-color: #b5d0ea; color: #2f5f8a; }
+@media (max-width: 840px) {
+  #influenza-admin-mock .admin-cal-cell.admin-cal-mark { padding: 3px 2px; font-size: 9px; line-height: 1.25; }
+  #influenza-admin-mock .admin-cal-cell.admin-cal-mark b,
+  #influenza-admin-mock .admin-cal-cell.admin-cal-mark span,
+  #influenza-admin-mock .admin-cal-cell.admin-cal-mark small { font-size: 9px; }
+  #influenza-admin-mock .admin-cal-tag { display: block; margin: 0 0 2px; padding: 1px 2px; border-radius: 6px; font-size: 8px; line-height: 1.3; text-align: center; }
+}
 #influenza-admin-mock .admin-list-title { margin: 0 0 8px; color: var(--admin-muted); font-size: 12px; font-weight: 500; }
 #influenza-admin-mock .admin-row-focus { outline: 2px solid var(--admin-green); outline-offset: -2px; }
 /* [検索ワード: adminChartReceptionV1] 患者一覧1行目：カルテ受付状況 */
@@ -1000,6 +1041,8 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
   if (bookToast && bookSubmit) bookSubmit.insertAdjacentElement("beforebegin", bookToast);
   const BOOK_MSG_SLOT = "予約可能な日時を選択し、予約状況を再度呼び出してください。";
   const BOOK_MSG_NAME = "氏名を入力してください。";
+  // [検索ワード: adminBookStaffRequiredV1] 窓口予約は「登録者」も必須（操作ログに誰が登録したかを必ず残すため）
+  const BOOK_MSG_STAFF = "担当者名を入力してください。";
   function showBookError(text) {
     bookToast.textContent = text;
     bookToast.dataset.state = "error";
@@ -1010,6 +1053,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
     if (bookToast.dataset.show === "true" && bookToast.textContent === text) bookToast.dataset.show = "false";
   }
   if (bookName) bookName.addEventListener("input", () => clearBookError(BOOK_MSG_NAME));
+  if (bookStaff) bookStaff.addEventListener("input", () => clearBookError(BOOK_MSG_STAFF));
   if (bookDate) bookDate.addEventListener("change", () => clearBookError(BOOK_MSG_SLOT));
   if (bookTime) bookTime.addEventListener("change", () => clearBookError(BOOK_MSG_SLOT));
   root.addEventListener("click", event => {
@@ -1022,6 +1066,14 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
   let currentView = "day";
   let currentReservations = [];
   let currentSlots = [];
+  // [検索ワード: adminCalendarMarksV1] カレンダーに出す設定のしるし（休診日・臨時休診時間・接種増減枠）。サーバーが返さなければ null（しるしなし）
+  let currentMarks = null;
+  function applyDashboardMarks(result) {
+    currentMarks =
+      result && result.marks && typeof result.marks === "object"
+        ? result.marks
+        : null;
+  }
   let currentScheduleMeta = {
     times: [],
     activeTimes: [],
@@ -1034,6 +1086,9 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
   let activeDetailId = null;
   // [検索ワード: adminChartStaffDraftV1] 展開・再描画でも未確定の担当者名を保持。
   const chartStaffDrafts = {};
+  // [検索ワード: adminChartPendingLockV1]
+  // カルテ受付の処理中の予約ID。一覧が描き直されても、処理中の予約は「処理中…」のまま押せなくする（二重押し防止）。
+  const chartProcessingIds = new Set();
   let activeDashboardRequest = 0;
   let dashboardCacheEpoch = 0;
   const DASHBOARD_CACHE_TTL_MS = 45000; // 先読み分を45秒保持（予約状況更新ボタン・自分の操作後・10分自動更新では即時取り直し）
@@ -1697,8 +1752,20 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
     const collapseInactive = currentScheduleMeta.collapseInactive === true;
     let closedGroup = [];
 
+    // [検索ワード: adminCalendarMarksV1]
+    // しるしを付けるための控え。calendarMarkRows：表に出した時間の行（上から順）。「受付なし」の帯のところは null を入れて区切る。
+    const calendarMarkRows = [];
+    const markExtraMap = {};
+    if (currentMarks && Array.isArray(currentMarks.extras)) {
+      currentMarks.extras.forEach(item => {
+        if (!item) return;
+        markExtraMap[String(item.date || "") + "|" + String(item.time || "")] = Number(item.delta || 0);
+      });
+    }
+
     const appendClosedBand = group => {
       if (!group.length) return;
+      calendarMarkRows.push(null);
       const band = document.createElement('div');
       band.className = 'admin-cal-closed-band';
       band.textContent = group.length === 1
@@ -1728,6 +1795,8 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
 
       calendar.appendChild(timeCell);
 
+      const calendarMarkRow = { time: time, cells: {}, hasSlot: {} };
+      calendarMarkRows.push(calendarMarkRow);
 
       dates.forEach(date => {
 
@@ -1739,6 +1808,8 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
 
         cell.className =
           "admin-cal-cell";
+
+        calendarMarkRow.cells[dateKey] = cell;
 
 
         const reservations =
@@ -1928,11 +1999,86 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
 
         }
 
+        // [検索ワード: adminCalendarMarksV1]
+        // 枠があるマスに、札を付ける。臨時枠＝「臨時枠 〇枠」（臨時枠で設定した定員）／接種増減枠＝「増減 +〇」「増減 −〇」
+        if (slot) {
+          calendarMarkRow.hasSlot[dateKey] = true;
+          const tags = [];
+          if (slot.adhocCapacity != null && Number.isFinite(Number(slot.adhocCapacity))) {
+            tags.push(`<span class="admin-cal-tag admin-cal-tag-adhoc">臨時枠 ${escapeHtml(String(Number(slot.adhocCapacity)))}枠</span>`);
+          }
+          const extraDelta = Number(markExtraMap[dateKey + "|" + time] || 0);
+          if (Number.isFinite(extraDelta) && extraDelta !== 0) {
+            tags.push(`<span class="admin-cal-tag admin-cal-tag-extra">増減 ${extraDelta > 0 ? "+" : "−"}${escapeHtml(String(Math.abs(extraDelta)))}</span>`);
+          }
+          if (tags.length) cell.insertAdjacentHTML("afterbegin", tags.join(""));
+        }
+
         calendar.appendChild(cell);
 
       });
 
     });
+
+    // [検索ワード: adminCalendarMarksV1]
+    // 休診日・臨時休診時間のしるし。枠も予約もないマスだけが対象。上下に続くマスは1つにまとめて、中に1回だけ書く。
+    // （「受付なし」の帯、枠や予約があるマスのところでは分かれる）
+    if (currentMarks) {
+      const markHolidayMap = {};
+      (Array.isArray(currentMarks.holidays) ? currentMarks.holidays : []).forEach(item => {
+        if (item && item.date && !markHolidayMap[item.date]) markHolidayMap[item.date] = item;
+      });
+      const markBlockMap = {};
+      (Array.isArray(currentMarks.blocks) ? currentMarks.blocks : []).forEach(item => {
+        if (!item || !item.date) return;
+        (markBlockMap[item.date] = markBlockMap[item.date] || []).push(item);
+      });
+
+      const paintMarkRun = run => {
+        const first = run.cells[0];
+        run.cells.slice(1).forEach(other => other.remove());
+        if (run.cells.length > 1) first.style.gridRow = "span " + run.cells.length;
+        first.classList.add("admin-cal-mark", "admin-cal-mark-" + run.type);
+        const note = String(run.info.note || "").trim();
+        first.innerHTML =
+          run.type === "holiday"
+            ? `<b>休診日</b>` + (note ? `<small>${escapeHtml(note)}</small>` : "")
+            : `<b>休診時間</b><span>${escapeHtml(String(run.info.start || ""))}〜${escapeHtml(String(run.info.end || ""))}</span>` +
+              (note ? `<small>${escapeHtml(note)}</small>` : "");
+      };
+
+      dates.forEach(date => {
+        const dateKey = dateToKey(date);
+        const holiday = markHolidayMap[dateKey] || null;
+        const blocks = markBlockMap[dateKey] || [];
+        if (!holiday && !blocks.length) return;
+        let run = null;
+        const flushRun = () => { if (run) paintMarkRun(run); run = null; };
+        calendarMarkRows.forEach(row => {
+          if (!row) { flushRun(); return; }
+          const cell = row.cells[dateKey];
+          let mark = null;
+          if (cell && !row.hasSlot[dateKey] && !cell.childElementCount) {
+            if (holiday) {
+              mark = { type: "holiday", id: "holiday", info: holiday };
+            } else {
+              const index = blocks.findIndex(block =>
+                row.time >= String(block.start || "") && row.time <= String(block.end || "")
+              );
+              if (index >= 0) mark = { type: "block", id: "block" + index, info: blocks[index] };
+            }
+          }
+          if (!mark) { flushRun(); return; }
+          if (run && run.id === mark.id) {
+            run.cells.push(cell);
+          } else {
+            flushRun();
+            run = { type: mark.type, id: mark.id, info: mark.info, cells: [cell] };
+          }
+        });
+        flushRun();
+      });
+    }
 
     appendClosedBand(closedGroup);
 
@@ -2044,8 +2190,12 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
         chartControl = chartReception.done
           ? `<button class="admin-chart-done" type="button" disabled>受付済</button>` +
             `<span class="admin-chart-staff-name">${escapeHtml(chartReception.staff)}</span>`
-          : `<button class="admin-chart-pending" type="button" data-chart-process-id="${escapeHtml(r.reserveId)}">カルテ未処理</button>` +
-            `<input class="admin-chart-staff-input" type="text" data-chart-staff-id="${escapeHtml(r.reserveId)}" value="${escapeHtml(chartStaffDrafts[r.reserveId] || '')}" placeholder="担当者名" aria-label="担当者名">`;
+          : (() => {
+              // [検索ワード: adminChartPendingLockV1] 処理中の予約は、描き直しても「処理中…」で押せないまま。
+              const chartBusy = chartProcessingIds.has(String(r.reserveId));
+              return `<button class="admin-chart-pending" type="button" data-chart-process-id="${escapeHtml(r.reserveId)}"${chartBusy ? ' disabled' : ''}>${chartBusy ? '処理中…' : 'カルテ未処理'}</button>` +
+                `<input class="admin-chart-staff-input" type="text" data-chart-staff-id="${escapeHtml(r.reserveId)}" value="${escapeHtml(chartStaffDrafts[r.reserveId] || '')}" placeholder="担当者名" aria-label="担当者名"${chartBusy ? ' disabled' : ''}>`;
+            })();
       }
 
       let operation = "";
@@ -2180,9 +2330,27 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
       });
     });
 
+    // [検索ワード: adminChartPendingLockV1]
+    // 処理が終わったら、いま画面に出ているその予約のボタンと担当者名の欄を元に戻す
+    //（処理中に一覧が描き直されていても、いま出ているほうを戻す）。
+    const chartProcessingEnd = id => {
+      chartProcessingIds.delete(id);
+      rows.querySelectorAll("[data-chart-process-id]").forEach(current => {
+        if (String(current.dataset.chartProcessId || "") !== id) return;
+        current.disabled = false;
+        current.textContent = "カルテ未処理";
+        const currentWrap = current.closest(".admin-status-chart-wrap");
+        const currentInput = currentWrap ? currentWrap.querySelector(".admin-chart-staff-input") : null;
+        if (currentInput) currentInput.disabled = false;
+      });
+    };
+
     rows.querySelectorAll("[data-chart-process-id]").forEach(button => {
       button.addEventListener("click", event => {
         event.stopPropagation();
+        const chartId = String(button.dataset.chartProcessId || "");
+        // 同じ予約を処理中のあいだは、もう一度押されても何もしない
+        if (chartProcessingIds.has(chartId)) return;
         const wrap = button.closest(".admin-status-chart-wrap");
         const input = wrap ? wrap.querySelector(".admin-chart-staff-input") : null;
         const staffName = input ? input.value.trim() : "";
@@ -2192,7 +2360,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
           return;
         }
 
-        const originalText = button.textContent;
+        chartProcessingIds.add(chartId);
         button.disabled = true;
         button.textContent = "処理中…";
         if (input) input.disabled = true;
@@ -2200,23 +2368,23 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
         google.script.run
           .withSuccessHandler(async result => {
             if (!result || result.ok !== true) {
-              button.disabled = false;
-              button.textContent = originalText;
-              if (input) input.disabled = false;
+              chartProcessingEnd(chartId);
               alert(result && result.message ? result.message : "カルテ受付処理に失敗しました。");
               return;
             }
-            delete chartStaffDrafts[button.dataset.chartProcessId];
+            delete chartStaffDrafts[chartId];
             clearDashboardCache();
-            await reloadAll(true);
+            try {
+              await reloadAll(true);
+            } finally {
+              chartProcessingEnd(chartId);
+            }
           })
           .withFailureHandler(error => {
-            button.disabled = false;
-            button.textContent = originalText;
-            if (input) input.disabled = false;
+            chartProcessingEnd(chartId);
             alert("カルテ受付処理に失敗しました。\n" + (error && error.message ? error.message : error));
           })
-          .app_adminMarkChartProcessed(button.dataset.chartProcessId, staffName);
+          .app_adminMarkChartProcessed(chartId, staffName);
       });
     });
 
@@ -2587,6 +2755,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
         getDates().map(dateToKey).join(",") !== dateKeys.join(",")
       ) return;
       currentSlots = Array.isArray(result.slots) ? result.slots : [];
+      applyDashboardMarks(result);
       currentScheduleMeta =
         result.schedule && typeof result.schedule === "object"
           ? {
@@ -2637,6 +2806,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
         Array.isArray(result.slots)
           ? result.slots
           : [];
+      applyDashboardMarks(result);
 
       currentScheduleMeta =
         result.schedule && typeof result.schedule === 'object'
@@ -2961,6 +3131,11 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
         showBookError(BOOK_MSG_NAME);
         return;
       }
+      // [検索ワード: adminBookStaffRequiredV1] 「登録者」が空（スペースだけも空として扱う）なら登録しない
+      if (!String(bookStaff.value || "").replace(/[\s\u3000]/g, "")) {
+        showBookError(BOOK_MSG_STAFF);
+        return;
+      }
       bookToast.dataset.show = "false";
 
       const date =
@@ -3127,6 +3302,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
         Array.isArray(result.slots)
           ? result.slots
           : [];
+      applyDashboardMarks(result);
 
       currentScheduleMeta =
         result.schedule && typeof result.schedule === "object"
@@ -3500,7 +3676,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
     if(birthField) birthField.classList.remove('admin-field-full');
     if(telField){telField.classList.remove('admin-field-full');const l=telField.querySelector('label');if(l)l.textContent='電話番号';}
     if(cardField){cardField.classList.remove('admin-field-full');const l=cardField.querySelector('label');if(l)l.textContent='診察券有無';const select=byId('admin-book-card');if(select)select.innerHTML='<option>無</option><option>有</option><option>有（診察券紛失）</option>';}
-    if(staffField){staffField.classList.remove('admin-field-full');const l=staffField.querySelector('label');if(l)l.textContent='受付担当';}
+    if(staffField){staffField.classList.remove('admin-field-full');const l=staffField.querySelector('label');if(l){l.textContent='受付担当';/* [検索ワード: adminBookStaffRequiredV1] 受付担当も必須の印（氏名と同じ見た目） */const m=document.createElement('span');m.className='admin-book-required-mark';m.textContent='必須';m.style.cssText='margin-left:6px;color:#b34d4d;font-size:12px;font-weight:700';l.appendChild(m);}}
     if(grid){grid.classList.add('admin-counter-form-list');[nameField,kanaField,birthField,genderField,postalPair,addressField,addressDetailField,buildingField,telField,cardField,cardNoField,staffField,noteField,dateField,timeField].forEach(el=>{if(el)grid.appendChild(el);});}
     // [検索ワード: adminCounterPostalLookupV1]
     // [検索ワード: adminCounterExactAddressCandidatesV2]
@@ -5060,8 +5236,8 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
         <details class="admin-setting-v1-card" data-v1-setting="block"><summary><div><h3>臨時休診（時間）</h3><p>その日の、この時間帯だけ予約を止める</p><p>例）10/5の14:00〜15:00に急な往診が入った</p></div><div class="admin-setting-v2-meta"><b data-v2-setting-state="block">確認中</b><span class="chev">⌄</span></div></summary><div class="admin-setting-v1-body" data-v1-body="block"></div></details>
       </div>
       <div class="admin-settings-v1-row">
-        <details class="admin-setting-v1-card" data-v1-setting="adhoc"><summary><div><h3>臨時枠</h3><p>普段は枠がない日時に、新しく枠を作る（開始15分前まで予約可能）</p><p>例）10/10の18:00に5人分追加</p></div><div class="admin-setting-v2-meta"><b data-v2-setting-state="adhoc">確認中</b><span class="chev">⌄</span></div></summary><div class="admin-setting-v1-body" data-v1-body="adhoc"></div></details>
-        <details class="admin-setting-v1-card" data-v1-setting="extra"><summary><div><h3>接種増減枠</h3><p>もともとある枠の人数を増やす・減らす</p><p>例）家族でまとめて接種したいが枠が足りない時・検診等が入って減らしたい時</p></div><div class="admin-setting-v2-meta"><b data-v2-setting-state="extra">確認中</b><span class="chev">⌄</span></div></summary><div class="admin-setting-v1-body" data-v1-body="extra"></div></details>
+        <details class="admin-setting-v1-card" data-v1-setting="adhoc"><summary><div><h3>臨時枠</h3><p>普段は枠がない日時に、新しく枠を作る<br class="admin-sp-br">（開始15分前まで予約可能）</p><p>例）10/10の18:00に5人分追加</p></div><div class="admin-setting-v2-meta"><b data-v2-setting-state="adhoc">確認中</b><span class="chev">⌄</span></div></summary><div class="admin-setting-v1-body" data-v1-body="adhoc"></div></details>
+        <details class="admin-setting-v1-card" data-v1-setting="extra"><summary><div><h3>接種増減枠</h3><p>もともとある枠の人数を増やす・減らす</p><p>例）家族でまとめて接種したいが<br class="admin-sp-br">枠が足りない時・検診等が入って減らしたい時</p></div><div class="admin-setting-v2-meta"><b data-v2-setting-state="extra">確認中</b><span class="chev">⌄</span></div></summary><div class="admin-setting-v1-body" data-v1-body="extra"></div></details>
       </div>
     </div>`;
   tabs.insertAdjacentElement('afterend',page);
@@ -5099,7 +5275,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
     if(method==='app_adminSaveBaseSettings'){chain.app_adminSaveBaseSettings(a[0]);return}
     if(method==='app_adminSaveBaseSchedule'){chain.app_adminSaveBaseSchedule(a[0]);return}
     if(method==='app_adminSaveSettingRow'){chain.app_adminSaveSettingRow(a[0]);return}
-    if(method==='app_adminDeleteSettingRow'){chain.app_adminDeleteSettingRow(a[0],a[1],a[2]);return}
+    if(method==='app_adminDeleteSettingRow'){chain.app_adminDeleteSettingRow(a[0],a[1],a[2],a[3]);return}
     fail('未対応の管理APIです: '+method);
   };
 
@@ -5380,15 +5556,31 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
     settingRun(busyBtn,'app_adminSaveBaseSettings',[payload],res=>{if(!res||res.ok!==true){msg.classList.add('error');msg.textContent=res&&(res.error||res.message)||'保存できません';return}msg.textContent='保存しました。';form.elements.baseStaff.value='';baseFormDirty=false;baseFormInitialized=true;fillBase(res.base||payload);setTimeout(load,150)},text=>{msg.classList.add('error');msg.textContent=text});
   });
 
+  // [検索ワード: adminSettingRowMatchV1]
+  // 設定の「削除」「編集→保存」は、画面で見えていた行の中身も一緒に送る。サーバーは、シートの同じ行番号の中身が同じときだけ実行する。
+  // 違ったとき（一覧を読み込んだあとにシートの行がずれていたとき）は、何も変えずに今の一覧が返ってくるので、その場で一覧を入れ替える。
+  function settingExpectedRow(kind,row){const list=data&&data.settings&&Array.isArray(data.settings[kind])?data.settings[kind]:[];const item=list.find(x=>Number(x.row)===Number(row));return item?Object.assign({},item):{}}
+  // 止まったときの案内。何の設定で失敗したかを、一覧と同じ書き方（日付・時刻・人数）で出す。
+  //   別の行にまだある（並びがずれただけ）→ 失敗したこと・一覧を直したこと・もう一度やることを案内
+  //   もうシートに無い → 存在しないことを案内
+  function settingStaleTitle(kind,r){r=r||{};return kind==='holiday'?String(r.date||'').trim():recordTitle(kind,r)}
+  function settingStaleText(kind,res,expected,action){
+    const names={holiday:'休診日',block:'臨時休診（時間）',adhoc:'臨時枠',extra:'接種増減枠'};
+    const title=settingStaleTitle(kind,expected);
+    if(res&&res.exists===true)return `${names[kind]||''} ${title} は、${action}に失敗しました。\n自動更新し、一覧を並び直しました\n再度、${title} の${action}作業を行ってください`;
+    return `${names[kind]||''} ${title} は、現在のシートには存在しません。\n（すでに消されたか、内容が変えられています）`;
+  }
+  function settingApplyStaleRows(kind,res){if(!res||res.stale!==true||!Array.isArray(res.rows))return false;if(data&&data.settings)data.settings[kind]=res.rows;/* 行がずれたので、各行に打ちかけていた担当者名は消す（行番号でおぼえているため、別の設定の欄に残ってしまう） */page.querySelectorAll(`[data-v1-records="${kind}"] [data-v1-record-staff]`).forEach(input=>{input.value=''});renderSetting(kind,res.rows);return true}
+
   page.addEventListener('submit',e=>{
-    const form=e.target.closest('[data-v1-form]');if(!form)return;e.preventDefault();if(settingOpBusy)return;const kind=form.dataset.v1Form,cfg=configs[kind],msg=page.querySelector(`[data-v1-message="${kind}"]`),payload={kind,rowNumber:Number(form.elements.rowNumber.value||0),staff:String(form.elements.staff.value||'').trim()};msg.classList.remove('error');if(!payload.staff){msg.classList.add('error');msg.textContent='担当者名を入力してください';return}cfg.fields.forEach(([name])=>payload[name]=form.elements[name].value);const busyBtn=form.querySelector('button[type="submit"]');if(!settingBusyStart(busyBtn,SETTING_BUSY_SAVE))return;msg.textContent='';
-    settingRun(busyBtn,'app_adminSaveSettingRow',[payload],res=>{if(!res||res.ok!==true){msg.classList.add('error');msg.textContent=res&&(res.error||res.message)||'保存できません';return}msg.textContent='保存しました。';form.reset();form.elements.rowNumber.value='';if(data&&data.settings)data.settings[kind]=res.rows||[];renderSetting(kind,res.rows||[]);setTimeout(load,150)},text=>{msg.classList.add('error');msg.textContent=text});
+    const form=e.target.closest('[data-v1-form]');if(!form)return;e.preventDefault();if(settingOpBusy)return;const kind=form.dataset.v1Form,cfg=configs[kind],msg=page.querySelector(`[data-v1-message="${kind}"]`),payload={kind,rowNumber:Number(form.elements.rowNumber.value||0),staff:String(form.elements.staff.value||'').trim()};msg.classList.remove('error');if(!payload.staff){msg.classList.add('error');msg.textContent='担当者名を入力してください';return}cfg.fields.forEach(([name])=>payload[name]=form.elements[name].value);if(payload.rowNumber>=2)payload.expected=form._expectedRow||{};const busyBtn=form.querySelector('button[type="submit"]');if(!settingBusyStart(busyBtn,SETTING_BUSY_SAVE))return;msg.textContent='';
+    settingRun(busyBtn,'app_adminSaveSettingRow',[payload],res=>{if(!res||res.ok!==true){msg.classList.add('error');msg.textContent=res&&(res.error||res.message)||'保存できません';if(settingApplyStaleRows(kind,res)){msg.style.whiteSpace='pre-line';msg.textContent=settingStaleText(kind,res,payload.expected,'編集');form.reset();form.elements.rowNumber.value='';form._expectedRow=null}return}msg.textContent='保存しました。';form.reset();form.elements.rowNumber.value='';form._expectedRow=null;if(data&&data.settings)data.settings[kind]=res.rows||[];renderSetting(kind,res.rows||[]);setTimeout(load,150)},text=>{msg.classList.add('error');msg.textContent=text});
   });
 
   page.addEventListener('click',e=>{
-    const clear=e.target.closest('[data-v1-clear]');if(clear){const form=page.querySelector(`[data-v1-form="${clear.dataset.v1Clear}"]`);if(form){form.reset();form.elements.rowNumber.value=''}return}
-    const edit=e.target.closest('[data-v1-edit]');if(edit){const kind=edit.dataset.v1Edit,row=Number(edit.dataset.row),card=edit.closest('.admin-setting-v1-record'),recordStaff=String(card&&card.querySelector('[data-v1-record-staff]')?card.querySelector('[data-v1-record-staff]').value:'').trim(),item=data&&data.settings&&Array.isArray(data.settings[kind])?data.settings[kind].find(x=>Number(x.row)===row):null,form=page.querySelector(`[data-v1-form="${kind}"]`);if(!recordStaff){alert('担当者名を入力してください');return}if(item&&form){form.elements.rowNumber.value=row;if(form.elements.staff)form.elements.staff.value=recordStaff;configs[kind].fields.forEach(([name])=>{if(form.elements[name]){form.elements[name].value=item[name]??'';if(name==='date'&&form.elements[name]._flatpickr)form.elements[name]._flatpickr.setDate(item[name]??'',false,'Y-m-d')}});form.scrollIntoView({behavior:'smooth',block:'center'})}return}
-    const del=e.target.closest('[data-v1-delete]');if(del){if(settingOpBusy)return;const kind=del.dataset.v1Delete,row=Number(del.dataset.row),card=del.closest('.admin-setting-v1-record'),staff=String(card&&card.querySelector('[data-v1-record-staff]')?card.querySelector('[data-v1-record-staff]').value:'').trim();if(!staff){alert('担当者名を入力してください');return}if(!confirm('この設定を削除しますか？'))return;if(!settingBusyStart(del,SETTING_BUSY_DELETE))return;settingRun(del,'app_adminDeleteSettingRow',[kind,row,staff],res=>{if(!res||res.ok!==true){alert(res&&(res.error||res.message)||'削除できません');return}if(data&&data.settings)data.settings[kind]=res.rows||[];renderSetting(kind,res.rows||[]);setTimeout(load,150)},msg=>alert(msg));}
+    const clear=e.target.closest('[data-v1-clear]');if(clear){const form=page.querySelector(`[data-v1-form="${clear.dataset.v1Clear}"]`);if(form){form.reset();form.elements.rowNumber.value='';form._expectedRow=null}return}
+    const edit=e.target.closest('[data-v1-edit]');if(edit){const kind=edit.dataset.v1Edit,row=Number(edit.dataset.row),card=edit.closest('.admin-setting-v1-record'),recordStaff=String(card&&card.querySelector('[data-v1-record-staff]')?card.querySelector('[data-v1-record-staff]').value:'').trim(),item=data&&data.settings&&Array.isArray(data.settings[kind])?data.settings[kind].find(x=>Number(x.row)===row):null,form=page.querySelector(`[data-v1-form="${kind}"]`);if(!recordStaff){alert('担当者名を入力してください');return}if(item&&form){form.elements.rowNumber.value=row;form._expectedRow=Object.assign({},item);if(form.elements.staff)form.elements.staff.value=recordStaff;configs[kind].fields.forEach(([name])=>{if(form.elements[name]){form.elements[name].value=item[name]??'';if(name==='date'&&form.elements[name]._flatpickr)form.elements[name]._flatpickr.setDate(item[name]??'',false,'Y-m-d')}});form.scrollIntoView({behavior:'smooth',block:'center'})}return}
+    const del=e.target.closest('[data-v1-delete]');if(del){if(settingOpBusy)return;const kind=del.dataset.v1Delete,row=Number(del.dataset.row),card=del.closest('.admin-setting-v1-record'),staff=String(card&&card.querySelector('[data-v1-record-staff]')?card.querySelector('[data-v1-record-staff]').value:'').trim();if(!staff){alert('担当者名を入力してください');return}if(!confirm('この設定を削除しますか？'))return;if(!settingBusyStart(del,SETTING_BUSY_DELETE))return;const expected=settingExpectedRow(kind,row);settingRun(del,'app_adminDeleteSettingRow',[kind,row,staff,expected],res=>{if(!res||res.ok!==true){const staleText=settingApplyStaleRows(kind,res)?settingStaleText(kind,res,expected,'削除'):'';alert(staleText||res&&(res.error||res.message)||'削除できません');return}if(data&&data.settings)data.settings[kind]=res.rows||[];renderSetting(kind,res.rows||[]);setTimeout(load,150)},msg=>alert(msg));}
   });
 
   // [検索ワード: adminStatusAutoMonitor10m]
@@ -5472,6 +5664,10 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
 #influenza-admin-mock .admin-settings-v1{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
 #influenza-admin-mock .admin-settings-v1>.admin-setting-v1-card[data-v1-setting="base"]{width:100%}
 #influenza-admin-mock .admin-setting-v2-meta{display:flex;align-items:center;gap:10px}
+/* [検索ワード: adminSettingStateNoWrapV1] 設定カードの「正常」などの文字は折り返さない（スマホで1文字ずつ縦に並ぶのを防ぐ）。説明文の改行（admin-sp-br）はスマホのときだけ効かせ、PCは1行のまま */
+#influenza-admin-mock .admin-setting-v2-meta{flex-shrink:0}
+#influenza-admin-mock .admin-setting-v2-meta b{white-space:nowrap}
+@media (min-width:841px){#influenza-admin-mock .admin-sp-br{display:none}}
 #influenza-admin-mock .admin-setting-v2-meta b{color:var(--admin-green-dark);font-size:12px}
 #influenza-admin-mock .admin-setting-v2-meta b.is-error{color:var(--admin-red)}
 @media(max-width:900px){
