@@ -161,7 +161,7 @@ function respond(name,args){
  if(name==='app_adminGetOperationLogs')return {ok:true,logs:logs()};
  if(name==='app_adminMonitorSettingsAll'){var all={ok:true};['holiday','block','adhoc','extra'].forEach(function(x){all[x]=respond('app_adminMonitor'+x.charAt(0).toUpperCase()+x.slice(1),[]);});return all;}
  if(/^app_adminMonitor/.test(name)){var k=name==='app_adminMonitorSetting'?args[0]:name.replace('app_adminMonitor','').toLowerCase();if(k==='basesettings')k='base';if(k==='spreadsheet')k='sheet';
-  var MK={gas:['通信','RPC応答','GAS RPC応答を確認しました'],sheet:['読み込み','接続・読込','必要シート6種の接続・読込を確認しました'],calendar:['外部サービス','接続・読込','接続確認済み'],logs:['読み込み','ログ取得','ログ取得正常'],base:['反映','読込・枠生成','基本設定・曜日時間表・表示期間の処理を確認しました']}[k]||['反映','予約枠反映確認','読込・処理反映を確認しました'];
+  var MK={gas:['通信','RPC応答','GAS RPC応答を確認しました'],sheet:['読み込み','接続・読込','必要シート9種の接続・読込を確認しました'],calendar:['外部サービス','接続・読込','接続確認済み'],logs:['読み込み','ログ取得','ログ取得正常'],base:['反映','読込・枠生成','基本設定・曜日時間表・表示期間の処理を確認しました']}[k]||['反映','予約枠反映確認','読込・処理反映を確認しました'];
   return {ok:true,monitor:{key:k,label:k,state:'正常',category:MK[0],stage:MK[1],message:MK[2],checkedAt:p2(new Date().getHours())+':'+p2(new Date().getMinutes())},rows:ST[k]||[],logs:logs(),base:ST.base,schedule:ST.schedule};}
  if(name==='app_adminSaveSettingRow'){var p=args[0]||{};var o=Object.assign({},p,{row:(ST[p.kind]||[]).length+2,registrant:p.staff});ST[p.kind]=(ST[p.kind]||[]).concat([o]);return {ok:true,rows:ST[p.kind]};}
  if(name==='app_adminDeleteSettingRow'){ST[args[0]]=(ST[args[0]]||[]).filter(function(r){return Number(r.row)!==Number(args[1]);});return {ok:true,rows:ST[args[0]]};}
@@ -229,6 +229,7 @@ window.google={script:{run:new Proxy({},{get:function(_,k){return runner()[k];}}
  * - 2026.10.6 予約状況：「予約を検索」の見た目をモックで決めた形に変更。検索の枠全体を太い黒縁にして患者一覧との境目をはっきりさせる／「予約を検索」の文字を「患者情報一覧」と同じ大きさ・太さ・色にする／入力欄は、選んだとき（カーソルを入れたとき）も太い黒線にせず細い緑の線にする。動きは変更なし [検索ワード: adminReservationSearchV1]
  * - 2026.10.6 予約状況：右の枠の並びをモックで決めた形に変更。もともと「患者情報一覧」があった見出しの場所を「予約を検索」にし、そのすぐ下に黒縁の検索の枠（入力欄・検索・消す・結果。枠の中の「予約を検索」の文字は無くす）、その下に「患者情報一覧」の見出し、その下に〇月〇日の予約一覧、の順にする（検索の上に「一覧」の文字があると違和感があるため）。窓口予約タブは今までどおり（見出しは「患者情報入力」。検索は出さない）。動きは変更なし [検索ワード: adminReservationSearchV1]
  * - 2026.10.6 上のボタンに「4. グラフ」を追加（紫のボタン。PCは4つ横並び、スマホは今までどおり縦に積み、スクロールすると選んでいるボタンだけ残る）。押すと、「接種済み（自動）」の集計を年度ごとに表示する：受付方法・診察券・性別（輪の形の円グラフ）、住所分布・年代（横棒）、傾向（1つ前の年度との比較：同じ日までの件数の差、割合が大きく増えた・減った項目、項目ごとの割合の差）。年度は右上のボタンで切り替え（新しい年度のデータが入ると自動でボタンが増える）。数字は「グラフ」シートと同じ集計で、件数と割合だけ（氏名・電話番号・番地は出ない）。読み込みは「4. グラフ」を開いたときだけで、ほかの3つの画面の読み込みは増えない。サーバー側は graph.gs の app_adminGetGraphData [検索ワード: adminGraphTabV1]
+ * - 2026.10.6 「4. グラフ」の傾向：色を入れ替え。▲（増えた）＝青、▼（減った）＝赤（これまでは▲＝赤、▼＝青）。記号・数字・並びは変更なし [検索ワード: adminGraphTabV1]
  * - 既存表記・既存レイアウトは無断変更しない
  -->
 <script id="admin-counter-selected-card-v1">
@@ -6587,6 +6588,7 @@ DEVスマホ上部3タブ：EXECと同じsticky位置を維持するため、親
 上のボタンに「4. グラフ」を追加。「接種済み（自動）」の集計（「グラフ」シートと同じ数字）を、年度ごとに画面で見られる。
 -->
 <style id="admin-graph-tab-v1">
+/* 傾向の色：▲増えた＝青、▼減った＝赤（「マイナスは赤」の感覚に合わせる。良い・悪いの意味ではない） */
 /* 上のボタンを4つ並べる（PC。900px以下は今までどおり縦に積む） */
 @media(min-width:900.01px){#influenza-admin-mock .admin-main-tabs{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
 #influenza-admin-mock .admin-main-tab[data-admin-tab="graph"][aria-selected="false"]{background:#f1ecf8!important;border-color:#cfc3e3!important;color:#5b4688!important}
@@ -6628,14 +6630,14 @@ DEVスマホ上部3タブ：EXECと同じsticky位置を維持するため、親
 #influenza-admin-mock .admin-graph-count span{display:block;font-size:13px;color:var(--admin-muted)}
 #influenza-admin-mock .admin-graph-count b{font-size:26px;font-weight:900;color:var(--admin-text)}
 #influenza-admin-mock .admin-graph-count em{font-style:normal;font-size:14px;color:var(--admin-muted);margin-left:10px}
-#influenza-admin-mock .admin-graph-count b.is-up{color:var(--admin-red)}
-#influenza-admin-mock .admin-graph-count b.is-down{color:var(--admin-blue)}
+#influenza-admin-mock .admin-graph-count b.is-up{color:var(--admin-blue)}
+#influenza-admin-mock .admin-graph-count b.is-down{color:var(--admin-red)}
 #influenza-admin-mock .admin-graph-moves{display:grid;gap:8px;margin-bottom:16px}
 #influenza-admin-mock .admin-graph-moves>div{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 #influenza-admin-mock .admin-graph-moves-label{flex:none;width:96px;font-size:14px;font-weight:800;color:var(--admin-text)}
 #influenza-admin-mock .admin-graph-chip{display:inline-block;padding:5px 12px;border-radius:999px;font-size:14px;font-weight:800}
-#influenza-admin-mock .admin-graph-chip.is-up{background:var(--admin-red-soft);color:var(--admin-red)}
-#influenza-admin-mock .admin-graph-chip.is-down{background:#e6f0f7;color:var(--admin-blue)}
+#influenza-admin-mock .admin-graph-chip.is-up{background:#e6f0f7;color:var(--admin-blue)}
+#influenza-admin-mock .admin-graph-chip.is-down{background:var(--admin-red-soft);color:var(--admin-red)}
 #influenza-admin-mock .admin-graph-chip.is-none{background:transparent;color:var(--admin-muted);font-weight:500;padding-left:0}
 #influenza-admin-mock .admin-graph-tgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px}
 #influenza-admin-mock .admin-graph-ttable{margin-bottom:14px}
@@ -6647,8 +6649,8 @@ DEVスマホ上部3タブ：EXECと同じsticky位置を維持するため、親
 #influenza-admin-mock .admin-graph-thead span{white-space:nowrap}
 #influenza-admin-mock .admin-graph-tprev{color:var(--admin-muted)}
 #influenza-admin-mock .admin-graph-diff{font-weight:800;white-space:nowrap}
-#influenza-admin-mock .admin-graph-diff.is-up{color:var(--admin-red)}
-#influenza-admin-mock .admin-graph-diff.is-down{color:var(--admin-blue)}
+#influenza-admin-mock .admin-graph-diff.is-up{color:var(--admin-blue)}
+#influenza-admin-mock .admin-graph-diff.is-down{color:var(--admin-red)}
 #influenza-admin-mock .admin-graph-diff.is-same{color:var(--admin-muted);font-weight:500}
 #influenza-admin-mock .admin-graph-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:10px 14px;margin:14px 0 4px;color:var(--admin-muted);font-size:13px}
 #influenza-admin-mock .admin-graph-foot button{min-height:38px;padding:0 16px;border-radius:8px;border:1px solid var(--admin-line);background:var(--admin-surface-strong);color:var(--admin-text);font:inherit;font-size:14px;font-weight:800;cursor:pointer}
