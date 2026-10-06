@@ -6681,14 +6681,23 @@ DEVスマホ上部3タブ：EXECと同じsticky位置を維持するため、親
 #influenza-admin-mock .admin-graph-splitnums span:first-child{min-width:132px}
 #influenza-admin-mock .admin-graph-splitnums span:last-child{min-width:160px}
 #influenza-admin-mock .admin-graph-splitnums b{font-weight:900}
+/* 傾向の表は、1つずつ枠で囲む（開いたり閉じたりはしない、ただの枠） */
+#influenza-admin-mock .admin-graph-ttable{margin-bottom:12px;padding:12px 12px 6px;border:1px solid var(--admin-line);border-radius:10px;background:var(--admin-surface)}
+#influenza-admin-mock .admin-graph-ttable .admin-graph-trow:last-child{border-bottom:0}
 /* 傾向の表が4つ並ぶとき（年代別 WEB利用率が増えたとき）は、広い画面で4列、中くらいの画面で2列にする */
-@media(min-width:1341px){
-  #influenza-admin-mock .admin-graph-tgrid[data-cols="4"]{grid-template-columns:repeat(4,minmax(0,1fr));gap:40px}
-  #influenza-admin-mock .admin-graph-tgrid[data-cols="4"] .admin-graph-ttable{max-width:300px}
+@media(min-width:1361px){
+  #influenza-admin-mock .admin-graph-tgrid[data-cols="4"]{grid-template-columns:repeat(4,minmax(0,330px));justify-content:space-between;gap:12px}
   #influenza-admin-mock .admin-graph-tgrid[data-cols="4"] .admin-graph-trow{grid-template-columns:minmax(0,1fr) 56px 56px 66px}
 }
-@media(min-width:901px) and (max-width:1340px){
+@media(min-width:901px) and (max-width:1360px){
   #influenza-admin-mock .admin-graph-tgrid[data-cols="4"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:900px){
+  #influenza-admin-mock .admin-graph-tgrid{gap:0}
+}
+@media(max-width:760px){
+  #influenza-admin-mock .admin-graph-ttable{padding:10px 10px 4px}
+  #influenza-admin-mock .admin-graph-ttable .admin-graph-trow{grid-template-columns:minmax(0,1fr) 54px 54px 66px}
 }
 @media(max-width:760px){
   #influenza-admin-mock .admin-graph-splitrows li{grid-template-columns:68px minmax(0,1fr);gap:2px 8px;padding:6px 0;font-size:14px}
