@@ -152,7 +152,7 @@ var MOCK_GRAPH={"ok":true,"source":"接種済み（自動）","cancelled":0,"noS
 /* 管理画面の版の番号の見本。ふつうは同じ番号を返す。
    アドレスの最後に ?stale=1 を付けて開くと、「開いたあとに書き換えてデプロイされた」ことにして、数秒後に古い画面の案内を出す（本体の仕組みをそのまま動かす） */
 var MOCK_STALE_DEMO=/[?&]stale=1(&|$)/.test(location.search);var mockOpenedAt=new Date().getTime();
-function mockScreenVersion(){return (MOCK_STALE_DEMO&&new Date().getTime()-mockOpenedAt>3500)?'2026.10.07-01':'2026.10.06-04';}
+function mockScreenVersion(){return (MOCK_STALE_DEMO&&new Date().getTime()-mockOpenedAt>3500)?'2026.10.07-01':'2026.10.06-05';}
 if(MOCK_STALE_DEMO){setTimeout(function(){var realNow=Date.now;Date.now=function(){return realNow.call(Date)+2*60000;};try{window.dispatchEvent(new Event('focus'));}finally{Date.now=realNow;}},5000);}
 function respond(name,args){
  if(name==='api_getAdminDashboard'){var keys=args[0]||[];return {ok:true,slots:slotsFor(keys),data:rows.filter(function(r){return keys.indexOf(r[1].slice(2,10))>=0;}),marks:marksFor(keys),schedule:{times:times,activeTimes:times,collapseInactive:false,intervalMinutes:30,startTime:'09:30',endTime:'17:00'}};}
@@ -241,6 +241,7 @@ window.google={script:{run:new Proxy({},{get:function(_,k){return runner()[k];}}
  * - 2026.10.6 古い画面の案内：文面を「管理画面のバージョンが更新されました。」「管理画面を1度閉じ、再度開き直してからやり直してください。」に変更（モックで決めた形）。スマホでは、1段目を1行、2段目を「管理画面を1度閉じ、再度開き直してから」「やり直してください。」の2行にして中央にそろえる（文の途中では折り返さない）。「管理者としてログイン中」の下に、開いたときの版の番号を「バージョン 〇〇」と表示（スマホは診療所名の下の右側）。今あるもの（題名・「管理者としてログイン中」・上のボタン）の位置は動かしていない。番号を上げるのは code.gs か dev.html を直したときだけ [検索ワード: adminScreenVersionNoticeV1／adminVersionLabelV1]
  * - 2026.10.6 「4. グラフ」：「未記入 ◯件のうち、管理画面での受付：◯件」の案内の文字を、灰色からふつうの文字色に変更（読みにくかったため。大きさ・太さ・位置はそのまま。傾向の枠の下の注釈は灰色のまま）。モックで決めた形 [検索ワード: adminGraphNoteColorV1]
  * - 2026.10.6 古い画面の案内：2段目の文面を「ブラウザの更新ボタン(F5)を押すか、／この画面を1度閉じ、開き直してから／作業をやり直してください。」に変更（モックで決めた形。1段目「管理画面のバージョンが更新されました。」はそのまま）。PCもスマホも、この改行どおりの3行で中央にそろえる。枠の大きさ・色・文字の大きさ・出る条件は変更なし [検索ワード: adminVersionNoticeTextV2]
+ * - 2026.10.6 「4. グラフ」：「年代」の下に、横いっぱいの枠「年代別 WEB／管理画面の利用率」を追加（年代ごとに、WEB＝青・管理画面＝緑の横棒と、割合・件数。昔の年度は「窓口」と出る。その年代が0件のときは「—」）。傾向の枠に表「年代別 WEB利用率」（今の年度・前の年度・差）を追加し、表の並びを「受付方法・診察券・性別 → 年代 → 年代別 WEB利用率 → 住所分布」に変更。傾向の表は1つずつ枠で囲み（開閉しない枠）、広い画面では4列・少し狭い画面では2列・スマホでは1列で出す。モックで決めた形。上のボタン・円グラフ・住所分布・年代の位置は変更なし（傾向の枠は新しい枠のぶん下へ下がる） [検索ワード: adminGraphAgeChannelV1]
  * - 既存表記・既存レイアウトは無断変更しない
  -->
 <script id="admin-counter-selected-card-v1">
@@ -6855,19 +6856,21 @@ DEVスマホ上部3タブ：EXECと同じsticky位置を維持するため、親
     const rightColor = esc(section.rightColor || '#b6d7a8');
     const items = (section.rows || []).map(r => {
       const total = Number(r.total) || 0, left = Number(r.left) || 0, right = Number(r.right) || 0;
-      const leftPct = total > 0 ? Math.round(left / total * 100) : 0;
-      const rightPct = total > 0 ? 100 - leftPct : 0;
+      // その年代が0件のときは、割合を出さず「—」にする（0%と見分けるため）
+      const leftPct = total > 0 ? Math.round(left / total * 100) + '%' : '—';
+      const rightPct = total > 0 ? (100 - Math.round(left / total * 100)) + '%' : '—';
       const bar = total > 0
         ? '<i style="width:' + (left / total * 100).toFixed(2) + '%;background:' + leftColor + '"></i><i style="width:' + (right / total * 100).toFixed(2) + '%;background:' + rightColor + '"></i>'
         : '';
       return '<li><span class="admin-graph-name">' + esc(r.label) + '</span><span class="admin-graph-split">' + bar + '</span>' +
-        '<span class="admin-graph-splitnums"><span>' + esc(leftLabel) + ' <b>' + leftPct + '%</b>（' + num(left) + '件）</span>' +
-        '<span>' + esc(rightLabel) + ' <b>' + rightPct + '%</b>（' + num(right) + '件）</span></span></li>';
+        '<span class="admin-graph-splitnums"><span>' + esc(leftLabel) + ' <b>' + leftPct + '</b>（' + num(left) + '件）</span>' +
+        '<span>' + esc(rightLabel) + ' <b>' + rightPct + '</b>（' + num(right) + '件）</span></span></li>';
     }).join('');
     return '<article class="admin-graph-card is-full"><h3>' + esc(section.name) + '</h3>' +
       '<p class="admin-graph-splitlegend"><span><i style="background:' + leftColor + '"></i>' + esc(leftLabel) + '</span>' +
       '<span><i style="background:' + rightColor + '"></i>' + esc(rightLabel) + '</span></p>' +
-      '<ul class="admin-graph-splitrows">' + items + '</ul></article>';
+      '<ul class="admin-graph-splitrows">' + items + '</ul>' +
+      (section.note ? '<p class="admin-graph-note">' + esc(section.note) + '</p>' : '') + '</article>';
   }
 
   function diffCell(diff, same) {
@@ -6880,8 +6883,10 @@ DEVスマホ上部3タブ：EXECと同じsticky位置を維持するため、親
 
   function trendTable(table, season, trend) {
     const rows = (table.rows || []).map(r =>
-      '<div class="admin-graph-trow"><span class="admin-graph-tname">' + esc(r.label) + '</span><b>' + pct1(r.now) + '</b>' +
-      '<span class="admin-graph-tprev">' + pct1(r.prev) + '</span>' + diffCell(r.diff, trend.same) + '</div>').join('');
+      // 数字が無い（その年代が0件で割合を出せない）ときは「—」を出す [検索ワード: adminGraphAgeChannelV1]
+      '<div class="admin-graph-trow"><span class="admin-graph-tname">' + esc(r.label) + '</span><b>' + (r.now == null ? '—' : pct1(r.now)) + '</b>' +
+      '<span class="admin-graph-tprev">' + (r.prev == null ? '—' : pct1(r.prev)) + '</span>' +
+      (r.diff == null ? '<span class="admin-graph-diff is-same">—</span>' : diffCell(r.diff, trend.same)) + '</div>').join('');
     return '<div class="admin-graph-ttable"><h4>' + esc(table.name) + '</h4>' +
       '<div class="admin-graph-trow admin-graph-thead"><span></span><span>' + esc(season.title) + '</span><span>' + esc(trend.prevTitle) + '</span><span>差</span></div>' +
       rows + '</div>';
