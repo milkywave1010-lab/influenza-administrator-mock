@@ -6686,7 +6686,7 @@ DEVスマホ上部3タブ：EXECと同じsticky位置を維持するため、親
 #influenza-admin-mock .admin-graph-ttable .admin-graph-trow:last-child{border-bottom:0}
 /* 傾向の表が4つ並ぶとき（年代別 WEB利用率が増えたとき）は、広い画面で4列、中くらいの画面で2列にする */
 @media(min-width:1361px){
-  #influenza-admin-mock .admin-graph-tgrid[data-cols="4"]{grid-template-columns:repeat(4,minmax(0,330px));justify-content:space-between;gap:12px}
+  #influenza-admin-mock .admin-graph-tgrid[data-cols="4"]{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
   #influenza-admin-mock .admin-graph-tgrid[data-cols="4"] .admin-graph-trow{grid-template-columns:minmax(0,1fr) 56px 56px 66px}
 }
 @media(min-width:901px) and (max-width:1360px){
