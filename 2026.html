@@ -54,6 +54,93 @@ function logs(){var t=new Date();function at(m){var d=new Date(t.getTime()-m*600
   {time:at(300),type:'設定変更',actor:'事務',source:'管理画面',target:'臨時枠',before:'',after:'',action:'臨時枠を追加しました',message:'',state:'正常'},
   {time:at(1500),type:'新規予約',actor:'事務',source:'管理画面',target:rows[19]?rows[19][0]:'',before:'未登録',after:'予約処理確定',action:'予約を登録',message:'',state:'正常'}];}
 var NO={ok:false,error:'表示確認用モックのため、この操作は行えません。',message:'表示確認用モックのため、この操作は行えません。'};
+/* 検索の見本：本体（code.gs）の探す処理をそのまま使い、上の架空データを予約シートに見立てて探す */
+var mockSearch=(function(){
+var HEAD=['予約ID','枠ID','氏名（漢字）','氏名（ふりがな）','生年月日','年齢','性別','住所','電話番号','診察券有無','診察券番号','申込経路（WEB/管理画面）','状態','登録日時','受付担当','備考'];
+var sheet={getLastRow:function(){return rows.length+1;},getLastColumn:function(){return 16;},getRange:function(r,c,n,m){return {getDisplayValues:function(){return [HEAD].concat(rows).slice(r-1,r-1+n).map(function(x){var o=[];for(var i=c-1;i<c-1+m;i++)o.push(x[i]==null?'':String(x[i]));return o;});}};}};
+var SH_RESV='予約';var SpreadsheetApp={getActive:function(){return {getSheetByName:function(n){return n===SH_RESV?sheet:null;}};}};function adminStatusSettingsAuthorize_(){}
+const ADMIN_SEARCH_MAX_RESULTS_ = 50;   // 画面へ返す件数の上限
+const ADMIN_SEARCH_COLUMNS_ = 16;       // A〜P列（Q列は並べ替えの一時用なので探さない）
+
+/** 比べる前に文字をそろえる：全角→半角、カタカナ→ひらがな、大文字→小文字、空白を取る */
+function adminSearchNormalize_(value) {
+  let text = String(value == null ? '' : value);
+  try { text = text.normalize('NFKC'); } catch (_) {}
+  text = text.replace(/[ァ-ヶ]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+  return text.toLowerCase().replace(/\s+/g, '');
+}
+
+/** ハイフンの類を取る（長音の「ー」は文字なので取らない） */
+function adminSearchStripHyphen_(text) {
+  return String(text == null ? '' : text).replace(/[-‐-―−－]/g, '');
+}
+
+function app_adminSearchReservations(query) {
+  try {
+    adminStatusSettingsAuthorize_();
+
+    const rawQuery = String(query == null ? '' : query).trim();
+    const needle = adminSearchNormalize_(rawQuery);
+    if (!needle) return { ok:false, message:'検索する文字を入力してください。' };
+    const needlePlain = adminSearchStripHyphen_(needle);
+
+    const sh = SpreadsheetApp.getActive().getSheetByName(SH_RESV);
+    if (!sh) return { ok:false, message:'予約シートが存在しません。' };
+    const lastRow = sh.getLastRow();
+    if (lastRow < 2) return { ok:true, query:rawQuery, total:0, limit:ADMIN_SEARCH_MAX_RESULTS_, results:[] };
+
+    const columnCount = Math.min(sh.getLastColumn(), ADMIN_SEARCH_COLUMNS_);
+    // 表示されている文字で比べる（Ctrl+F と同じ）。見出し（1行目）とデータを1回で読む。
+    const values = sh.getRange(1, 1, lastRow, columnCount).getDisplayValues();
+    const header = values[0];
+    const cell = (row, index) => String(index < row.length && row[index] != null ? row[index] : '').trim();
+
+    const results = [];
+    let total = 0;
+    for (let r = 1; r < values.length; r++) {
+      const row = values[r];
+      const reserveId = cell(row, 0);
+      const slotId = cell(row, 1);
+      if (!reserveId && !slotId) continue; // 空の行は対象外
+
+      let hitIndex = -1;
+      for (let c = 0; c < row.length; c++) {
+        const text = adminSearchNormalize_(row[c]);
+        if (!text) continue;
+        if (text.indexOf(needle) >= 0 || (needlePlain && adminSearchStripHyphen_(text).indexOf(needlePlain) >= 0)) {
+          hitIndex = c;
+          break;
+        }
+      }
+      if (hitIndex < 0) continue;
+
+      total++;
+      if (results.length >= ADMIN_SEARCH_MAX_RESULTS_) continue;
+
+      const slotMatch = /^S-(\d{8})-(\d{2})(\d{2})$/.exec(slotId);
+      const idMatch = /^R-(\d{8})-(\d{2})(\d{2})-\d+$/.exec(reserveId);
+      const when = slotMatch || idMatch;
+      const hitText = cell(row, hitIndex).replace(/\s+/g, ' ');
+      results.push({
+        reserveId: reserveId,
+        slotId: slotId,
+        dateKey: when ? when[1] : '',
+        time: when ? when[2] + ':' + when[3] : '',
+        name: cell(row, 2),
+        kana: cell(row, 3),
+        channel: cell(row, 11),
+        status: cell(row, 12),
+        hitLabel: String(header[hitIndex] || '').replace(/\s+/g, ' ').trim(),
+        hitText: hitText.length > 40 ? hitText.slice(0, 40) + '…' : hitText
+      });
+    }
+
+    return { ok:true, query:rawQuery, total:total, limit:ADMIN_SEARCH_MAX_RESULTS_, results:results };
+  } catch (err) {
+    return { ok:false, message:'検索エラー: ' + String(err && err.message || err) };
+  }
+}
+return app_adminSearchReservations;})();
 function respond(name,args){
  if(name==='api_getAdminDashboard'){var keys=args[0]||[];return {ok:true,slots:slotsFor(keys),data:rows.filter(function(r){return keys.indexOf(r[1].slice(2,10))>=0;}),marks:marksFor(keys),schedule:{times:times,activeTimes:times,collapseInactive:false,intervalMinutes:30,startTime:'09:30',endTime:'17:00'}};}
  if(name==='api_getReservations')return {ok:true,data:rows.filter(function(r){return r[1].slice(2,10)===args[0];})};
@@ -72,6 +159,7 @@ function respond(name,args){
  if(name==='app_adminDeleteSettingRow'){ST[args[0]]=(ST[args[0]]||[]).filter(function(r){return Number(r.row)!==Number(args[1]);});return {ok:true,rows:ST[args[0]]};}
  if(name==='app_adminSaveBaseSettings')return {ok:true,base:Object.assign(ST.base,args[0])};
  if(name==='app_adminSaveBaseSchedule')return {ok:true,schedule:ST.schedule};
+ if(name==='app_adminSearchReservations')return mockSearch(args[0]);
  return NO;
 }
 function runner(){var s=function(){},f=function(){};var p=new Proxy({},{get:function(_,k){if(k==='withSuccessHandler')return function(h){s=h;return p;};if(k==='withFailureHandler')return function(h){f=h;return p;};if(k==='withUserObject')return function(){return p;};
@@ -126,6 +214,9 @@ window.google={script:{run:new Proxy({},{get:function(_,k){return runner()[k];}}
  * - 2026.10.5 予約状況のカレンダー：どの設定が効いているかを表示。休診日＝無地のグレーに「休診日」と備考／臨時休診時間＝ピンクの斜め線に「休診時間」・時間・備考（どちらも枠も予約もないマスが対象で、上下に続くマスは1つにまとめる。「受付なし」の帯では分かれる）／臨時枠＝紫の札「臨時枠 〇枠」／接種増減枠＝薄い青の札「増減 +〇」「増減 −〇」。予約のカード・「＋ 空き」ボタンの動きは変更なし。サーバーがしるしの情報を返さないときは、今までどおりの表示 [検索ワード: adminCalendarMarksV1]
  * - 2026.10.5 窓口予約：「受付担当」の見出しに、氏名と同じ赤い「必須」の印を追加（受付担当を必須にしたのに印が無かったため）[検索ワード: adminBookStaffRequiredV1]
  * - 2026.10.6 ステータス・設定（スマホ）：設定カードの「正常」が1文字ずつ縦に並ぶのを修正。「正常」などの状態の文字は折り返さないようにし、臨時枠・接種増減枠の説明文はスマホのときだけ決まった位置で改行する（臨時枠：「…新しく枠を作る／（開始15分前まで予約可能）」、接種増減枠：「例）家族でまとめて接種したいが／枠が足りない時・検診等が入って減らしたい時」）。文言とPCの見え方は変更なし [検索ワード: adminSettingStateNoWrapV1]
+ * - 2026.10.6 読み込みを軽くした（見た目・文言は変更なし）。①開いた直後：「1日分」を読んですぐ捨てるのをやめ、最初から週表示で「今週分」を読む。②「今週分」を続けて2回読むのをやめた（読み込み中・読み込んで5秒以内は、タブを押したときの読み直しをしない。上の件数表示は、今読んだ今週分をそのまま使う）。これで開いた直後の問い合わせは7回→5回 [検索ワード: adminLoadDedupV1]
+ * - 2026.10.6 ステータス・設定：休診日・臨時休診（時間）・臨時枠・接種増減枠の4つの監視を、1回の問い合わせでまとめて受け取る（9回→6回）。まとめた問い合わせが失敗したときは、今までどおり4回に分けて問い合わせる [検索ワード: adminMonitorSettingsAllV1]
+ * - 2026.10.6 予約状況：「患者情報一覧」の上に「予約を検索」の窓を追加。入れた文字が予約シートのどこか（氏名・ふりがな・生年月日・住所・電話番号・診察券番号・予約ID・受付担当・備考など全項目）に含まれている予約を一覧で出す（シートの Ctrl+F と同じ考え方。空白の有無・全角と半角・ひらがなとカタカナ・ハイフンの有無は気にしなくてよい）。探すのは予約シートだけ。「検索」ボタンか Enter で探す（1文字ごとには探さない）。結果を押すと、その予約の週を読み込み、カレンダーの患者名を押したときと同じ動きで患者カードへ移動する（状態の絞り込みは「すべて」に戻す）。「消す」で窓と結果を空にする。今までの表示・動きは変更なし（窓を足しただけ）[検索ワード: adminReservationSearchV1]
  * - 既存表記・既存レイアウトは無断変更しない
  -->
 <script id="admin-counter-selected-card-v1">
@@ -1068,7 +1159,10 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
   let currentSlots = [];
   // [検索ワード: adminCalendarMarksV1] カレンダーに出す設定のしるし（休診日・臨時休診時間・接種増減枠）。サーバーが返さなければ null（しるしなし）
   let currentMarks = null;
+  // [検索ワード: adminLoadDedupV1] カレンダーの中身を最後に入れ替えた時刻（直後の読み直しを省くために使う）
+  let lastDashboardAppliedAt = 0;
   function applyDashboardMarks(result) {
+    lastDashboardAppliedAt = Date.now();
     currentMarks =
       result && result.marks && typeof result.marks === "object"
         ? result.marks
@@ -2437,7 +2531,9 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
 
 
   let adminSideMetricsLoaded = false;
-  async function updateMetrics(forceRefresh = false) {
+  // [検索ワード: adminLoadDedupV1]
+  // preloaded：呼び出し元がたった今読み込んだ結果（{ key, result }）。今週分と同じものなら、それを使って読み直さない。
+  async function updateMetrics(forceRefresh = false, preloaded = null) {
 
     try {
       const today = new Date();
@@ -2453,10 +2549,13 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
       );
       const weekKeys = weekDates.map(dateToKey);
 
-      const result = await requestAdminDashboard(
-        weekKeys,
-        forceRefresh
-      );
+      const result =
+        preloaded && preloaded.result && preloaded.key === dashboardKey(weekKeys)
+          ? preloaded.result
+          : await requestAdminDashboard(
+              weekKeys,
+              forceRefresh
+            );
 
       const reservations =
         Array.isArray(result.data)
@@ -2774,7 +2873,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
       renderCalendar();
       renderRows();
       prefetchAdjacentDashboards();
-      await updateMetrics(true);
+      await updateMetrics(true, { key: dashboardKey(dateKeys), result: result });
     } catch (error) {
       console.error("登録後の裏読み直しエラー", error);
     }
@@ -2850,7 +2949,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
       }
       prefetchAdjacentDashboards();
 
-      await updateMetrics(forceRefresh);
+      await updateMetrics(forceRefresh, { key: dashboardKey(dateKeys), result: result });
 
       setStatus(true);
       loadMessage.textContent =
@@ -3283,6 +3382,13 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
       root.dataset.adminMainTab !== "manage"
     ) return;
 
+    // [検索ワード: adminLoadDedupV1]
+    // いま予約状況を読み込んでいる最中、または読み込んで5秒以内なら、読み直さない（同じ週を続けて2回読むのを防ぐ）。
+    if (
+      refreshButton.dataset.loading === "true" ||
+      Date.now() - lastDashboardAppliedAt < 5000
+    ) return;
+
     adminCalendarOnlyRefreshing = true;
 
     try {
@@ -3358,6 +3464,18 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
 
   bookDate.value =
     formatDateInput(today);
+
+  // [検索ワード: adminLoadDedupV1]
+  // 開いた直後は、このあとの処理がすぐ「週表示」に切り替えて読み込む。ここで「1日分」を読むと、読んですぐ捨てることになる。
+  // そのため、最初から週表示にして「今週分」を読む。あとから来る週表示への切り替えは、同じ読み込みをそのまま使う（サーバーへは1回だけ）。
+  const initialWeekButton = root.querySelector('[data-range="week"]');
+  if (initialWeekButton) {
+    rangeButtons.forEach(item =>
+      item.setAttribute("aria-pressed", String(item === initialWeekButton))
+    );
+    currentView = "week";
+    root.dataset.rangeView = currentView;
+  }
 
   updatePeriodButtons();
   reloadAll();
@@ -5272,6 +5390,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
     if(method==='app_adminMonitorAdhoc'){chain.app_adminMonitorAdhoc();return}
     if(method==='app_adminMonitorExtra'){chain.app_adminMonitorExtra();return}
     if(method==='app_adminMonitorSetting'){chain.app_adminMonitorSetting(a[0]);return}
+    if(method==='app_adminMonitorSettingsAll'){if(typeof chain.app_adminMonitorSettingsAll!=='function'){fail('未対応の管理APIです: '+method);return}chain.app_adminMonitorSettingsAll();return}
     if(method==='app_adminSaveBaseSettings'){chain.app_adminSaveBaseSettings(a[0]);return}
     if(method==='app_adminSaveBaseSchedule'){chain.app_adminSaveBaseSchedule(a[0]);return}
     if(method==='app_adminSaveSettingRow'){chain.app_adminSaveSettingRow(a[0]);return}
@@ -5489,11 +5608,29 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
     // [検索ワード: adminSettingMonitorDedicatedRpc]
     // 休診日・臨時休診日・臨時枠・接種増減枠は同一構成の専用RPCで監視する。
     const settingApis={holiday:'app_adminMonitorHoliday',block:'app_adminMonitorBlock',adhoc:'app_adminMonitorAdhoc',extra:'app_adminMonitorExtra'};
-    Object.keys(settingApis).forEach(kind=>{
-      runner(settingApis[kind],[],res=>{
-        if(res&&res.monitor)setMonitor(kind,res.monitor);else rpcFailure(kind,'応答形式が不正です');
-        data.settings[kind]=res&&Array.isArray(res.rows)?res.rows:[];renderSetting(kind,data.settings[kind]);
-      },msg=>{rpcFailure(kind,msg);data.settings[kind]=[];renderSetting(kind,[])});
+    const applySettingMonitor=(kind,res)=>{
+      if(res&&res.monitor)setMonitor(kind,res.monitor);else rpcFailure(kind,'応答形式が不正です');
+      data.settings[kind]=res&&Array.isArray(res.rows)?res.rows:[];renderSetting(kind,data.settings[kind]);
+    };
+    const loadSettingMonitorsSeparately=()=>{
+      Object.keys(settingApis).forEach(kind=>{
+        runner(settingApis[kind],[],res=>applySettingMonitor(kind,res),msg=>{rpcFailure(kind,msg);data.settings[kind]=[];renderSetting(kind,[])});
+      });
+    };
+    // [検索ワード: adminMonitorSettingsAllV1]
+    // 4つの設定の監視は、1回の問い合わせでまとめて受け取る（サーバー側で同じシートを何度も読まないため）。
+    // まとめた問い合わせが使えない・失敗したときは、今までどおり4回に分けて問い合わせる。
+    const settingLoadData=data;
+    runner('app_adminMonitorSettingsAll',[],res=>{
+      if(data!==settingLoadData)return; // 途中で読み直しが始まっていたら、古い結果は使わない
+      if(res&&Object.keys(settingApis).every(kind=>res[kind]&&typeof res[kind]==='object')){
+        Object.keys(settingApis).forEach(kind=>applySettingMonitor(kind,res[kind]));
+        return;
+      }
+      loadSettingMonitorsSeparately();
+    },()=>{
+      if(data!==settingLoadData)return;
+      loadSettingMonitorsSeparately();
     });
   }
 
@@ -6128,3 +6265,256 @@ DEVスマホ上部3タブ：EXECと同じsticky位置を維持するため、親
   }
 }
 </style>
+
+<style id="admin-reservation-search-v1">
+/* [検索ワード: adminReservationSearchV1] 予約状況：患者情報一覧の上の「予約を検索」 */
+#influenza-admin-mock .admin-resv-search{display:grid;gap:8px;margin:0 0 14px;padding:12px;border:1px solid var(--admin-line);border-radius:8px;background:var(--admin-surface-strong)}
+#influenza-admin-mock .admin-resv-search-label{color:var(--admin-muted);font-size:12px;font-weight:700}
+#influenza-admin-mock .admin-resv-search-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center}
+#influenza-admin-mock .admin-resv-search-input{width:100%;min-width:0;height:44px;padding:0 11px;border:1px solid #d8d0c3;border-radius:8px;background:#fff;color:var(--admin-text);font:inherit;font-size:15px}
+#influenza-admin-mock .admin-resv-search-row button{min-height:44px;white-space:nowrap}
+#influenza-admin-mock .admin-resv-search-row button:disabled{opacity:.6;cursor:default}
+#influenza-admin-mock .admin-resv-search-message{min-height:1.4em;color:var(--admin-muted);font-size:12px;font-weight:700;overflow-wrap:anywhere}
+#influenza-admin-mock .admin-resv-search-message[data-kind="error"]{color:var(--admin-red)}
+#influenza-admin-mock .admin-resv-search-message:empty{display:none}
+#influenza-admin-mock .admin-resv-search-results{display:grid;gap:6px;max-height:300px;overflow-y:auto;overscroll-behavior:contain}
+#influenza-admin-mock .admin-resv-search-results:empty{display:none}
+#influenza-admin-mock .admin-resv-search-hit{display:grid;gap:3px;width:100%;padding:9px 11px;border:1px solid var(--admin-line);border-radius:8px;background:var(--admin-surface);color:var(--admin-text);text-align:left;font:inherit}
+#influenza-admin-mock .admin-resv-search-hit:hover{border-color:var(--admin-green)}
+#influenza-admin-mock .admin-resv-search-hit[aria-current="true"]{border-color:var(--admin-green);background:var(--admin-green-soft)}
+#influenza-admin-mock .admin-resv-search-hit-main{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;font-size:14px;font-weight:800}
+#influenza-admin-mock .admin-resv-search-hit-state{padding:1px 8px;border-radius:999px;background:var(--admin-green-soft);color:var(--admin-green-dark);font-size:11px;font-weight:800}
+#influenza-admin-mock .admin-resv-search-hit-state[data-state="cancelled"]{background:var(--admin-red-soft);color:var(--admin-red)}
+#influenza-admin-mock .admin-resv-search-hit-sub{color:var(--admin-muted);font-size:11px;font-weight:600;overflow-wrap:anywhere}
+@media(max-width:560px){
+  #influenza-admin-mock .admin-resv-search-row{grid-template-columns:minmax(0,1fr) auto}
+  #influenza-admin-mock .admin-resv-search-input{grid-column:1/-1}
+  #influenza-admin-mock .admin-resv-search-row button[data-resv-search-go]{grid-column:1}
+}
+</style>
+<script id="admin-reservation-search-v1-script">
+/* [検索ワード: adminReservationSearchV1]
+ * 予約状況：「患者情報一覧」の上に「予約を検索」の窓を出す。
+ * ・探すのはサーバー側（code.gs の app_adminSearchReservations）。予約シートの全項目から、入れた文字が含まれる予約を返す。
+ * ・結果を押すと、その予約の週を読み込み、カレンダーの患者名を押したときと同じ動き（今ある処理）で患者カードへ移動する。
+ * ・今ある処理には手を入れていない。この窓は、患者情報一覧が右の枠に出ているときだけ、その上に差し込む。
+ */
+(() => {
+  const root = document.getElementById('influenza-admin-mock');
+  if (!root || root.dataset.reservationSearchReady === 'true') return;
+  const calendar = document.getElementById('admin-calendar');
+  const dateInput = document.getElementById('admin-date');
+  const stateFilter = document.getElementById('admin-state-filter');
+  const loadButton = document.getElementById('admin-load-reservations');
+  const listTitle = root.querySelector('.admin-list-title');
+  if (!calendar || !dateInput || !listTitle) return;
+  root.dataset.reservationSearchReady = 'true';
+
+  const weekdays = ['日','月','火','水','木','金','土'];
+  const box = document.createElement('div');
+  box.className = 'admin-resv-search';
+  box.setAttribute('data-resv-search', '');
+  box.innerHTML =
+    '<label class="admin-resv-search-label" for="admin-resv-search-input">予約を検索</label>' +
+    '<div class="admin-resv-search-row">' +
+      '<input class="admin-resv-search-input" id="admin-resv-search-input" type="text" autocomplete="off" placeholder="氏名・電話番号・予約ID など">' +
+      '<button class="admin-secondary" type="button" data-resv-search-go>検索</button>' +
+      '<button class="admin-secondary" type="button" data-resv-search-clear>消す</button>' +
+    '</div>' +
+    '<div class="admin-resv-search-message" role="status" aria-live="polite"></div>' +
+    '<div class="admin-resv-search-results"></div>';
+  const input = box.querySelector('.admin-resv-search-input');
+  const goButton = box.querySelector('[data-resv-search-go]');
+  const clearButton = box.querySelector('[data-resv-search-clear]');
+  const message = box.querySelector('.admin-resv-search-message');
+  const resultsBox = box.querySelector('.admin-resv-search-results');
+
+  // 患者情報一覧（見出し）が画面に出ているときだけ、そのすぐ上に窓を差し込む。
+  // タブを切り替えると右の枠の中身が入れ替えられるので、入れ替えのたびに差し込み直す（窓そのものは同じものを使うので、打った文字は消えない）。
+  function placeBox() {
+    const parent = listTitle.parentElement;
+    if (!parent) return;
+    if (box.parentElement === parent && box.nextElementSibling === listTitle) return;
+    parent.insertBefore(box, listTitle);
+  }
+  placeBox();
+  const workspace = root.querySelector('.admin-workspace');
+  if (workspace && window.MutationObserver) {
+    const panels = [...workspace.children].filter(el => el.classList && el.classList.contains('admin-panel'));
+    panels.forEach(panel => {
+      const body = panel.querySelector('.admin-panel-body');
+      if (body) new MutationObserver(placeBox).observe(body, { childList:true });
+    });
+  }
+
+  function setMessage(text, kind) {
+    message.textContent = text || '';
+    if (kind) message.dataset.kind = kind; else delete message.dataset.kind;
+  }
+  function esc(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+  function whenText(item) {
+    const key = String(item && item.dateKey || '');
+    if (!/^\d{8}$/.test(key)) return '日時不明';
+    const y = Number(key.slice(0,4)), m = Number(key.slice(4,6)), d = Number(key.slice(6,8));
+    const day = new Date(y, m - 1, d);
+    return m + '/' + d + '（' + weekdays[day.getDay()] + '）' + (item.time ? ' ' + item.time : '');
+  }
+  function stateText(status) {
+    const value = String(status || '').trim();
+    if (value === 'キャンセル処理確定') return 'キャンセル済み';
+    if (value === '予約処理確定' || value === '') return '予約済み';
+    return value;
+  }
+
+  let searchSeq = 0;
+  let searching = false;
+  let lastResults = [];
+
+  function renderResults(list) {
+    lastResults = Array.isArray(list) ? list : [];
+    resultsBox.innerHTML = lastResults.map((item, index) => {
+      const cancelled = String(item.status || '').trim() === 'キャンセル処理確定';
+      const sub = [String(item.reserveId || '')];
+      if (item.hitLabel || item.hitText) sub.push('一致：' + String(item.hitLabel || '') + (item.hitText ? '「' + String(item.hitText) + '」' : ''));
+      return '<button type="button" class="admin-resv-search-hit" data-resv-search-index="' + index + '">' +
+        '<span class="admin-resv-search-hit-main">' +
+          '<span>' + esc(whenText(item)) + '</span>' +
+          '<span>' + esc(item.name || '（氏名なし）') + '</span>' +
+          '<span class="admin-resv-search-hit-state"' + (cancelled ? ' data-state="cancelled"' : '') + '>' + esc(stateText(item.status)) + '</span>' +
+        '</span>' +
+        '<span class="admin-resv-search-hit-sub">' + esc(sub.filter(Boolean).join('　')) + '</span>' +
+      '</button>';
+    }).join('');
+  }
+
+  function setSearching(flag) {
+    searching = flag;
+    goButton.disabled = flag;
+    goButton.textContent = flag ? '検索中…' : '検索';
+  }
+
+  function runSearch() {
+    if (searching) return;
+    const query = String(input.value || '').trim();
+    if (!query) {
+      renderResults([]);
+      setMessage('検索する文字を入力してください。', 'error');
+      input.focus();
+      return;
+    }
+    if (!(window.google && google.script && google.script.run)) {
+      setMessage('検索できませんでした。画面を開き直してからお試しください。', 'error');
+      return;
+    }
+    const seq = ++searchSeq;
+    setSearching(true);
+    setMessage('検索中…');
+    google.script.run
+      .withSuccessHandler(res => {
+        if (seq !== searchSeq) return;
+        setSearching(false);
+        if (!res || res.ok !== true) {
+          renderResults([]);
+          setMessage((res && (res.message || res.error)) || '検索できませんでした。もう一度お試しください。', 'error');
+          return;
+        }
+        const list = Array.isArray(res.results) ? res.results : [];
+        const total = Number(res.total || list.length);
+        renderResults(list);
+        if (!list.length) {
+          setMessage('「' + query + '」が含まれる予約はありません。（探すのは予約シートだけです）');
+        } else if (total > list.length) {
+          setMessage(total + '件見つかりました。先頭の' + list.length + '件を表示しています。文字を増やして絞ってください。');
+        } else {
+          setMessage(total + '件見つかりました。押すと、その患者さんへ移動します。');
+        }
+      })
+      .withFailureHandler(error => {
+        if (seq !== searchSeq) return;
+        setSearching(false);
+        setMessage('検索できませんでした。もう一度お試しください。（' + ((error && error.message) || error || '通信エラー') + '）', 'error');
+      })
+      .app_adminSearchReservations(query);
+  }
+
+  // 結果を押したとき：その予約の週を出して、カレンダーの患者名を押したときと同じ動きをさせる。
+  let jumpSeq = 0;
+  function findEvent(reserveId) {
+    const safe = window.CSS && CSS.escape ? CSS.escape(reserveId) : String(reserveId).replace(/(["\\])/g, '\\$1');
+    return calendar.querySelector('.admin-cal-event[data-reserve-id="' + safe + '"]');
+  }
+  function jumpTo(item, button) {
+    const reserveId = String(item && item.reserveId || '');
+    const key = String(item && item.dateKey || '');
+    if (!reserveId || !/^\d{8}$/.test(key)) {
+      setMessage('この予約は日時が読み取れないため、移動できません。', 'error');
+      return;
+    }
+    const seq = ++jumpSeq;
+    resultsBox.querySelectorAll('.admin-resv-search-hit[aria-current]').forEach(el => el.removeAttribute('aria-current'));
+    if (button) button.setAttribute('aria-current', 'true');
+
+    // 状態の絞り込みで隠れていると移動できないので、「すべて」に戻す。
+    if (stateFilter && stateFilter.selectedIndex !== 0) {
+      stateFilter.selectedIndex = 0;
+      stateFilter.dispatchEvent(new Event('change', { bubbles:true }));
+    }
+
+    const label = whenText(item) + ' ' + String(item.name || '');
+    const go = eventButton => {
+      eventButton.click();
+      setMessage(label + ' へ移動しました。');
+    };
+
+    const already = findEvent(reserveId);
+    if (already) { go(already); return; }
+
+    // 表示中の週に無いので、その予約の日を基準日にして読み込む（基準日を手で変えたときと同じ動き）。
+    dateInput.value = key.slice(0,4) + '-' + key.slice(4,6) + '-' + key.slice(6,8);
+    dateInput.dispatchEvent(new Event('change', { bubbles:true }));
+    setMessage(whenText(item) + ' の週を読み込んでいます…');
+
+    const started = Date.now();
+    const timer = setInterval(() => {
+      if (seq !== jumpSeq) { clearInterval(timer); return; }
+      const loading = !!(loadButton && loadButton.disabled);
+      const found = findEvent(reserveId);
+      if (found && !loading) { clearInterval(timer); go(found); return; }
+      const waited = Date.now() - started;
+      if (!loading && waited > 1500) {
+        clearInterval(timer);
+        setMessage('この予約はカレンダーに見つかりませんでした。（' + reserveId + '）', 'error');
+        return;
+      }
+      if (waited > 60000) {
+        clearInterval(timer);
+        setMessage('読み込みに時間がかかっています。「予約状況更新」を押してから、もう一度お試しください。', 'error');
+      }
+    }, 200);
+  }
+
+  goButton.addEventListener('click', runSearch);
+  input.addEventListener('keydown', event => {
+    // 日本語入力の変換確定のエンターでは探さない
+    if (event.key !== 'Enter' || event.isComposing || event.keyCode === 229) return;
+    event.preventDefault();
+    runSearch();
+  });
+  clearButton.addEventListener('click', () => {
+    searchSeq++; jumpSeq++;
+    setSearching(false);
+    input.value = '';
+    renderResults([]);
+    setMessage('');
+    input.focus();
+  });
+  resultsBox.addEventListener('click', event => {
+    const button = event.target.closest('.admin-resv-search-hit');
+    if (!button || !resultsBox.contains(button)) return;
+    const item = lastResults[Number(button.dataset.resvSearchIndex)];
+    if (item) jumpTo(item, button);
+  });
+})();
+</script>
