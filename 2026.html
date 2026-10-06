@@ -6633,6 +6633,8 @@ DEVスマホ上部3タブ：EXECと同じsticky位置を維持するため、親
 #influenza-admin-mock .admin-graph-track{display:block;height:16px;border-radius:8px;background:var(--admin-green-soft);overflow:hidden}
 #influenza-admin-mock .admin-graph-fill{display:block;height:100%;border-radius:8px;background:var(--admin-green)}
 #influenza-admin-mock .admin-graph-note{margin:8px 0 0;font-size:13px;color:var(--admin-muted)}
+/* [モック先行：本体（dev.html）には未反映] 「未記入 ◯件のうち…」の案内だけ、灰色をやめてふつうの文字色にする（大きさ・太さはそのまま。傾向の枠の注釈は灰色のまま） */
+#influenza-admin-mock .admin-graph-card:not(.is-trend) .admin-graph-note{color:var(--admin-text)}
 #influenza-admin-mock .admin-graph-count{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}
 #influenza-admin-mock .admin-graph-count>div{border:1px solid var(--admin-line);border-radius:10px;padding:10px 14px;background:var(--admin-surface)}
 #influenza-admin-mock .admin-graph-count span{display:block;font-size:13px;color:var(--admin-muted)}
