@@ -152,7 +152,7 @@ var MOCK_GRAPH={"ok":true,"source":"接種済み（自動）","cancelled":0,"noS
 /* 管理画面の版の番号の見本。ふつうは同じ番号を返す。
    アドレスの最後に ?stale=1 を付けて開くと、「開いたあとに書き換えてデプロイされた」ことにして、数秒後に古い画面の案内を出す（本体の仕組みをそのまま動かす） */
 var MOCK_STALE_DEMO=/[?&]stale=1(&|$)/.test(location.search);var mockOpenedAt=new Date().getTime();
-function mockScreenVersion(){return (MOCK_STALE_DEMO&&new Date().getTime()-mockOpenedAt>3500)?'2026.10.07-01':'2026.10.06-05';}
+function mockScreenVersion(){return (MOCK_STALE_DEMO&&new Date().getTime()-mockOpenedAt>3500)?'2026.10.08-01':'2026.10.07-01';}
 if(MOCK_STALE_DEMO){setTimeout(function(){var realNow=Date.now;Date.now=function(){return realNow.call(Date)+2*60000;};try{window.dispatchEvent(new Event('focus'));}finally{Date.now=realNow;}},5000);}
 function respond(name,args){
  if(name==='api_getAdminDashboard'){var keys=args[0]||[];return {ok:true,slots:slotsFor(keys),data:rows.filter(function(r){return keys.indexOf(r[1].slice(2,10))>=0;}),marks:marksFor(keys),schedule:{times:times,activeTimes:times,collapseInactive:false,intervalMinutes:30,startTime:'09:30',endTime:'17:00'}};}
@@ -245,6 +245,7 @@ window.google={script:{run:new Proxy({},{get:function(_,k){return runner()[k];}}
  * - 2026.10.7 ステータス・設定：設定カード（休診日・臨時休診時間・接種増減枠・臨時枠）の、日時の下に出る内容（備考・登録者）の文字を、灰色から真っ黒（#000）に変更し、太さを1段だけ太く、大きさを10から11に変更（PCもスマホも。Windows では細い文字が灰色っぽく見えるため）。日時の文字は、PC（幅1200以上）だけ12から14に変更（それより狭い画面とスマホは12のまま）。ボタンの位置は変更なし（PCは枠の高さも同じ。スマホは枠が少し高くなる）。色と文字の大きさだけの変更なので版の番号は上げていない [検索ワード: adminSettingRecordTextColorV1]
  * - 2026.10.7 ステータス・設定：設定カードの「登録: ○○」を途中で切らないように変更（「登録: 管理／画面」のように2行に割れていた）。入りきらない行だけ、「登録: ○○」が丸ごと次の行に下がる。文字・並び・ほかの行の高さは変更なし。表示だけの変更なので版の番号は上げていない [検索ワード: adminSettingRecordByNowrapV1]
  * - 2026.10.7 呼び方を「臨時休診時間」に統一（シートの名前・操作ログと同じ）。設定カードの見出し・案内の文・監視の名前・削除や保存の案内に出る名前を「臨時休診（時間）」から「臨時休診時間」へ、予約状況のカレンダーのしるしを「休診時間」から「臨時休診時間」へ変更。しるしの名前は「臨時」「休診」「時間」の区切りでだけ折り返す。言い回しだけの変更なので版の番号は上げていない [検索ワード: adminBlockNameUnifyV1]
+ * - 2026.10.7 ステータス・設定：上のカード（GAS・スプレッドシート・Googleカレンダー）を5段から4段に変更。1段目は左に名前・右に「正常／異常／確認中」を並べ、種別・工程・最終確認はその下の3段。枠の内側と行の上下の余白も詰めた（カードの高さは約7割）。文字・色・文字の大きさ・カードの並び順は変更なし。位置の変更なので版の番号を上げた（code.gs） [検索ワード: adminStatusCardCompactV1]
  * - 既存表記・既存レイアウトは無断変更しない
  -->
 <script id="admin-counter-selected-card-v1">
@@ -5219,6 +5220,12 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
 #influenza-admin-mock .admin-status-v1-card strong.is-error{color:var(--admin-red)}
 #influenza-admin-mock .admin-status-v1-rows{display:grid;gap:0;margin-top:12px}
 #influenza-admin-mock .admin-status-v1-row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--admin-line);font-size:12px}
+/* ステータスのカード（GAS・スプレッドシート・Googleカレンダー）：5段を4段に。1段目は左に名前・右に「正常／異常」。上下の余白も詰める（文字の大きさ・色は変更なし） [検索ワード: adminStatusCardCompactV1] 2026.10.7 */
+#influenza-admin-mock .admin-status-v1-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:12px;padding:12px 16px 6px}
+#influenza-admin-mock .admin-status-v1-card h3{margin:0}
+#influenza-admin-mock .admin-status-v1-card strong{text-align:right;white-space:nowrap}
+#influenza-admin-mock .admin-status-v1-card .admin-status-v1-rows{grid-column:1/-1;margin-top:8px}
+#influenza-admin-mock .admin-status-v1-card .admin-status-v1-row{padding:6px 0}
 #influenza-admin-mock .admin-status-v1-panel{border:1px solid var(--admin-line);border-radius:10px;background:var(--admin-surface);box-shadow:var(--admin-shadow);overflow:hidden}
 #influenza-admin-mock .admin-status-v1-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border-bottom:1px solid var(--admin-line)}
 #influenza-admin-mock .admin-status-v1-head h2{margin:0;font-size:16px}
