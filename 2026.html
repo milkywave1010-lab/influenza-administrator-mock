@@ -244,6 +244,7 @@ window.google={script:{run:new Proxy({},{get:function(_,k){return runner()[k];}}
  * - 2026.10.6 「4. グラフ」：「年代」の下に、横いっぱいの枠「年代別 WEB／管理画面の利用率」を追加（年代ごとに、WEB＝青・管理画面＝緑の横棒と、割合・件数。昔の年度は「窓口」と出る。その年代が0件のときは「—」）。傾向の枠に表「年代別 WEB利用率」（今の年度・前の年度・差）を追加し、表の並びを「受付方法・診察券・性別 → 年代 → 年代別 WEB利用率 → 住所分布」に変更。傾向の表は1つずつ枠で囲み（開閉しない枠）、広い画面では4列・少し狭い画面では2列・スマホでは1列で出す。モックで決めた形。上のボタン・円グラフ・住所分布・年代の位置は変更なし（傾向の枠は新しい枠のぶん下へ下がる） [検索ワード: adminGraphAgeChannelV1]
  * - 2026.10.7 ステータス・設定：設定カード（休診日・臨時休診時間・接種増減枠・臨時枠）の、日時の下に出る内容（備考・登録者）の文字を、灰色から真っ黒（#000）に変更し、太さを1段だけ太く、大きさを10から11に変更（PCもスマホも。Windows では細い文字が灰色っぽく見えるため）。日時の文字は、PC（幅1200以上）だけ12から14に変更（それより狭い画面とスマホは12のまま）。ボタンの位置は変更なし（PCは枠の高さも同じ。スマホは枠が少し高くなる）。色と文字の大きさだけの変更なので版の番号は上げていない [検索ワード: adminSettingRecordTextColorV1]
  * - 2026.10.7 ステータス・設定：設定カードの「登録: ○○」を途中で切らないように変更（「登録: 管理／画面」のように2行に割れていた）。入りきらない行だけ、「登録: ○○」が丸ごと次の行に下がる。文字・並び・ほかの行の高さは変更なし。表示だけの変更なので版の番号は上げていない [検索ワード: adminSettingRecordByNowrapV1]
+ * - 2026.10.7 呼び方を「臨時休診時間」に統一（シートの名前・操作ログと同じ）。設定カードの見出し・案内の文・監視の名前・削除や保存の案内に出る名前を「臨時休診（時間）」から「臨時休診時間」へ、予約状況のカレンダーのしるしを「休診時間」から「臨時休診時間」へ変更。しるしの名前は「臨時」「休診」「時間」の区切りでだけ折り返す。言い回しだけの変更なので版の番号は上げていない [検索ワード: adminBlockNameUnifyV1]
  * - 既存表記・既存レイアウトは無断変更しない
  -->
 <script id="admin-counter-selected-card-v1">
@@ -504,6 +505,8 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
 #influenza-admin-mock .admin-cal-cell.admin-cal-mark { display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 7px 8px; font-size: 12px; line-height: 1.35; overflow: hidden; }
 #influenza-admin-mock .admin-cal-cell.admin-cal-mark b { font-size: 12.5px; font-weight: 800; letter-spacing: .02em; }
 #influenza-admin-mock .admin-cal-cell.admin-cal-mark span { font-size: 12px; font-weight: 700; }
+/* しるしの名前「臨時休診時間」は、「臨時」「休診」「時間」の区切りでだけ折り返す（言葉の途中では切らない） [検索ワード: adminBlockNameUnifyV1] 2026.10.7 */
+#influenza-admin-mock .admin-cal-cell.admin-cal-mark b i { font-style: normal; display: inline-block; }
 #influenza-admin-mock .admin-cal-cell.admin-cal-mark small { font-size: 11px; font-weight: 600; overflow-wrap: anywhere; }
 #influenza-admin-mock .admin-cal-cell.admin-cal-mark-holiday { background: #e9e4da; color: #7d776c; }
 #influenza-admin-mock .admin-cal-cell.admin-cal-mark-holiday b { color: #8a5a4a; }
@@ -2164,7 +2167,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
         first.innerHTML =
           run.type === "holiday"
             ? `<b>休診日</b>` + (note ? `<small>${escapeHtml(note)}</small>` : "")
-            : `<b>休診時間</b><span>${escapeHtml(String(run.info.start || ""))}〜${escapeHtml(String(run.info.end || ""))}</span>` +
+            : `<b><i>臨時</i><i>休診</i><i>時間</i></b><span>${escapeHtml(String(run.info.start || ""))}〜${escapeHtml(String(run.info.end || ""))}</span>` +
               (note ? `<small>${escapeHtml(note)}</small>` : "");
       };
 
@@ -5381,10 +5384,10 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
           </div>
         </form></div>
       </details>
-      <div class="admin-settings-v1-guide" style="margin:4px 0 0;padding:10px 12px;border:1px solid var(--admin-line);border-radius:10px;background:var(--admin-amber-soft);color:var(--admin-text);font-size:13px;line-height:1.6">シートの優先実行力については <b>休診日＞ 臨時枠＞ 臨時休診時間＞ 基本設定＞ 接種増減枠</b> の順番<br>迷ったら：<b>時間ごと予約を止めたい</b>ときは「臨時休診（時間）」、<b>人数だけ変えたい</b>ときは「接種増減枠」を使ってください。</div>
+      <div class="admin-settings-v1-guide" style="margin:4px 0 0;padding:10px 12px;border:1px solid var(--admin-line);border-radius:10px;background:var(--admin-amber-soft);color:var(--admin-text);font-size:13px;line-height:1.6">シートの優先実行力については <b>休診日＞ 臨時枠＞ 臨時休診時間＞ 基本設定＞ 接種増減枠</b> の順番<br>迷ったら：<b>時間ごと予約を止めたい</b>ときは「臨時休診時間」、<b>人数だけ変えたい</b>ときは「接種増減枠」を使ってください。</div>
       <div class="admin-settings-v1-row">
         <details class="admin-setting-v1-card" data-v1-setting="holiday"><summary><div><h3>休診日</h3><p>その日は1日まるごと予約を受け付けない</p><p>例）祝日、学会でお休み</p></div><div class="admin-setting-v2-meta"><b data-v2-setting-state="holiday">確認中</b><span class="chev">⌄</span></div></summary><div class="admin-setting-v1-body" data-v1-body="holiday"></div></details>
-        <details class="admin-setting-v1-card" data-v1-setting="block"><summary><div><h3>臨時休診（時間）</h3><p>その日の、この時間帯だけ予約を止める</p><p>例）10/5の14:00〜15:00に急な往診が入った</p></div><div class="admin-setting-v2-meta"><b data-v2-setting-state="block">確認中</b><span class="chev">⌄</span></div></summary><div class="admin-setting-v1-body" data-v1-body="block"></div></details>
+        <details class="admin-setting-v1-card" data-v1-setting="block"><summary><div><h3>臨時休診時間</h3><p>その日の、この時間帯だけ予約を止める</p><p>例）10/5の14:00〜15:00に急な往診が入った</p></div><div class="admin-setting-v2-meta"><b data-v2-setting-state="block">確認中</b><span class="chev">⌄</span></div></summary><div class="admin-setting-v1-body" data-v1-body="block"></div></details>
       </div>
       <div class="admin-settings-v1-row">
         <details class="admin-setting-v1-card" data-v1-setting="adhoc"><summary><div><h3>臨時枠</h3><p>普段は枠がない日時に、新しく枠を作る<br class="admin-sp-br">（開始15分前まで予約可能）</p><p>例）10/10の18:00に5人分追加</p></div><div class="admin-setting-v2-meta"><b data-v2-setting-state="adhoc">確認中</b><span class="chev">⌄</span></div></summary><div class="admin-setting-v1-body" data-v1-body="adhoc"></div></details>
@@ -5569,7 +5572,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
   }
 
   const monitorState={};
-  const monitorLabels={gas:'GAS',sheet:'スプレッドシート',calendar:'Googleカレンダー',logs:'ログ',base:'基本設定',holiday:'休診日',block:'臨時休診（時間）',adhoc:'臨時枠',extra:'接種増減枠'};
+  const monitorLabels={gas:'GAS',sheet:'スプレッドシート',calendar:'Googleカレンダー',logs:'ログ',base:'基本設定',holiday:'休診日',block:'臨時休診時間',adhoc:'臨時枠',extra:'接種増減枠'};
   const monitorKeys=Object.keys(monitorLabels);
 
   function renderErrorOverview(){
@@ -5735,7 +5738,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
   //   もうシートに無い → 存在しないことを案内
   function settingStaleTitle(kind,r){r=r||{};return kind==='holiday'?String(r.date||'').trim():recordTitle(kind,r)}
   function settingStaleText(kind,res,expected,action){
-    const names={holiday:'休診日',block:'臨時休診（時間）',adhoc:'臨時枠',extra:'接種増減枠'};
+    const names={holiday:'休診日',block:'臨時休診時間',adhoc:'臨時枠',extra:'接種増減枠'};
     const title=settingStaleTitle(kind,expected);
     if(res&&res.exists===true)return `${names[kind]||''} ${title} は、${action}に失敗しました。\n自動更新し、一覧を並び直しました\n再度、${title} の${action}作業を行ってください`;
     return `${names[kind]||''} ${title} は、現在のシートには存在しません。\n（すでに消されたか、内容が変えられています）`;
