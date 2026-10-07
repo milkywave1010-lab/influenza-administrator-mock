@@ -242,7 +242,7 @@ window.google={script:{run:new Proxy({},{get:function(_,k){return runner()[k];}}
  * - 2026.10.6 「4. グラフ」：「未記入 ◯件のうち、管理画面での受付：◯件」の案内の文字を、灰色からふつうの文字色に変更（読みにくかったため。大きさ・太さ・位置はそのまま。傾向の枠の下の注釈は灰色のまま）。モックで決めた形 [検索ワード: adminGraphNoteColorV1]
  * - 2026.10.6 古い画面の案内：2段目の文面を「ブラウザの更新ボタン(F5)を押すか、／この画面を1度閉じ、開き直してから／作業をやり直してください。」に変更（モックで決めた形。1段目「管理画面のバージョンが更新されました。」はそのまま）。PCもスマホも、この改行どおりの3行で中央にそろえる。枠の大きさ・色・文字の大きさ・出る条件は変更なし [検索ワード: adminVersionNoticeTextV2]
  * - 2026.10.6 「4. グラフ」：「年代」の下に、横いっぱいの枠「年代別 WEB／管理画面の利用率」を追加（年代ごとに、WEB＝青・管理画面＝緑の横棒と、割合・件数。昔の年度は「窓口」と出る。その年代が0件のときは「—」）。傾向の枠に表「年代別 WEB利用率」（今の年度・前の年度・差）を追加し、表の並びを「受付方法・診察券・性別 → 年代 → 年代別 WEB利用率 → 住所分布」に変更。傾向の表は1つずつ枠で囲み（開閉しない枠）、広い画面では4列・少し狭い画面では2列・スマホでは1列で出す。モックで決めた形。上のボタン・円グラフ・住所分布・年代の位置は変更なし（傾向の枠は新しい枠のぶん下へ下がる） [検索ワード: adminGraphAgeChannelV1]
- * - 2026.10.7 ステータス・設定：設定カード（休診日・臨時休診時間・接種増減枠・臨時枠）の、日時の下に出る内容（備考・登録者）の文字を、灰色から黒（ふつうの文字色）に変更し、大きさを10から12（日時と同じ大きさ）に変更。日時の文字・ボタンの位置は変更なし（PCは枠の高さも同じ。スマホは枠が少し高くなる）。色と文字の大きさだけの変更なので版の番号は上げていない [検索ワード: adminSettingRecordTextColorV1]
+ * - 2026.10.7 ステータス・設定：設定カード（休診日・臨時休診時間・接種増減枠・臨時枠）の、日時の下に出る内容（備考・登録者）の文字を、灰色から黒（ふつうの文字色）に変更し、大きさを10から12に変更（PCもスマホも）。日時の文字は、PC（幅1200以上）だけ12から14に変更（それより狭い画面とスマホは12のまま）。ボタンの位置は変更なし（PCは枠の高さも同じ。スマホは枠が少し高くなる）。色と文字の大きさだけの変更なので版の番号は上げていない [検索ワード: adminSettingRecordTextColorV1]
  * - 既存表記・既存レイアウトは無断変更しない
  -->
 <script id="admin-counter-selected-card-v1">
@@ -5259,8 +5259,10 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
 #influenza-admin-mock .admin-setting-v1-message.error{color:var(--admin-red)}
 #influenza-admin-mock .admin-setting-v1-records{display:grid;gap:7px;margin-top:12px}
 #influenza-admin-mock .admin-setting-v1-record{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--admin-line);border-radius:8px;background:var(--admin-bg)}
+/* 設定カードの日時：PC（幅1200以上）は14（前は12）。それより狭い画面とスマホは12のまま（狭い画面で大きくすると文字が折り返して枠が高くなるため） [検索ワード: adminSettingRecordTextColorV1] 2026.10.7 */
 #influenza-admin-mock .admin-setting-v1-record b{display:block;font-size:12px}
-/* 設定カードの日時の下の内容（備考・登録者）は、灰色にしない。黒（ふつうの文字色）で書く。大きさは日時と同じ12（前は10） [検索ワード: adminSettingRecordTextColorV1] 2026.10.7 */
+@media(min-width:1200px){#influenza-admin-mock .admin-setting-v1-record b{font-size:14px}}
+/* 設定カードの日時の下の内容（備考・登録者）は、灰色にしない。黒（ふつうの文字色）で書く。大きさは12（前は10）。PCもスマホも同じ [検索ワード: adminSettingRecordTextColorV1] 2026.10.7 */
 #influenza-admin-mock .admin-setting-v1-record span{display:block;margin-top:2px;color:var(--admin-text);font-size:12px}
 #influenza-admin-mock .admin-setting-v1-record .buttons{display:flex;gap:6px}
 #influenza-admin-mock .admin-setting-v1-record .delete{color:var(--admin-red)}
