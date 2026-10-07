@@ -243,6 +243,7 @@ window.google={script:{run:new Proxy({},{get:function(_,k){return runner()[k];}}
  * - 2026.10.6 古い画面の案内：2段目の文面を「ブラウザの更新ボタン(F5)を押すか、／この画面を1度閉じ、開き直してから／作業をやり直してください。」に変更（モックで決めた形。1段目「管理画面のバージョンが更新されました。」はそのまま）。PCもスマホも、この改行どおりの3行で中央にそろえる。枠の大きさ・色・文字の大きさ・出る条件は変更なし [検索ワード: adminVersionNoticeTextV2]
  * - 2026.10.6 「4. グラフ」：「年代」の下に、横いっぱいの枠「年代別 WEB／管理画面の利用率」を追加（年代ごとに、WEB＝青・管理画面＝緑の横棒と、割合・件数。昔の年度は「窓口」と出る。その年代が0件のときは「—」）。傾向の枠に表「年代別 WEB利用率」（今の年度・前の年度・差）を追加し、表の並びを「受付方法・診察券・性別 → 年代 → 年代別 WEB利用率 → 住所分布」に変更。傾向の表は1つずつ枠で囲み（開閉しない枠）、広い画面では4列・少し狭い画面では2列・スマホでは1列で出す。モックで決めた形。上のボタン・円グラフ・住所分布・年代の位置は変更なし（傾向の枠は新しい枠のぶん下へ下がる） [検索ワード: adminGraphAgeChannelV1]
  * - 2026.10.7 ステータス・設定：設定カード（休診日・臨時休診時間・接種増減枠・臨時枠）の、日時の下に出る内容（備考・登録者）の文字を、灰色から真っ黒（#000）に変更し、太さを1段だけ太く、大きさを10から11に変更（PCもスマホも。Windows では細い文字が灰色っぽく見えるため）。日時の文字は、PC（幅1200以上）だけ12から14に変更（それより狭い画面とスマホは12のまま）。ボタンの位置は変更なし（PCは枠の高さも同じ。スマホは枠が少し高くなる）。色と文字の大きさだけの変更なので版の番号は上げていない [検索ワード: adminSettingRecordTextColorV1]
+ * - 2026.10.7 ステータス・設定：設定カードの「登録: ○○」を途中で切らないように変更（「登録: 管理／画面」のように2行に割れていた）。入りきらない行だけ、「登録: ○○」が丸ごと次の行に下がる。文字・並び・ほかの行の高さは変更なし。表示だけの変更なので版の番号は上げていない [検索ワード: adminSettingRecordByNowrapV1]
  * - 既存表記・既存レイアウトは無断変更しない
  -->
 <script id="admin-counter-selected-card-v1">
@@ -5265,6 +5266,8 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
 /* 設定カードの日時の下の内容（備考・登録者）は、灰色にしない。黒で書く。大きさは11（前は10）。PCもスマホも同じ。
    Windows では細い文字（游ゴシックの標準の太さ）が灰色っぽく見えるので、色は真っ黒（#000）、太さは1段だけ太く（500）する [検索ワード: adminSettingRecordTextColorV1] 2026.10.7 */
 #influenza-admin-mock .admin-setting-v1-record span{display:block;margin-top:2px;color:#000;font-weight:500;font-size:11px}
+/* 「登録: ○○」は途中で切らない。入りきらない行だけ、「登録: ○○」が丸ごと次の行に下がる（文字は足していない） [検索ワード: adminSettingRecordByNowrapV1] 2026.10.7 */
+#influenza-admin-mock .admin-setting-v1-record-by{font-style:normal;white-space:nowrap}
 #influenza-admin-mock .admin-setting-v1-record .buttons{display:flex;gap:6px}
 #influenza-admin-mock .admin-setting-v1-record .delete{color:var(--admin-red)}
 #influenza-admin-mock .admin-status-v1-loading{padding:20px;text-align:center;color:var(--admin-muted)}
@@ -5556,7 +5559,7 @@ window.adminRenderCounterSelected = function(el, dateValue, timeValue){
     list.innerHTML=safeRows.length?safeRows.map(r=>{
       const row=Number(r.row);
       const draft=operatorDrafts[String(row)]||'';
-      return `<div class="admin-setting-v1-record" data-row="${row}"><div><b>${esc(recordTitle(kind,r))}</b><span>${esc(r.note||'')}${r.registrant?'　登録: '+esc(r.registrant):''}</span></div><div class="buttons"><input type="text" class="admin-setting-v1-record-operator" data-v1-record-staff="${kind}" data-row="${row}" value="${esc(draft)}" placeholder="担当者名" autocomplete="off"><button type="button" data-v1-edit="${kind}" data-row="${row}">編集</button><button type="button" class="delete" data-v1-delete="${kind}" data-row="${row}">削除</button></div></div>`;
+      return `<div class="admin-setting-v1-record" data-row="${row}"><div><b>${esc(recordTitle(kind,r))}</b><span>${esc(r.note||'')}${r.registrant?'　<em class="admin-setting-v1-record-by">登録: '+esc(r.registrant)+'</em>':''}</span></div><div class="buttons"><input type="text" class="admin-setting-v1-record-operator" data-v1-record-staff="${kind}" data-row="${row}" value="${esc(draft)}" placeholder="担当者名" autocomplete="off"><button type="button" data-v1-edit="${kind}" data-row="${row}">編集</button><button type="button" class="delete" data-v1-delete="${kind}" data-row="${row}">削除</button></div></div>`;
     }).join(''):'<div class="admin-status-v1-loading">登録はありません。</div>';
   }
 
