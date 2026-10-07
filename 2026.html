@@ -152,7 +152,7 @@ var MOCK_GRAPH={"ok":true,"source":"接種済み（自動）","cancelled":0,"noS
 /* 管理画面の版の番号の見本。ふつうは同じ番号を返す。
    アドレスの最後に ?stale=1 を付けて開くと、「開いたあとに書き換えてデプロイされた」ことにして、数秒後に古い画面の案内を出す（本体の仕組みをそのまま動かす） */
 var MOCK_STALE_DEMO=/[?&]stale=1(&|$)/.test(location.search);var mockOpenedAt=new Date().getTime();
-function mockScreenVersion(){return (MOCK_STALE_DEMO&&new Date().getTime()-mockOpenedAt>3500)?'2026.10.08-01':'2026.10.07-01';}
+function mockScreenVersion(){return (MOCK_STALE_DEMO&&new Date().getTime()-mockOpenedAt>3500)?'2026.10.08-01':'2026.10.07-02';}
 if(MOCK_STALE_DEMO){setTimeout(function(){var realNow=Date.now;Date.now=function(){return realNow.call(Date)+2*60000;};try{window.dispatchEvent(new Event('focus'));}finally{Date.now=realNow;}},5000);}
 function respond(name,args){
  if(name==='api_getAdminDashboard'){var keys=args[0]||[];return {ok:true,slots:slotsFor(keys),data:rows.filter(function(r){return keys.indexOf(r[1].slice(2,10))>=0;}),marks:marksFor(keys),schedule:{times:times,activeTimes:times,collapseInactive:false,intervalMinutes:30,startTime:'09:30',endTime:'17:00'}};}
